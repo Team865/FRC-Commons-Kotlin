@@ -21,9 +21,6 @@ dependencies {
     compile(kotlin("stdlib"))
     compile("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.2.1")
 
-    // Apache Commons Math
-    compile("org.apache.commons", "commons-math3", "3.6.1")
-
     // WPILib and Vendors
     wpi.deps.wpilib().forEach { compile(it) }
     wpi.deps.vendor.java().forEach { compile(it) }
