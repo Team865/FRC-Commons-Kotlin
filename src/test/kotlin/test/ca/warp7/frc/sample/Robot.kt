@@ -1,32 +1,36 @@
 package test.ca.warp7.frc.sample
 
-import ca.warp7.frc.action.*
+import ca.warp7.frc.action.cancel
+import ca.warp7.frc.action.notifier
+import ca.warp7.frc.action.run
+import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.TimedRobot
 
 class Robot : TimedRobot(0.2) {
 
     private val io: BaseIO = ioInstance()
+    private val notifier: Notifier = io.notifier
 
     override fun robotInit() {
         println("Hello me is robit!")
         io.initialize()
-        io.notifier.startPeriodic(0.01)
+        notifier.startPeriodic(0.01)
     }
 
     override fun disabledInit() {
         io.disable()
-        io.cancel()
+        notifier.cancel()
     }
 
     override fun autonomousInit() {
         io.enable()
-        Autonomous().run()
+        notifier run Autonomous()
     }
 
     override fun teleopInit() {
         io.enable()
-        Teleop().run()
+        notifier run Teleop()
     }
 
     override fun disabledPeriodic() {}
