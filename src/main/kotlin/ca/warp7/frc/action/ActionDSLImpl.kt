@@ -1,7 +1,7 @@
 package ca.warp7.frc.action
 
-@ActionDSLMarker
-open class ActionDSLImpl : ActionDSL, Action, ActionState {
+@ActionDSL
+open class ActionDSLImpl : ActionDSLBase, Action, ActionState {
 
     private var start: ActionState.() -> Unit = {}
     private var update: ActionState.() -> Unit = {}

@@ -10,6 +10,9 @@ class ActionAsyncImpl : ActionDSLImpl(), ActionAsyncGroup {
             override fun start() {
                 isStopSignal = true
             }
+
+            override val shouldFinish: Boolean
+                get() = true
         }
 
     private val asyncActions = mutableListOf<Action>()

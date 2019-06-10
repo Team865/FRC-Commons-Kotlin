@@ -28,7 +28,7 @@ interface Action {
      * actually get applied to subsystems because updateState
      * will not run on the first call of this method after start
      */
-    val shouldFinish: Boolean get() = true
+    val shouldFinish: Boolean
 
     /**
      * Periodically updates the action
