@@ -1,8 +1,7 @@
 package test.ca.warp7.frc.sample
 
 import ca.warp7.frc.action.Action
-import ca.warp7.frc.action.run
-import kotlinx.coroutines.delay
+import ca.warp7.frc.action.notifier.dispatch
 
 class Autonomous : Action {
     override val shouldFinish: Boolean
@@ -11,9 +10,10 @@ class Autonomous : Action {
 
 
     override fun update() {
-
-        run {
-            delay(3)
+        dispatch {
+            start(Teleop())
+            +Teleop()
+            await()
         }
     }
 }

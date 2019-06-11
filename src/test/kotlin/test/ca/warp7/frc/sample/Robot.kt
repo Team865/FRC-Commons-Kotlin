@@ -1,8 +1,8 @@
 package test.ca.warp7.frc.sample
 
-import ca.warp7.frc.action.cancel
-import ca.warp7.frc.action.notifier
-import ca.warp7.frc.action.run
+import ca.warp7.frc.action.notifier.cancel
+import ca.warp7.frc.action.notifier.notifier
+import ca.warp7.frc.action.notifier.run
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.TimedRobot
