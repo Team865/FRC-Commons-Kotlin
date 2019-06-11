@@ -4,14 +4,31 @@ import ca.warp7.frc.action.Action
 import kotlin.coroutines.*
 
 class DispatchCoroutine(block: suspend DispatchScope.() -> Unit): DispatchScope, Continuation<Unit> {
-
-    private var nextStep: Continuation<Unit> = block.createCoroutine(this, this)
-
-    override suspend fun Action.unaryPlus() {
+    override suspend fun cancel() {
         TODO("not implemented")
     }
 
-    override suspend fun await() {
+    override suspend fun lock() {
+        TODO("not implemented")
+    }
+
+    override suspend fun free() {
+        TODO("not implemented")
+    }
+
+    private var nextStep: Continuation<Unit> = block.createCoroutine(this, this)
+
+
+    override suspend fun delay(seconds: Number): Dispatch<Action> {
+        TODO("not implemented")
+    }
+
+    override suspend fun <T : Action> T.unaryPlus(): Dispatch<T> {
+        start(this)
+        return Dispatch(this)
+    }
+
+    override suspend fun await(vararg dispatch: Dispatch<*>) {
         TODO("not implemented")
     }
 
@@ -22,7 +39,7 @@ class DispatchCoroutine(block: suspend DispatchScope.() -> Unit): DispatchScope,
         result.getOrThrow()
     }
 
-    override suspend fun start(action: Action) {
+    private suspend fun start(action: Action) {
         return suspendCoroutine {
             nextStep = it
         }

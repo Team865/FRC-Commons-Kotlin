@@ -10,4 +10,7 @@ interface BaseIO: IOAction {
 
     val driverInput: RobotController
     val operatorInput: RobotController
+
+    var pushing: Boolean
+    var grabbing: Boolean
 }

@@ -3,6 +3,13 @@ package test.ca.warp7.frc.sample
 import ca.warp7.frc.control.RobotController
 
 class PhysicalIO : BaseIO {
+    override var pushing: Boolean
+        get() = TODO("not implemented")
+        set(value) {}
+    override var grabbing: Boolean
+        get() = TODO("not implemented")
+        set(value) {}
+
     override fun initialize() {
         TODO("not implemented")
     }
