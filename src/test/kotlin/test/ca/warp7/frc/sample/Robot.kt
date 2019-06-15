@@ -1,8 +1,8 @@
 package test.ca.warp7.frc.sample
 
 import ca.warp7.frc.action.notifier.cancel
-import ca.warp7.frc.action.notifier.notifier
 import ca.warp7.frc.action.notifier.run
+import ca.warp7.frc.action.notifier.using
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.TimedRobot
@@ -10,7 +10,9 @@ import edu.wpi.first.wpilibj.TimedRobot
 class Robot : TimedRobot(0.2) {
 
     private val io: BaseIO = ioInstance()
-    private val notifier: Notifier = io.notifier
+    private val notifier = Notifier {
+        using(io.readInputs()) { io.writeOutputs() }
+    }
 
     override fun robotInit() {
         println("Hello me is robit!")

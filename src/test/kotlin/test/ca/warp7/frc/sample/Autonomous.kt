@@ -75,7 +75,6 @@ class Autonomous : Action {
 
 
     override fun update() {
-        dispatch(routine = routine1)
-
+        dispatch(routine1)
     }
 }
