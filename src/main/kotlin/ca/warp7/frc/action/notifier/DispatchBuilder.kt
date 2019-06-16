@@ -1,15 +1,24 @@
 package ca.warp7.frc.action.notifier
 
 import ca.warp7.frc.action.Action
-import ca.warp7.frc.action.ActionDSL
 import kotlinx.coroutines.delay
-import kotlin.concurrent.withLock
+import java.util.concurrent.ConcurrentHashMap
+
+internal val managers: MutableMap<Action, ActionManager> = ConcurrentHashMap()
+
+private val Action.manager
+    get() = managers[this] ?: notManaged(this)
+
+private fun notManaged(thisAction: Action): Nothing {
+    val st =Thread.currentThread().stackTrace;
+    val se = st[3].methodName
+    error("$thisAction is not a managed action; unable to call $se")
+}
+
 
 @ActionDSL
-suspend inline infix fun <T : Action> Dispatch<T>.finally(block: T.() -> Unit): Dispatch<T> {
-    block(action)
-    delay(2)
-    return this
+inline infix fun <T : Action> T.finally(block: () -> Unit) {
+    block()
 }
 
 @ActionDSL
@@ -31,22 +40,10 @@ fun <T : Action> T.dispatch(
         routine: Routine? = null,
         debug: Boolean = false,
         block: suspend DispatchScope.() -> Unit = {}
-): Dispatch<T> {
-    managersMutex.withLock {
-        val maybeManager = managers.firstOrNull { it.manages(this) }
-        if (maybeManager != null) {
-
-        } else {
-
-        }
-    }
-
-    if (routine != null) {
-        DispatchCoroutine(routine.block)
-    } else {
-        DispatchCoroutine(Routine(debug, block).block)
-    }
-    return Dispatch(this)
+): Dispatch<T> = if (routine == null) {
+    manager.dispatch(this, debug, block)
+} else {
+    manager.dispatch(this, routine.debug, routine.block)
 }
 
 @ActionDSL

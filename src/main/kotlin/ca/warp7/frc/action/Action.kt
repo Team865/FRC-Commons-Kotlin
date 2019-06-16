@@ -14,6 +14,8 @@ interface Action {
      */
     fun start() {}
 
+    fun initialize() { }
+
     /**
      * Returns whether or not the code has finished execution.
      */
@@ -28,4 +30,7 @@ interface Action {
      * Run code once when the action finishes, usually for clean up
      */
     fun stop() {}
+
+
+    fun stop(interrupted: Boolean) {}
 }

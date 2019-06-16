@@ -1,7 +1,6 @@
 package ca.warp7.frc.action.notifier
 
 import ca.warp7.frc.action.Action
-import ca.warp7.frc.action.ActionDSL
 
 @ActionDSL
 interface DispatchScope {
@@ -17,6 +16,9 @@ interface DispatchScope {
     @ActionDSL
     suspend fun delay(seconds: Number): Dispatch<Action>
 
+    @ActionDSL
     suspend fun lock()
+
+    @ActionDSL
     suspend fun free()
 }

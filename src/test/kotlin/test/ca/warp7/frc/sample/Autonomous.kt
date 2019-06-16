@@ -22,8 +22,8 @@ class Autonomous : Action {
         }
 
 
-        +LiftSetpoint(8.0) finally {
-            stop()
+        +LiftSetpoint(8.0) with {
+
         }
 
         sequential {
@@ -76,5 +76,8 @@ class Autonomous : Action {
 
     override fun update() {
         dispatch(routine1)
+        finally {
+
+        }
     }
 }
