@@ -14,8 +14,8 @@ class ActionQueueImpl : ActionDSLImpl(), ActionQueue {
         if (!started) queue.add(this)
     }
 
-    override fun start() {
-        super.start()
+    override fun initialize() {
+        super.initialize()
         started = true
     }
 
@@ -24,19 +24,19 @@ class ActionQueueImpl : ActionDSLImpl(), ActionQueue {
         if (currentAction == null) {
             if (queue.isEmpty()) return
             val action = queue.removeAt(0)
-            action.start()
+            action.initialize()
             currentAction = action
         }
         currentAction?.update()
         if (currentAction?.shouldFinish == true) {
-            currentAction?.stop()
+            currentAction?.stop(false)
             currentAction = null
         }
     }
 
-    override fun stop() {
-        currentAction?.stop()
-        super.stop()
+    override fun stop(interrupted: Boolean) {
+        currentAction?.stop(interrupted)
+        super.stop(interrupted)
     }
 
     override fun printTaskGraph() {

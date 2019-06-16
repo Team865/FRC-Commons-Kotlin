@@ -1,10 +1,11 @@
-package ca.warp7.frc.action.notifier
+package ca.warp7.frc.action.dispatch
 
 import ca.warp7.frc.action.Action
 
 @ActionDSL
 interface DispatchScope {
 
+    @ActionDSL
     suspend operator fun <T: Action> T.unaryPlus(): Dispatch<T>
 
     @ActionDSL
@@ -21,4 +22,7 @@ interface DispatchScope {
 
     @ActionDSL
     suspend fun free()
+
+    @ActionDSL
+    suspend fun parallel(block: suspend DispatchScope.() -> Unit)
 }

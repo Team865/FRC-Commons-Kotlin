@@ -12,9 +12,7 @@ interface Action {
      * Run code once when the action is started, usually for set up.
      * This method is called first before shouldFinish
      */
-    fun start() {}
-
-    fun initialize() { }
+    fun initialize() {}
 
     /**
      * Returns whether or not the code has finished execution.
@@ -29,8 +27,5 @@ interface Action {
     /**
      * Run code once when the action finishes, usually for clean up
      */
-    fun stop() {}
-
-
     fun stop(interrupted: Boolean) {}
 }

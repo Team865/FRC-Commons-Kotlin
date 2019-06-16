@@ -1,4 +1,4 @@
-package ca.warp7.frc.action.notifier
+package ca.warp7.frc.action.dispatch
 
 import ca.warp7.frc.action.Action
 
@@ -8,4 +8,10 @@ interface ActionManager {
             debug: Boolean,
             block: suspend DispatchScope.() -> Unit
     ): Dispatch<T>
+
+    fun elapsed(): Double
+
+    fun setEpoch()
+
+    fun dt(): Double
 }

@@ -9,16 +9,16 @@ class ActionControl : Action {
         stopping = false
     }
 
-    override fun start() {
-        currentAction?.start()
+    override fun initialize() {
+        currentAction?.initialize()
     }
 
     override fun update() {
         currentAction?.update()
     }
 
-    override fun stop() {
-        currentAction?.stop()
+    override fun stop(interrupted: Boolean) {
+        currentAction?.stop(interrupted)
         stopping = true
     }
 

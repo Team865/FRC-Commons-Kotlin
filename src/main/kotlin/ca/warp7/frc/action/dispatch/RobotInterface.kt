@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package ca.warp7.frc.action.notifier
+package ca.warp7.frc.action.dispatch
 
 import ca.warp7.frc.action.Action
 import ca.warp7.frc.action.NoAction
@@ -14,7 +14,7 @@ fun updateActions() {
     if (!finished) {
         if (currentAction.shouldFinish) {
             finished = true
-            currentAction.stop()
+            currentAction.stop(false)
         } else {
             currentAction.update()
         }
@@ -25,14 +25,14 @@ fun updateActions() {
 infix fun Notifier.run(action: Action) {
     cancel()
     val m = ManagedAction(action)
-    m.start()
+    m.initialize()
     currentAction = m
 }
 
 @ActionDSL
 fun Notifier.cancel() {
     if (!finished) {
-        currentAction.stop()
+        currentAction.stop(true)
     }
 }
 

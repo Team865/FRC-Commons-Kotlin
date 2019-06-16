@@ -12,7 +12,7 @@ open class ActionDSLImpl : ActionDSLBase, Action, ActionState {
 
     override val elapsed get() = System.nanoTime() / 1e9 - startTime
 
-    override fun start() {
+    override fun initialize() {
         startTime = System.nanoTime() / 1e9
         start.invoke(this)
     }
@@ -24,7 +24,7 @@ open class ActionDSLImpl : ActionDSLBase, Action, ActionState {
         update.invoke(this)
     }
 
-    override fun stop() {
+    override fun stop(interrupted: Boolean) {
         stop.invoke(this)
     }
 

@@ -1,4 +1,4 @@
-package ca.warp7.frc.action.notifier
+package ca.warp7.frc.action.dispatch
 
 @DslMarker
 annotation class ActionDSL

@@ -42,7 +42,7 @@ fun ActionDSLBase.periodic(block: ActionState.() -> Unit) = action {
 //}
 
 inline fun runOnce(crossinline block: () -> Unit) = object : Action {
-    override fun start() = block()
+    override fun initialize() = block()
     override val shouldFinish: Boolean get() = false
 }
 

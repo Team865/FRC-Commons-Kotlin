@@ -7,7 +7,7 @@ class ActionAsyncImpl : ActionDSLImpl(), ActionAsyncGroup {
 
     override val stopSignal: Action
         get() = object : Action {
-            override fun start() {
+            override fun initialize() {
                 isStopSignal = true
             }
 
@@ -20,6 +20,6 @@ class ActionAsyncImpl : ActionDSLImpl(), ActionAsyncGroup {
 
     override val shouldFinish: Boolean get() = isStopSignal || asyncActions.all { it.shouldFinish }
     override fun update() = asyncActions.forEach { it.update() }
-    override fun stop() = asyncActions.forEach { it.stop() }
-    override fun start() = asyncActions.forEach { it.start() }
+    override fun stop(interrupted: Boolean) = asyncActions.forEach { it.stop(true) }
+    override fun initialize() = asyncActions.forEach { it.initialize() }
 }

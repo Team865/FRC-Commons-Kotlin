@@ -1,7 +1,7 @@
 package test.ca.warp7.frc.sample
 
 import ca.warp7.frc.action.Action
-import ca.warp7.frc.action.notifier.*
+import ca.warp7.frc.action.dispatch.*
 import ca.warp7.frc.feet
 import ca.warp7.frc.inches
 
@@ -45,7 +45,8 @@ class Autonomous : Action {
         }
 
         parallel {
-            delay(0.5)
+            delay(0.5) with {
+            }
             +LiftSetpoint(5.0)
         }
 
