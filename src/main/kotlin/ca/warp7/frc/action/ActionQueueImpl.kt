@@ -24,7 +24,7 @@ class ActionQueueImpl : ActionDSLImpl(), ActionQueue {
         if (currentAction == null) {
             if (queue.isEmpty()) return
             val action = queue.removeAt(0)
-            action.initialize()
+            action.firstCycle()
             currentAction = action
         }
         currentAction?.update()

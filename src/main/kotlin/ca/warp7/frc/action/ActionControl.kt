@@ -10,7 +10,7 @@ class ActionControl : Action {
     }
 
     override fun initialize() {
-        currentAction?.initialize()
+        currentAction?.firstCycle()
     }
 
     override fun update() {

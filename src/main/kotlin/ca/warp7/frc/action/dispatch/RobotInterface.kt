@@ -25,7 +25,7 @@ fun updateActions() {
 infix fun Notifier.run(action: Action) {
     cancel()
     val m = ManagedAction(action)
-    m.initialize()
+    m.firstCycle()
     currentAction = m
 }
 
