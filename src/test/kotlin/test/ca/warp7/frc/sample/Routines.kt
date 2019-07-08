@@ -1,6 +1,6 @@
 package test.ca.warp7.frc.sample
 
-import ca.warp7.frc.action.Action
+import ca.warp7.frc.action.coroutine.*
 import ca.warp7.frc.action.dispatch.*
 import ca.warp7.frc.feet
 import ca.warp7.frc.inches
@@ -51,24 +51,17 @@ object Routines {
         await()
     }
 
-    class LiftSetpoint(height: Double) : Action {
-        override val shouldFinish: Boolean
-            get() = false
-
+    class LiftSetpoint(height: Double) : Action() {
         fun stopAll() {
 
         }
     }
 
-    class DriveTrajectory(dist: Number) : Action {
-        override val shouldFinish: Boolean
-            get() = false
+    class DriveTrajectory(dist: Number) : Action() {
     }
 
-    class QuickTurn(angle: Number) : Action {
+    class QuickTurn(angle: Number) : Action() {
         var currentAngle: Double = 0.0
-        override val shouldFinish: Boolean
-            get() = false
     }
 
     suspend fun CommandScope.quickTurn(angle: Double) {

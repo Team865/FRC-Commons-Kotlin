@@ -19,13 +19,14 @@ repositories {
 dependencies {
     // Kotlin Standard Library and Coroutines
     compile(kotlin("stdlib"))
-    compile("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.2.1")
 
     // WPILib and Vendors
     wpi.deps.wpilib().forEach { compile(it) }
     wpi.deps.vendor.java().forEach { compile(it) }
     wpi.deps.vendor.jni(NativePlatforms.roborio).forEach { nativeZip(it) }
     wpi.deps.vendor.jni(NativePlatforms.desktop).forEach { nativeDesktopZip(it) }
+    
+    implementation("com.github.Oblarg:command-rewrite-jitpack:1.1.4")
 
     // Unit Testing
     testCompile(kotlin("test"))
