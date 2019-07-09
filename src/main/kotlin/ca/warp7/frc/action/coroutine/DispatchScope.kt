@@ -6,7 +6,7 @@ import ca.warp7.frc.action.dispatch.ActionDSL
 interface DispatchScope {
 
     @ActionDSL
-    suspend operator fun <T: Action> T.unaryPlus(): Dispatch<T>
+    suspend operator fun <T : Action> T.unaryPlus(): Dispatch<T>
 
     @ActionDSL
     suspend fun await(vararg dispatch: Dispatch<*>)
@@ -22,6 +22,9 @@ interface DispatchScope {
 
     @ActionDSL
     suspend fun free()
+
+    @ActionDSL
+    suspend fun skip()
 
     @ActionDSL
     suspend fun parallel(block: suspend DispatchScope.() -> Unit)

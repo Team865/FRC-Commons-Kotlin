@@ -1,31 +1,13 @@
 package ca.warp7.frc.action.coroutine
 
 import ca.warp7.frc.action.dispatch.ActionDSL
-import java.util.concurrent.ConcurrentHashMap
 
-internal val managers: MutableMap<Action, ActionManager> = ConcurrentHashMap()
-
-private val Action.manager
-    get() = managers[this] ?: notManaged(this)
 
 private fun notManaged(thisAction: Action): Nothing {
     val st = Thread.currentThread().stackTrace;
     val se = st[3].methodName
     error("$thisAction is not a managed action; unable to call $se")
 }
-
-@ActionDSL
-val Action.elapsed: Double
-    get() = manager.elapsed()
-
-@ActionDSL
-fun Action.setEpoch() {
-    manager.setEpoch()
-}
-
-@ActionDSL
-val Action.dt: Double
-    get() = manager.dt()
 
 @ActionDSL
 operator fun String.not() {
@@ -35,11 +17,6 @@ operator fun String.not() {
 @ActionDSL
 operator fun Number.not() {
     println(this)
-}
-
-@ActionDSL
-inline infix fun <T : Action> T.finally(block: () -> Unit) {
-    block()
 }
 
 @ActionDSL
@@ -60,19 +37,19 @@ suspend fun delay(n: Int) {
     TODO()
 }
 
-@ActionDSL
-fun <T : Action> T.dispatch(
-        routine: Routine? = null,
-        debug: Boolean = false,
-        block: suspend DispatchScope.() -> Unit = {}
-): Dispatch<T> = if (routine == null) {
-    manager.dispatch(this, debug, block)
-} else {
-    manager.dispatch(this, routine.debug, routine.block)
-}
+//@ActionDSL
+//fun <T : Action> T.dispatch(
+//        routine: Routine? = null,
+//        debug: Boolean = false,
+//        block: suspend DispatchScope.() -> Unit = {}
+//): Dispatch<T> = if (routine == null) {
+//    manager.dispatch(this, debug, block)
+//} else {
+//    manager.dispatch(this, routine.debug, routine.block)
+//}
 
 @ActionDSL
-fun routine(debug: Boolean = false, block: suspend DispatchScope.() -> Unit) = Routine(debug, block)
+fun routineOf(debug: Boolean = false, block: suspend DispatchScope.() -> Unit) = Routine(debug, block)
 
 @ActionDSL
 suspend inline fun DispatchScope.sequential(block: () -> Unit) {

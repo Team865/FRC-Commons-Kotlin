@@ -7,7 +7,7 @@ import ca.warp7.frc.inches
 
 object Routines {
     private val io = ioInstance()
-    val routine1 = routine {
+    val routine1 = routineOf {
 
         sequential {
             +DriveTrajectory(88.inches + 1.feet)
@@ -27,7 +27,6 @@ object Routines {
             io.grabbing = false
             io.pushing = true
             delay(0.5) with {
-                !elapsed
             }
             io.pushing = false
         }
