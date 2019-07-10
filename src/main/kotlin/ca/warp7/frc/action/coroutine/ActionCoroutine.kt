@@ -1,9 +1,7 @@
 package ca.warp7.frc.action.coroutine
 
-import ca.warp7.frc.action.dispatch.ActionDSL
-
 @ActionDSL
-interface DispatchScope {
+interface ActionCoroutine {
 
     @ActionDSL
     suspend operator fun <T : Action> T.unaryPlus(): Dispatch<T>
@@ -27,5 +25,5 @@ interface DispatchScope {
     suspend fun skip()
 
     @ActionDSL
-    suspend fun parallel(block: suspend DispatchScope.() -> Unit)
+    suspend fun parallel(block: suspend ActionCoroutine.() -> Unit)
 }

@@ -1,4 +1,4 @@
-package ca.warp7.frc.action.dispatch
+package ca.warp7.frc.action.coroutine
 
 @DslMarker
 annotation class ActionDSL

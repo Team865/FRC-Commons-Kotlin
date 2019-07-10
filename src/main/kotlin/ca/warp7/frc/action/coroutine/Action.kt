@@ -1,23 +1,65 @@
 package ca.warp7.frc.action.coroutine
 
-import ca.warp7.frc.action.coroutine.Action.CycleState.*
-import ca.warp7.frc.action.dispatch.ActionDSL
+import ca.warp7.frc.action.coroutine.CycleState.*
+import edu.wpi.first.wpilibj.Notifier
+import edu.wpi.first.wpilibj.RobotBase
 import kotlin.coroutines.*
 
+/**
+ * An [Action] defines any self contained action that can be executed by the robot.
+ * An Action is the unit of basis for autonomous programs. Actions may contain anything,
+ * which means we can run sub-actions in various ways, in combination with the [firstCycle],
+ * [update], [lastCycle], [interrupt], and [shouldFinish] methods.
+ */
 @Suppress("MemberVisibilityCanBePrivate")
 open class Action {
 
-    open fun firstCycle() {}
+    /**
+     * Run code once when the action is started, usually for set up.
+     * This method is called first before shouldFinish
+     */
+    protected open fun firstCycle() {
+        warnThis("is started (first cycle); no override implementation")
+    }
 
-    open fun update() {}
+    /**
+     * Periodically updates the action
+     */
+    protected open fun update() {}
 
-    open fun lastCycle() {}
+    /**
+     * Run the last cycle
+     */
+    protected open fun lastCycle() {
+        warnThis("is stopped (last cycle); no override implementation")
+    }
 
-    open fun interrupt() {}
+    /**
+     * Interrupt the action
+     */
+    protected open fun interrupt() {
+        warnThis("is interrupted; no override implementation")
+    }
 
+    /**
+     * Returns whether or not the code has finished execution.
+     */
     open fun shouldFinish(): Boolean {
         return false
     }
+
+    /**
+     * Sends a warning message
+     */
+    open fun warnThis(msg: String) {
+        println("ERROR $this $msg")
+    }
+
+    private val coroutines: MutableList<DispatchCoroutine> = mutableListOf()
+
+    private var cycleState = FirstCycle
+
+    private var coroutineCycleCompleted = false
 
     @ActionDSL
     protected fun Routine.run() {
@@ -26,23 +68,21 @@ open class Action {
 
     @ActionDSL
     protected fun dispatch(debug: Boolean = false,
-                 block: suspend DispatchScope.() -> Unit) {
+                           block: suspend ActionCoroutine.() -> Unit) {
         if (cycleState == Periodic) {
-            val coroutine = Coroutine(debug)
+            val coroutine = DispatchCoroutine(debug)
             coroutine.nextStep = block.createCoroutine(coroutine, coroutine)
             coroutines.add(coroutine)
         }
     }
 
     @ActionDSL
-    protected fun finally(block: () -> Unit) {
+    protected fun runFinally(block: () -> Unit) {
         if (cycleState == Periodic) {
             runCoroutineCycle()
             block()
         }
     }
-
-    private var coroutineCycleCompleted = false
 
     private fun runCoroutineCycle() {
         if (!coroutineCycleCompleted) {
@@ -58,14 +98,6 @@ open class Action {
             coroutineCycleCompleted = true
         }
     }
-
-    private enum class CycleState {
-        FirstCycle, Periodic, Done, DoneAfterWarning
-    }
-
-    private val coroutines: MutableList<Coroutine> = mutableListOf()
-
-    private var cycleState = FirstCycle
 
     private fun advanceState() {
         when (cycleState) {
@@ -84,10 +116,10 @@ open class Action {
                 }
             }
             Done -> {
-                println("ERROR: $this is already done; cannot advance state")
-                cycleState = DoneAfterWarning
+                warnThis("is already done; cannot advance state")
+                cycleState = Idle
             }
-            DoneAfterWarning -> {
+            Idle -> {
 
             }
         }
@@ -95,10 +127,18 @@ open class Action {
 
     private fun stop() {
         when (cycleState) {
-            FirstCycle -> TODO()
-            Periodic -> TODO()
-            Done -> TODO()
-            DoneAfterWarning -> TODO()
+            FirstCycle -> {
+
+            }
+            Periodic -> {
+
+            }
+            Done -> {
+
+            }
+            Idle -> {
+
+            }
         }
     }
 
@@ -111,87 +151,167 @@ open class Action {
         return name + coroutines.joinToString(", ", "[", "]")
     }
 
-    private enum class CoroutineState {
-        Ready, Done
-    }
 
-    private class Coroutine(val debug: Boolean = false) : DispatchScope, Continuation<Unit> {
-
-        override fun resumeWith(result: Result<Unit>) {
-            result.getOrThrow()
-        }
-
-        override val context: CoroutineContext
-            get() = EmptyCoroutineContext
-
-        var nextStep: Continuation<Unit>? = null
-
-        var locked = false
-
-        var state = CoroutineState.Ready
-
-        fun advanceStateIsDone(): Boolean {
-            if (state == CoroutineState.Ready) {
-                val next = nextStep
-                if (next == null) {
-                    state = CoroutineState.Done
-                    return true
-                } else {
-                    nextStep = null // Keep track of state using null
-                    next.resume(Unit)
-                }
-            }
-            return false
-        }
-
-        override suspend fun <T : Action> T.unaryPlus(): Dispatch<T> {
-            TODO()
-        }
-
-        override suspend fun await(vararg dispatch: Dispatch<*>) {
-        }
-
-        override suspend fun cancel() {
-        }
-
-        override suspend fun delay(seconds: Number): Dispatch<Action> {
-            TODO()
-        }
-
-        override suspend fun lock() {
-            locked = true
-        }
-
-        override suspend fun free() {
-            locked = false
-        }
-
-        override suspend fun skip() {
-            suspendCoroutine<Unit> { continuation ->
-                nextStep = continuation
-            }
-        }
-
-        override suspend fun parallel(block: suspend DispatchScope.() -> Unit) {
-            TODO("not implemented")
-        }
-    }
-
-    companion object {
+    class Control {
         private var currentAction = Action()
 
-        internal fun setAction(action: Action) {
-            currentAction = action
-            currentAction.advanceState()
+        fun setAction(action: Action) {
+            synchronized(this) {
+                currentAction = action
+                currentAction.advanceState()
+            }
         }
 
-        internal fun interrupt() {
-            currentAction.stop()
+        fun interrupt() {
+            synchronized(this) {
+                currentAction.stop()
+            }
         }
-
 
         fun updateActions() {
-            currentAction.advanceState()
+            synchronized(this) {
+                currentAction.advanceState()
+            }
         }
     }
+}
+
+private enum class CoroutineState {
+    Ready, Done
+}
+
+private enum class CycleState {
+    FirstCycle, Periodic, Done, Idle
+}
+
+private class DispatchCoroutine(val debug: Boolean = false) : ActionCoroutine, Continuation<Unit> {
+
+    var nextStep: Continuation<Unit>? = null
+
+    var locked = false
+
+    var state = CoroutineState.Ready
+
+    val subActions: MutableList<Action> = mutableListOf()
+
+    override fun resumeWith(result: Result<Unit>) {
+        result.getOrThrow()
+    }
+
+    override val context: CoroutineContext
+        get() = EmptyCoroutineContext
+
+
+    fun advanceStateIsDone(): Boolean {
+        if (state == CoroutineState.Ready) {
+            val next = nextStep
+            if (next == null) {
+                state = CoroutineState.Done
+                return true
+            } else {
+                nextStep = null // Keep track of state using null
+                next.resume(Unit)
+            }
+        }
+        return false
+    }
+
+    override suspend fun <T : Action> T.unaryPlus(): Dispatch<T> {
+        if (locked) {
+            subActions.add(this)
+        }
+        TODO()
+    }
+
+    override suspend fun await(vararg dispatch: Dispatch<*>) {
+    }
+
+    override suspend fun cancel() {
+    }
+
+    override suspend fun delay(seconds: Number): Dispatch<Action> {
+        TODO()
+    }
+
+    override suspend fun lock() {
+        locked = true
+    }
+
+    override suspend fun free() {
+        locked = false
+    }
+
+    override suspend fun skip() {
+        suspendCoroutine<Unit> { continuation ->
+            nextStep = continuation
+        }
+    }
+
+    override suspend fun parallel(block: suspend ActionCoroutine.() -> Unit) {
+        TODO("not implemented")
+    }
+}
+
+@ActionDSL
+operator fun String.not() {
+    println(this)
+}
+
+@ActionDSL
+operator fun Number.not() {
+    println(this)
+}
+
+@ActionDSL
+suspend inline infix fun <T : Action> Dispatch<T>.with(block: T.() -> Unit): Dispatch<T> {
+    block(action)
+    delay(2)
+    return this
+}
+
+@ActionDSL
+suspend inline infix fun <T : Action> Dispatch<T>.await(block: T.() -> Boolean) {
+    block(action)
+    cancel()
+    delay(2)
+}
+
+suspend fun delay(n: Int) {
+    TODO()
+}
+
+@ActionDSL
+fun routineOf(debug: Boolean = false, block: suspend ActionCoroutine.() -> Unit) = Routine(debug, block)
+
+@ActionDSL
+suspend inline fun ActionCoroutine.sequential(block: () -> Unit) {
+    lock()
+    block()
+    free()
+}
+
+class Routine(
+        val debug: Boolean,
+        val block: suspend ActionCoroutine.() -> Unit
+)
+
+val actionControl = Action.Control()
+
+@ActionDSL
+infix fun Notifier.run(action: Action) {
+    cancel()
+    actionControl.setAction(action)
+}
+
+@Suppress("unused")
+@ActionDSL
+fun Notifier.cancel() {
+    actionControl.interrupt()
+}
+
+@Suppress("unused")
+@ActionDSL
+inline fun <T> RobotBase.using(t: T, block: T.() -> Unit) {
+    actionControl.updateActions()
+    block(t)
 }
