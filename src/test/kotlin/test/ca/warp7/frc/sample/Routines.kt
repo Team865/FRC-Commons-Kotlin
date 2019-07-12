@@ -10,23 +10,18 @@ object Routines {
 
         sequential {
             +DriveTrajectory(88.inches + 1.feet)
-            +QuickTurn(-90.0) with {
-                !currentAngle
-            }
+            +QuickTurn(-90.0)
             +DriveTrajectory(65.inches)
             +QuickTurn(70.0)
         }
 
-        +LiftSetpoint(8.0) with {
-
-        }
+        +LiftSetpoint(8.0)
 
         sequential {
             +DriveTrajectory(50.inches)
             io.grabbing = false
             io.pushing = true
-            delay(0.5) with {
-            }
+            delay(0.5)
             io.pushing = false
         }
 
@@ -34,19 +29,14 @@ object Routines {
 
         parallel {
             +DriveTrajectory((-3).feet)
-            +QuickTurn(-160.0) with {
-                !currentAngle
-            }
+            +QuickTurn(-160.0)
             +DriveTrajectory(160.inches)
         }
 
         parallel {
-            delay(0.5) with {
-            }
+            delay(0.5)
             +LiftSetpoint(5.0)
         }
-
-        await()
     }
 
     class LiftSetpoint(height: Double) : Action() {
@@ -62,21 +52,4 @@ object Routines {
         var currentAngle: Double = 0.0
     }
 
-    suspend fun CommandScope.quickTurn(angle: Double) {
-        whileActive {
-            val actual = 0
-            val error = angle - actual
-            val left = -error*0.1
-            val right = error *0.1
-        }
-        val left = 0
-        val right = 0
-    }
-
-    @ActionDSL
-    suspend fun CommandScope.whileActive(block: () -> Unit): Boolean {
-        return true
-    }
 }
-
-typealias CommandScope = ActionCoroutine
