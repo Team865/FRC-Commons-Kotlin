@@ -1,4 +1,5 @@
 import edu.wpi.first.toolchain.NativePlatforms
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
@@ -14,6 +15,13 @@ buildDir = File(rootProject.projectDir, "build/" + project.name)
 
 application {
     mainClassName = "ca.warp7.pathplanner.MainKt"
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        freeCompilerArgs = listOf("-Xnew-inference")
+        kotlinOptions.jvmTarget = "1.8"
+    }
 }
 
 dependencies {
