@@ -17,6 +17,9 @@ repositories {
     maven { setUrl("https://jitpack.io") }
 }
 
+group = "ca.warp7.frc"
+version = "2019.1.0"
+
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xnew-inference")
@@ -40,7 +43,7 @@ dependencies {
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
-    archiveName = "sources"
+    classifier = "sources"
     from(sourceSets.main.get().allSource)
 }
 
