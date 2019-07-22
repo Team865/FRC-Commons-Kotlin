@@ -8,8 +8,6 @@ fun async(block: ActionAsyncGroup.() -> Unit): Action = ActionAsyncImpl().apply(
 
 fun queue(block: ActionQueue.() -> Unit): Action = ActionQueueImpl().apply(block)
 
-fun mode(block: ActionDSLBase.() -> Unit): () -> Action = { action(block) }
-
 fun await(action: Action) = action
 
 fun waitUntil(predicate: ActionState.() -> Boolean) = action { finishWhen(predicate) }
@@ -29,17 +27,6 @@ fun ActionDSLBase.periodic(block: ActionState.() -> Unit) = action {
     onUpdate(block)
     finishWhen { false }
 }
-
-//@ActionDSL
-//fun Action.withTimeout(seconds: Double): Action {
-//    val action = this
-//    return action {
-//        onStart { action.start() }
-//        onUpdate { action.update() }
-//        finishWhen { elapsed > seconds || action.shouldFinish }
-//        onStop { action.stop() }
-//    }
-//}
 
 inline fun runOnce(crossinline block: () -> Unit) = object : Action {
     override fun firstCycle() = block()

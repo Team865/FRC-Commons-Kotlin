@@ -1,22 +1,24 @@
-@file:Suppress("UnusedImport", "SpellCheckingInspection")
-
-import edu.wpi.first.gradlerio.GradleRIOPlugin
-import edu.wpi.first.gradlerio.frc.FRCJavaArtifact
-import edu.wpi.first.gradlerio.frc.RoboRIO
 import edu.wpi.first.toolchain.NativePlatforms
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.3.41"
-    id("edu.wpi.first.GradleRIO") version "2019.4.1"
+    kotlin("jvm")
+    id("edu.wpi.first.GradleRIO")
+    id("application")
 }
 
 repositories {
     mavenCentral()
-    maven { setUrl("https://jitpack.io") }
+}
+
+buildDir = File(rootProject.projectDir, "build/" + project.name)
+
+application {
+    mainClassName = "ca.warp7.pathplanner.MainKt"
 }
 
 dependencies {
+    compile(rootProject)
+
     // Kotlin Standard Library and Coroutines
     compile(kotlin("stdlib"))
 
@@ -25,8 +27,8 @@ dependencies {
     wpi.deps.vendor.java().forEach { compile(it) }
     wpi.deps.vendor.jni(NativePlatforms.roborio).forEach { nativeZip(it) }
     wpi.deps.vendor.jni(NativePlatforms.desktop).forEach { nativeDesktopZip(it) }
-    
-    implementation("com.github.Oblarg:command-rewrite-jitpack:1.1.4")
+
+    compile("org.processing:core:3.3.7")
 
     // Unit Testing
     testCompile(kotlin("test"))

@@ -20,3 +20,5 @@ pluginManagement {
         }
     }
 }
+
+include("path-planner")
