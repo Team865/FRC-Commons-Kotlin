@@ -9,7 +9,7 @@ class ActionControl : Action {
         stopping = false
     }
 
-    override fun initialize() {
+    override fun firstCycle() {
         currentAction?.firstCycle()
     }
 

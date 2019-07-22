@@ -14,8 +14,8 @@ class ActionQueueImpl : ActionDSLImpl(), ActionQueue {
         if (!started) queue.add(this)
     }
 
-    override fun initialize() {
-        super.initialize()
+    override fun firstCycle() {
+        super.firstCycle()
         started = true
     }
 

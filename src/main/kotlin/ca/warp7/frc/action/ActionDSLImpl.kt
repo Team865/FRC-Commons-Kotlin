@@ -12,7 +12,7 @@ open class ActionDSLImpl : ActionDSLBase, Action, ActionState {
 
     override val elapsed get() = System.nanoTime() / 1e9 - startTime
 
-    override fun initialize() {
+    override fun firstCycle() {
         startTime = System.nanoTime() / 1e9
         start.invoke(this)
     }
