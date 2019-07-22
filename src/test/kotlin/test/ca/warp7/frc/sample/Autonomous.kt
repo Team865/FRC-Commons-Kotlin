@@ -1,7 +1,7 @@
 package test.ca.warp7.frc.sample
 
-import ca.warp7.frc.action.coroutine.Action
-import ca.warp7.frc.action.coroutine.sequential
+import ca.warp7.frc.Action
+import ca.warp7.frc.runRoutine
 import test.ca.warp7.frc.sample.Routines.routine1
 
 class Autonomous : Action() {
@@ -14,7 +14,8 @@ class Autonomous : Action() {
 
     override fun update() {
 
-        dispatch {
+        runRoutine {
+            delay(3)
         }
 
         routine1.run()

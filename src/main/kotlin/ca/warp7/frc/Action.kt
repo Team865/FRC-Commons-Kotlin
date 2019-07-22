@@ -1,9 +1,10 @@
-package ca.warp7.frc.action.coroutine
+package ca.warp7.frc
 
-import ca.warp7.frc.action.coroutine.CycleState.*
+import ca.warp7.frc.CycleState.*
 import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.Timer
+import java.lang.StringBuilder
 import kotlin.coroutines.*
 
 /**
@@ -14,7 +15,9 @@ import kotlin.coroutines.*
  *
  * [Action] is subclassed to provide custom functionality. However, if multiple actions need
  * to be scheduled, the coroutine functionality as provided by the [ActionCoroutine] interface
- * through the [run] and [dispatch] methods
+ * through the [run] method
+ *
+ * @since 4.0
  */
 
 @Suppress("MemberVisibilityCanBePrivate")
@@ -24,6 +27,8 @@ open class Action {
      * Returns whether or not the code has finished execution.
      *
      * Contract: [shouldFinish] is called only after [firstCycle] is called
+     *
+     * @since 5.0
      */
     open fun shouldFinish(): Boolean {
         if (cycleState == Periodic && cycleCount == 0) {
@@ -45,6 +50,8 @@ open class Action {
      * Contract: [firstCycle] is called whenever this action is scheduled
      * before any other method, including [shouldFinish]. [setEpoch] is
      * called once immediately before this method is called to track time
+     *
+     * @since 5.0
      */
     open fun firstCycle() {
         warnThis("is started (first cycle); no override implementation")
@@ -120,7 +127,7 @@ open class Action {
         return Timer.getFPGATimestamp()
     }
 
-    private val coroutines: MutableList<Dispatch> = mutableListOf()
+    private val coroutines: MutableList<CoroutineWithContinuation> = mutableListOf()
 
     private var cycleState = FirstCycle
 
@@ -128,7 +135,8 @@ open class Action {
 
     private var epoch = 0.0
 
-    private var cycleCount = 0
+    var cycleCount = 0
+        private set
 
     protected var name: String = javaClass.simpleName
 
@@ -136,17 +144,20 @@ open class Action {
         if (coroutines.isEmpty()) {
             return name
         }
-        return name + coroutines.joinToString(", ", "[", "]")
+        val builder = StringBuilder()
+        builder.append(name).append("[")
+        coroutines.forEachIndexed { index, coroutine ->
+            builder.append(index).append(",")
+            builder.append(coroutine)
+        }
+        builder.append("]")
+        return builder.toString()
     }
 
-    protected fun Routine.run() {
-        dispatch(debug, block)
-    }
-
-    protected fun dispatch(debug: Boolean = false,
-                           block: suspend ActionCoroutine.() -> Unit) {
+    internal fun Routine.run() {
         if (cycleState == Periodic || cycleState == FirstCycle) {
-            val coroutine = Dispatch(debug)
+            val coroutine = CoroutineWithContinuation(coroutineHandle, this@Action, debug)
+            coroutineHandle++
             coroutine.nextStep = block.createCoroutine(coroutine, coroutine)
             coroutines.add(coroutine)
         }
@@ -218,6 +229,10 @@ open class Action {
             Idle -> Unit
         }
     }
+
+    companion object {
+        var coroutineHandle = 0
+    }
 }
 
 class SynchronizedControl {
@@ -243,12 +258,12 @@ class SynchronizedControl {
     }
 }
 
-private enum class CoroutineState {
-    Ready, Done
-}
-
 private enum class CycleState {
     FirstCycle, Periodic, Done, Idle
+}
+
+private enum class CoroutineState {
+    Ready, Done
 }
 
 /**
@@ -283,7 +298,11 @@ interface ActionCoroutine {
     suspend fun parallel(block: suspend ActionCoroutine.() -> Unit)
 }
 
-private class Dispatch(val debug: Boolean = false) : ActionCoroutine, Continuation<Unit> {
+private class CoroutineWithContinuation(
+        val handle: Int,
+        val action: Action,
+        val debug: Boolean = false
+) : ActionCoroutine, Continuation<Unit> {
 
     var nextStep: Continuation<Unit>? = null
 
@@ -300,6 +319,9 @@ private class Dispatch(val debug: Boolean = false) : ActionCoroutine, Continuati
     override val context: CoroutineContext
         get() = EmptyCoroutineContext
 
+    override fun toString(): String {
+        return ""
+    }
 
     fun advanceStateIsDone(): Boolean {
         if (state == CoroutineState.Ready) {
@@ -351,7 +373,7 @@ private class Dispatch(val debug: Boolean = false) : ActionCoroutine, Continuati
     }
 
     override suspend fun parallel(block: suspend ActionCoroutine.() -> Unit) {
-        TODO("not implemented")
+        action.runRoutine(debug, block)
     }
 }
 
@@ -379,6 +401,11 @@ class Routine(
         val debug: Boolean,
         val block: suspend ActionCoroutine.() -> Unit
 )
+
+@ActionDSL
+fun Action.runRoutine(debug: Boolean = false, block: suspend ActionCoroutine.() -> Unit) {
+    Routine(debug, block).run()
+}
 
 val synchronizedControl = SynchronizedControl()
 

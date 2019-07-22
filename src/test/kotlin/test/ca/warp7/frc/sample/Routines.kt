@@ -1,8 +1,6 @@
 package test.ca.warp7.frc.sample
 
-import ca.warp7.frc.action.coroutine.*
-import ca.warp7.frc.feet
-import ca.warp7.frc.inches
+import ca.warp7.frc.*
 
 object Routines {
     private val io = ioInstance()
