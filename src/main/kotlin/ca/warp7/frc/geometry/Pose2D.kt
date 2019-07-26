@@ -1,5 +1,7 @@
 package ca.warp7.frc.geometry
 
+import kotlin.math.abs
+
 class Pose2D(val translation: Translation2D, val rotation: Rotation2D) : State<Pose2D> {
 
     constructor(x: Double, y: Double, rotation: Rotation2D) : this(Translation2D(x, y), rotation)
@@ -62,7 +64,7 @@ class Pose2D(val translation: Translation2D, val rotation: Rotation2D) : State<P
             val halfTheta = 0.5 * dTheta
             val cosMinusOne = rotation.cos - 1.0
             val halfThetaByTanOfHalfDTheta =
-                    if (Math.abs(cosMinusOne) < 1E-9) 1.0 - 1.0 / 12.0 * dTheta * dTheta
+                    if (abs(cosMinusOne) < 1E-9) 1.0 - 1.0 / 12.0 * dTheta * dTheta
                     else -(halfTheta * rotation.sin) / cosMinusOne
             val translation = translation.rotate(Rotation2D(halfThetaByTanOfHalfDTheta, -halfTheta))
             return Twist2D(translation.x, translation.y, dTheta)

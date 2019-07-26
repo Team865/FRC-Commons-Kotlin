@@ -7,6 +7,9 @@ import edu.wpi.first.wpilibj.Timer
 import java.lang.StringBuilder
 import kotlin.coroutines.*
 
+@Experimental
+annotation class ExperimentalActionDSL
+
 /**
  * An [Action] defines any self contained action that can be executed by the robot.
  * An Action is the unit of basis for autonomous programs. Actions may contain anything,
@@ -21,6 +24,7 @@ import kotlin.coroutines.*
  */
 
 @Suppress("MemberVisibilityCanBePrivate")
+@ExperimentalActionDSL
 open class Action {
 
     /**
@@ -235,6 +239,7 @@ open class Action {
     }
 }
 
+@ExperimentalActionDSL
 class SynchronizedControl {
     private var currentAction = Action()
 
@@ -273,6 +278,7 @@ private enum class CoroutineState {
 @DslMarker
 annotation class ActionDSL
 
+@ExperimentalActionDSL
 @ActionDSL
 interface ActionCoroutine {
 
@@ -298,6 +304,7 @@ interface ActionCoroutine {
     suspend fun parallel(block: suspend ActionCoroutine.() -> Unit)
 }
 
+@ExperimentalActionDSL
 private class CoroutineWithContinuation(
         val handle: Int,
         val action: Action,
@@ -387,9 +394,11 @@ operator fun Number.not() {
     println(this)
 }
 
+@ExperimentalActionDSL
 @ActionDSL
 fun routineOf(debug: Boolean = false, block: suspend ActionCoroutine.() -> Unit) = Routine(debug, block)
 
+@ExperimentalActionDSL
 @ActionDSL
 suspend inline fun ActionCoroutine.sequential(block: () -> Unit) {
     lock()
@@ -397,30 +406,36 @@ suspend inline fun ActionCoroutine.sequential(block: () -> Unit) {
     free()
 }
 
+@ExperimentalActionDSL
 class Routine(
         val debug: Boolean,
         val block: suspend ActionCoroutine.() -> Unit
 )
 
+@ExperimentalActionDSL
 @ActionDSL
 fun Action.runRoutine(debug: Boolean = false, block: suspend ActionCoroutine.() -> Unit) {
     Routine(debug, block).run()
 }
 
+@ExperimentalActionDSL
 val synchronizedControl = SynchronizedControl()
 
+@ExperimentalActionDSL
 @ActionDSL
 infix fun Notifier.run(action: Action) {
     cancel()
     synchronizedControl.setAction(action)
 }
 
+@ExperimentalActionDSL
 @Suppress("unused")
 @ActionDSL
 fun Notifier.cancel() {
     synchronizedControl.interrupt()
 }
 
+@ExperimentalActionDSL
 @Suppress("unused")
 @ActionDSL
 inline fun <T> RobotBase.using(t: T, block: T.() -> Unit) {

@@ -1,7 +1,10 @@
 package ca.warp7.frc.geometry
 
 import ca.warp7.frc.f
+import kotlin.math.abs
+import kotlin.math.cos
 import kotlin.math.hypot
+import kotlin.math.sin
 
 class Twist2D(val dx: Double, val dy: Double, val dTheta: Double) {
     override fun toString(): String {
@@ -18,11 +21,11 @@ class Twist2D(val dx: Double, val dy: Double, val dTheta: Double) {
      */
     val exp: Pose2D
         get() {
-            val sinTheta = Math.sin(dTheta)
-            val cosTheta = Math.cos(dTheta)
+            val sinTheta = sin(dTheta)
+            val cosTheta = cos(dTheta)
             val s: Double
             val c: Double
-            if (Math.abs(dTheta) < 1E-9) {
+            if (abs(dTheta) < 1E-9) {
                 s = 1.0 - 1.0 / 6.0 * dTheta * dTheta
                 c = .5 * dTheta
             } else {

@@ -32,3 +32,5 @@ val Number.feet: Double get() = this.toDouble() * kFeetToMeters
 val Number.inches: Double get() = this.toDouble() * kInchesToMeters
 
 val Double.squared: Double get() = this * this
+
+fun Boolean.toInt() = if (this) 1 else -1

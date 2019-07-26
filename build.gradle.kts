@@ -22,7 +22,13 @@ version = "2019.1.0"
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        freeCompilerArgs = listOf("-Xnew-inference")
+        freeCompilerArgs = listOf(
+                "-Xnew-inference",
+                "-Xuse-experimental=kotlin.Experimental",
+                "-Xallow-kotlin-package",
+                "-Xno-call-assertions",
+                "-Xno-param-assertions"
+        )
         kotlinOptions.jvmTarget = "1.8"
     }
 }

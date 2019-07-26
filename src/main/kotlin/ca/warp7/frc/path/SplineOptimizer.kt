@@ -1,6 +1,7 @@
 package ca.warp7.frc.path
 
 import ca.warp7.frc.geometry.*
+import kotlin.math.sqrt
 
 /**
  * @author Team 254
@@ -82,7 +83,7 @@ fun MutableList<QuinticSegment2D>.runOptimizationIteration() {
         magnitude += controlPoints[i].ddx * controlPoints[i].ddx + controlPoints[i].ddy * controlPoints[i].ddy
     }
 
-    magnitude = Math.sqrt(magnitude)
+    magnitude = sqrt(magnitude)
 
     //minimize along the direction of the gradient
     //first calculate 3 points along the direction of the gradient

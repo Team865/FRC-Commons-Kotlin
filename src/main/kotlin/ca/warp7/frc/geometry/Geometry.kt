@@ -3,10 +3,7 @@
 package ca.warp7.frc.geometry
 
 import ca.warp7.frc.epsilonEquals
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.hypot
-import kotlin.math.sin
+import kotlin.math.*
 
 /*
  * ROTATION FUNCTIONS
@@ -36,7 +33,7 @@ fun Rotation2D.rotate(by: Rotation2D): Rotation2D = transform(by)
 
 val Rotation2D.tan: Double
     get() {
-        return if (Math.abs(cos) < 1E-12) {
+        return if (abs(cos) < 1E-12) {
             if (sin >= 0.0) {
                 Double.POSITIVE_INFINITY
             } else {
@@ -89,7 +86,7 @@ fun Pose2D.intersection(other: Pose2D): Translation2D {
         // Lines are parallel.
         return Translation2D(java.lang.Double.POSITIVE_INFINITY, java.lang.Double.POSITIVE_INFINITY)
     }
-    return if (Math.abs(rotation.cos) < Math.abs(otherRotation.cos)) {
+    return if (abs(rotation.cos) < abs(otherRotation.cos)) {
         intersectionInternal(this, other)
     } else {
         intersectionInternal(other, this)
