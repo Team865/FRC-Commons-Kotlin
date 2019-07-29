@@ -1,5 +1,6 @@
 package test.ca.warp7.frc.sample
 
+import ca.warp7.frc.ExperimentalActionDSL
 import ca.warp7.frc.cancel
 import ca.warp7.frc.run
 import ca.warp7.frc.using
@@ -7,6 +8,8 @@ import edu.wpi.first.wpilibj.Notifier
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.TimedRobot
 
+
+@UseExperimental(ExperimentalActionDSL::class)
 class Robot : TimedRobot(0.2) {
 
     private val io: BaseIO = ioInstance()

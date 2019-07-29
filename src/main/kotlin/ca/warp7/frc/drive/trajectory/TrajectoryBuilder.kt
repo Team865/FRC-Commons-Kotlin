@@ -14,7 +14,7 @@ class TrajectoryBuilder(builder: TrajectoryBuilder.() -> Unit) {
     internal var trajectoryAcceleration = 0.0
     internal var maxCentripetalAcceleration = 0.0
     internal var maxJerk = Double.POSITIVE_INFINITY
-    internal var bendFactor = 1.0
+    internal var bendFactor = 1.2
 
     object NoFollower : TrajectoryFollower {
         override fun updateTrajectory(
