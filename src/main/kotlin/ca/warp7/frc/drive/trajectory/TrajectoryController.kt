@@ -1,4 +1,4 @@
-package ca.warp7.frc.trajectory
+package ca.warp7.frc.drive.trajectory
 
 import ca.warp7.frc.epsilonEquals
 import ca.warp7.frc.geometry.*
@@ -9,10 +9,9 @@ import ca.warp7.frc.toInt
 import java.util.concurrent.FutureTask
 
 @Suppress("MemberVisibilityCanBePrivate")
-class TrajectoryController(trajectoryBuilder: TrajectoryBuilder.() -> Unit) {
+class TrajectoryController(builder: TrajectoryBuilder.() -> Unit) {
 
-    private val builder = BuilderImpl().also { trajectoryBuilder(it) }
-
+    private val builder = TrajectoryBuilder(builder)
 
     private var t = 0.0
     private var trajectory: List<TrajectoryState> = listOf()

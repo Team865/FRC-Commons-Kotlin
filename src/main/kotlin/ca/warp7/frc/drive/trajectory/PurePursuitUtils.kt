@@ -1,4 +1,4 @@
-package ca.warp7.frc.trajectory
+package ca.warp7.frc.drive.trajectory
 
 import ca.warp7.frc.geometry.*
 
