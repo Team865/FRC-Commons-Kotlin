@@ -4,8 +4,6 @@ import ca.warp7.frc.epsilonEquals
 import ca.warp7.frc.geometry.*
 import ca.warp7.frc.linearInterpolate
 import ca.warp7.frc.path.mixParameterizedPathOf
-import ca.warp7.frc.path.parameterized
-import ca.warp7.frc.path.quinticSplinesOf
 import ca.warp7.frc.toInt
 import java.util.concurrent.FutureTask
 
@@ -14,10 +12,18 @@ class TrajectoryController(builder: TrajectoryBuilder.() -> Unit) {
 
     private val builder = TrajectoryBuilder(builder)
 
-    private var t = 0.0
-    private var trajectory: List<TrajectoryState> = listOf()
-    private var totalTime = 0.0
-    private var initialState: Pose2D = Pose2D.identity
+    var t = 0.0
+        private set
+
+    var trajectory: List<TrajectoryState> = listOf()
+        private set
+
+    var totalTime = 0.0
+        private set
+
+    var initialState: Pose2D = Pose2D.identity
+        private set
+
     private var trajectoryGenerator: FutureTask<List<TrajectoryState>>? = null
 
     private var invertMultiplier = 0.0
@@ -44,7 +50,7 @@ class TrajectoryController(builder: TrajectoryBuilder.() -> Unit) {
         trajectoryGenerator = FutureTask generator@{
             val startTime = System.nanoTime()
             val path = if (absolute) getArray(robotState, *waypoints) else waypoints
-            val parameterizedPath =  mixParameterizedPathOf(path,
+            val parameterizedPath = mixParameterizedPathOf(path,
                     optimizePath = optimizeDkSquared, bendFactor = builder.bendFactor)
             val b = generateTrajectory(parameterizedPath, builder.wheelbaseRadius,
                     builder.trajectoryVelocity,
