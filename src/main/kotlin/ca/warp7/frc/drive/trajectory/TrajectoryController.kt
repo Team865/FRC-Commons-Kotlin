@@ -3,6 +3,7 @@ package ca.warp7.frc.drive.trajectory
 import ca.warp7.frc.epsilonEquals
 import ca.warp7.frc.geometry.*
 import ca.warp7.frc.linearInterpolate
+import ca.warp7.frc.path.mixParameterizedPathOf
 import ca.warp7.frc.path.parameterized
 import ca.warp7.frc.path.quinticSplinesOf
 import ca.warp7.frc.toInt
@@ -30,6 +31,10 @@ class TrajectoryController(builder: TrajectoryBuilder.() -> Unit) {
         mirroredMultiplier = mirrored.toInt().toDouble()
     }
 
+    private fun <T> getArray(vararg t: T): Array<out T> {
+        return t
+    }
+
     fun initTrajectory(
             waypoints: Array<Pose2D>,
             absolute: Boolean,
@@ -38,13 +43,12 @@ class TrajectoryController(builder: TrajectoryBuilder.() -> Unit) {
     ) {
         trajectoryGenerator = FutureTask generator@{
             val startTime = System.nanoTime()
-            val path =
-                    if (absolute) quinticSplinesOf(robotState, *waypoints, optimizePath = optimizeDkSquared)
-                    else quinticSplinesOf(*waypoints, optimizePath = optimizeDkSquared)
-            val parameterizedPath = path.parameterized()
+            val path = if (absolute) getArray(robotState, *waypoints) else waypoints
+            val parameterizedPath =  mixParameterizedPathOf(path,
+                    optimizePath = optimizeDkSquared, bendFactor = builder.bendFactor)
             val b = generateTrajectory(parameterizedPath, builder.wheelbaseRadius,
-                    builder.adjustedVelocity,
-                    builder.adjustedAcceleration, builder.adjustedCentripetalAcceleration, builder.adjustedJerk)
+                    builder.trajectoryVelocity,
+                    builder.trajectoryAcceleration, builder.maxCentripetalAcceleration, builder.maxJerk)
             val elapsedTime = ((System.nanoTime() - startTime) / 1E6).toInt()
             println("Trajectory Generation Time: $elapsedTime ms")
             return@generator b

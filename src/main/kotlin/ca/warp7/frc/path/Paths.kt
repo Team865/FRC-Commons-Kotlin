@@ -2,15 +2,15 @@
 
 package ca.warp7.frc.path
 
-import ca.warp7.frc.geometry.ArcPose2D
-import ca.warp7.frc.geometry.Pose2D
+import ca.warp7.frc.epsilonEquals
+import ca.warp7.frc.geometry.*
 
 operator fun Path2D.get(t: Double): Path2DState {
     return Path2DState(t, px(t), py(t), vx(t), vy(t), ax(t), ay(t), jx(t), jy(t))
 }
 
-fun quinticSplineFromPose(p0: Pose2D, p1: Pose2D): QuinticSegment2D {
-    val scale = p0.translation.distanceTo(p1.translation) * 1.2
+fun quinticSplineFromPose(p0: Pose2D, p1: Pose2D, bendFactor: Double = 1.2): QuinticSegment2D {
+    val scale = p0.translation.distanceTo(p1.translation) * bendFactor
     return QuinticSegment2D(
             x0 = p0.translation.x,
             x1 = p1.translation.x,
@@ -36,3 +36,45 @@ fun quinticSplinesOf(vararg waypoints: Pose2D, optimizePath: Boolean = false): L
 
 fun parameterizedSplinesOf(vararg waypoints: Pose2D): List<ArcPose2D> =
         quinticSplinesOf(*waypoints).parameterized()
+
+fun mixParameterizedPathOf(waypoints: Array<Pose2D>, optimizePath: Boolean, bendFactor: Double): List<ArcPose2D> {
+    val param = mutableListOf<ArcPose2D>()
+    val path = mutableListOf<QuinticSegment2D>()
+    for (i in 0 until waypoints.size - 1) {
+        val a = waypoints[i]
+        val b = waypoints[i + 1]
+        if (a.translation.epsilonEquals(b.translation)) {
+            if (path.isNotEmpty()) {
+                val segment = if (optimizePath) path.optimized().parameterized() else path.parameterized()
+                if (param.isEmpty()) param.addAll(segment)
+                else param.addAll(segment.subList(0, segment.lastIndex))
+                path.clear()
+            }
+            val theta = (b.rotation - a.rotation).radians
+            val phi = a.rotation.radians
+            check(!theta.epsilonEquals(0.0))
+            var x = 0.0
+            if (theta > 0) {
+                while (x < theta) {
+                    x += 0.1
+                    param.add(ArcPose2D(Pose2D(a.translation,
+                            Rotation2D.fromRadians(phi + x)), Double.POSITIVE_INFINITY, 0.0))
+                }
+            } else {
+                while (x > theta) {
+                    x -= 0.1
+                    param.add(ArcPose2D(Pose2D(a.translation,
+                            Rotation2D.fromRadians(phi + x)), Double.NEGATIVE_INFINITY, 0.0))
+                }
+            }
+        } else {
+            path.add(quinticSplineFromPose(waypoints[i], waypoints[i + 1], bendFactor))
+        }
+    }
+    if (path.isNotEmpty()) {
+        val segment = if (optimizePath) path.optimized().parameterized() else path.parameterized()
+        if (param.isEmpty()) param.addAll(segment)
+        else param.addAll(segment.subList(0, segment.lastIndex))
+    }
+    return param
+}
