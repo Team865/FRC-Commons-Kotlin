@@ -44,11 +44,6 @@ open class ActionDSLImpl : ActionDSLBase, Action, ActionState {
         stop = block
     }
 
-
-    override fun String.not() {
-        name = this
-    }
-
     override fun printTaskGraph() {
     }
 }

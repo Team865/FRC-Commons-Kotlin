@@ -276,6 +276,7 @@ private enum class CoroutineState {
  */
 
 @DslMarker
+@ExperimentalActionDSL
 annotation class ActionDSL
 
 @ExperimentalActionDSL
@@ -382,16 +383,6 @@ private class CoroutineWithContinuation(
     override suspend fun parallel(block: suspend ActionCoroutine.() -> Unit) {
         action.runRoutine(debug, block)
     }
-}
-
-@ActionDSL
-operator fun String.not() {
-    println(this)
-}
-
-@ActionDSL
-operator fun Number.not() {
-    println(this)
 }
 
 @ExperimentalActionDSL

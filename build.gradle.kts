@@ -40,8 +40,6 @@ dependencies {
     // WPILib and Vendors
     wpi.deps.wpilib().forEach { compile(it) }
     wpi.deps.vendor.java().forEach { compile(it) }
-    wpi.deps.vendor.jni(NativePlatforms.roborio).forEach { nativeZip(it) }
-    wpi.deps.vendor.jni(NativePlatforms.desktop).forEach { nativeDesktopZip(it) }
 
     // Unit Testing
     testCompile(kotlin("test"))

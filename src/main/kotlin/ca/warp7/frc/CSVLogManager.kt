@@ -8,7 +8,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class CSVLogManager {
-    private val rootDir: File = File(File("/home/lvuser"), "/RobotLogs/")
+    private val rootDir: File = File("/home/lvuser/RobotLogs/")
     private val format = SimpleDateFormat("yyyy_MM_dd HH_mm_ss")
 
     init {
