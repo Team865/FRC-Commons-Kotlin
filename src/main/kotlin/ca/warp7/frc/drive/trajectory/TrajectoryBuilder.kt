@@ -76,18 +76,27 @@ class TrajectoryBuilder(builder: TrajectoryBuilder.() -> Unit) {
 
     fun turnRight(degrees: Double) {
         check(waypoints.isNotEmpty() && degrees > 0)
-        val pose = waypoints.last().run { Pose2D(translation, rotation.rotate(Rotation2D.fromDegrees(-degrees))) }
+        val pose = waypoints.last().run { Pose2D(translation, rotation + Rotation2D.fromDegrees(-degrees)) }
         waypoints.add(pose)
     }
 
     fun turnLeft(degrees: Double) {
         check(waypoints.isNotEmpty() && degrees > 0)
-        val pose = waypoints.last().run { Pose2D(translation, rotation.rotate(Rotation2D.fromDegrees(degrees))) }
+        val pose = waypoints.last().run { Pose2D(translation, rotation + Rotation2D.fromDegrees(degrees)) }
         waypoints.add(pose)
     }
 
     fun moveTo(pose: Pose2D) {
         check(waypoints.isNotEmpty() && !pose.epsilonEquals(waypoints.last()))
+        waypoints.add(pose)
+    }
+
+    fun move(t: Translation2D, r: Rotation2D = Rotation2D.identity) {
+        // TODO make absolute/relative rotation consistent
+        check(waypoints.isNotEmpty()
+                && (!t.epsilonEquals(Translation2D.identity)
+                || !r.epsilonEquals(Rotation2D.identity)))
+        val pose = waypoints.last().run { Pose2D(translation + t, rotation + r) }
         waypoints.add(pose)
     }
 

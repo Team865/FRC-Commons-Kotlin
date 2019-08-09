@@ -37,6 +37,12 @@ fun quinticSplinesOf(vararg waypoints: Pose2D, optimizePath: Boolean = false): L
 fun parameterizedSplinesOf(vararg waypoints: Pose2D): List<ArcPose2D> =
         quinticSplinesOf(*waypoints).parameterized()
 
+fun mixParameterizeSplines(path: MutableList<QuinticSegment2D>, param: MutableList<ArcPose2D>, optimizePath: Boolean) {
+    val segment = if (optimizePath) path.optimized().parameterized() else path.parameterized()
+    if (param.isEmpty()) param.addAll(segment)
+    else param.addAll(segment.subList(0, segment.lastIndex))
+}
+
 fun mixParameterizedPathOf(waypoints: Array<Pose2D>, optimizePath: Boolean, bendFactor: Double): List<ArcPose2D> {
     val param = mutableListOf<ArcPose2D>()
     val path = mutableListOf<QuinticSegment2D>()
@@ -45,9 +51,7 @@ fun mixParameterizedPathOf(waypoints: Array<Pose2D>, optimizePath: Boolean, bend
         val b = waypoints[i + 1]
         if (a.translation.epsilonEquals(b.translation)) {
             if (path.isNotEmpty()) {
-                val segment = if (optimizePath) path.optimized().parameterized() else path.parameterized()
-                if (param.isEmpty()) param.addAll(segment)
-                else param.addAll(segment.subList(0, segment.lastIndex))
+                mixParameterizeSplines(path, param, optimizePath)
                 path.clear()
             }
             val theta = (b.rotation - a.rotation).radians
@@ -72,9 +76,7 @@ fun mixParameterizedPathOf(waypoints: Array<Pose2D>, optimizePath: Boolean, bend
         }
     }
     if (path.isNotEmpty()) {
-        val segment = if (optimizePath) path.optimized().parameterized() else path.parameterized()
-        if (param.isEmpty()) param.addAll(segment)
-        else param.addAll(segment.subList(0, segment.lastIndex))
+        mixParameterizeSplines(path, param, optimizePath)
     }
     return param
 }
