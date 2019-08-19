@@ -36,6 +36,14 @@ dependencies {
     testCompile("junit", "junit", "4.12")
 }
 
+
+tasks.jar {
+    manifest {
+        attributes("Automatic-Module-Name" to "ca.warp_seven.frc")
+    }
+}
+
+
 val sourcesJar by tasks.registering(Jar::class) {
     archiveClassifier.set("sources")
     from(sourceSets.main.get().allSource)
@@ -43,7 +51,7 @@ val sourcesJar by tasks.registering(Jar::class) {
 
 publishing {
     publications {
-        register("mavenJava", MavenPublication::class) {
+        register("mavenJava", MavenPublication::class.java) {
             from(components["java"])
             artifact(sourcesJar.get())
             artifactId = "frc-commons"
