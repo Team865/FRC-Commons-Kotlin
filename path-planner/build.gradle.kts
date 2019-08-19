@@ -24,13 +24,13 @@ tasks.withType<KotlinCompile> {
 }
 
 dependencies {
-    implementation(rootProject)
+    compile(rootProject)
 
-    implementation(kotlin("stdlib"))
+    compile(kotlin("stdlib"))
 
-    implementation("org.processing:core:3.3.7")
+    compile("org.processing:core:3.3.7")
 
     // Unit Testing
-    testImplementation(kotlin("test"))
-    testImplementation("junit", "junit", "4.12")
+    testCompile(kotlin("test"))
+    testCompile("junit", "junit", "4.12")
 }

@@ -1,7 +1,9 @@
 @file:Suppress("UnusedImport", "SpellCheckingInspection")
 
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
-    `java-library`
+    java
     kotlin("jvm") version "1.3.41"
     `maven-publish`
 }
@@ -12,40 +14,26 @@ repositories {
 }
 
 group = "ca.warp7.frc"
-version = "2019.1.1"
-//
-tasks.compileJava {
-    dependsOn(":compileKotlin")
-    doFirst {
-        options.compilerArgs = listOf("--module-path", classpath.asPath)
-        classpath = files()
-    }
-}
-//
-tasks.compileKotlin {
+version = "2019.1.0"
+
+tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf(
                 "-Xnew-inference",
-                "-Xuse-experimental=kotlin.Experimental"//,
-//                "-Xallow-kotlin-package",
-//                "-Xno-call-assertions",
-//                "-Xno-param-assertions"
+                "-Xuse-experimental=kotlin.Experimental",
+                "-Xallow-kotlin-package",
+                "-Xno-call-assertions",
+                "-Xno-param-assertions"
         )
         kotlinOptions.jvmTarget = "11"
     }
 }
 
-tasks.compileKotlin.get().destinationDir = tasks.compileJava.get().destinationDir
-//
-tasks.jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
 dependencies {
-    implementation(kotlin("stdlib"))
+    compile(kotlin("stdlib"))
 
-    testImplementation(kotlin("test"))
-    testImplementation("junit", "junit", "4.12")
+    testCompile(kotlin("test"))
+    testCompile("junit", "junit", "4.12")
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
