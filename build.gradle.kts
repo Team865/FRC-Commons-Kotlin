@@ -1,15 +1,15 @@
 @file:Suppress("UnusedImport", "SpellCheckingInspection")
 
-import edu.wpi.first.gradlerio.GradleRIOPlugin
-import edu.wpi.first.gradlerio.frc.FRCJavaArtifact
-import edu.wpi.first.gradlerio.frc.RoboRIO
-import edu.wpi.first.toolchain.NativePlatforms
+//import edu.wpi.first.gradlerio.GradleRIOPlugin
+//import edu.wpi.first.gradlerio.frc.FRCJavaArtifact
+//import edu.wpi.first.gradlerio.frc.RoboRIO
+//import edu.wpi.first.toolchain.NativePlatforms
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.3.41"
     `maven-publish`
-    id("edu.wpi.first.GradleRIO") version "2019.4.1"
+//    id("edu.wpi.first.GradleRIO") version "2019.4.1"
 }
 
 repositories {
@@ -38,8 +38,8 @@ dependencies {
     compile(kotlin("stdlib"))
 
     // WPILib and Vendors
-    wpi.deps.wpilib().forEach { compile(it) }
-    wpi.deps.vendor.java().forEach { compile(it) }
+//    wpi.deps.wpilib().forEach { compile(it) }
+//    wpi.deps.vendor.java().forEach { compile(it) }
 
     // Unit Testing
     testCompile(kotlin("test"))

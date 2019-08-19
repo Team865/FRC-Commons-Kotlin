@@ -1,9 +1,9 @@
 package ca.warp7.frc
 
 import ca.warp7.frc.CycleState.*
-import edu.wpi.first.wpilibj.Notifier
-import edu.wpi.first.wpilibj.RobotBase
-import edu.wpi.first.wpilibj.Timer
+//import edu.wpi.first.wpilibj.Notifier
+//import edu.wpi.first.wpilibj.RobotBase
+//import edu.wpi.first.wpilibj.Timer
 import java.lang.StringBuilder
 import kotlin.coroutines.*
 
@@ -128,7 +128,7 @@ open class Action {
      * Gets the current time in seconds
      */
     open fun time(): Double {
-        return Timer.getFPGATimestamp()
+        return System.nanoTime() / 1E9
     }
 
     private val coroutines: MutableList<CoroutineWithContinuation> = mutableListOf()
@@ -411,25 +411,3 @@ fun Action.runRoutine(debug: Boolean = false, block: suspend ActionCoroutine.() 
 
 @ExperimentalActionDSL
 val synchronizedControl = SynchronizedControl()
-
-@ExperimentalActionDSL
-@ActionDSL
-infix fun Notifier.run(action: Action) {
-    cancel()
-    synchronizedControl.setAction(action)
-}
-
-@ExperimentalActionDSL
-@Suppress("unused")
-@ActionDSL
-fun Notifier.cancel() {
-    synchronizedControl.interrupt()
-}
-
-@ExperimentalActionDSL
-@Suppress("unused")
-@ActionDSL
-inline fun <T> RobotBase.using(t: T, block: T.() -> Unit) {
-    synchronizedControl.updateActions()
-    block(t)
-}
