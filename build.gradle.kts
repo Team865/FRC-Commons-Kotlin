@@ -1,15 +1,11 @@
 @file:Suppress("UnusedImport", "SpellCheckingInspection")
 
-//import edu.wpi.first.gradlerio.GradleRIOPlugin
-//import edu.wpi.first.gradlerio.frc.FRCJavaArtifact
-//import edu.wpi.first.gradlerio.frc.RoboRIO
-//import edu.wpi.first.toolchain.NativePlatforms
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    java
     kotlin("jvm") version "1.3.41"
     `maven-publish`
-//    id("edu.wpi.first.GradleRIO") version "2019.4.1"
 }
 
 repositories {
@@ -29,25 +25,19 @@ tasks.withType<KotlinCompile> {
                 "-Xno-call-assertions",
                 "-Xno-param-assertions"
         )
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = "11"
     }
 }
 
 dependencies {
-    // Kotlin Standard Library and Coroutines
     compile(kotlin("stdlib"))
 
-    // WPILib and Vendors
-//    wpi.deps.wpilib().forEach { compile(it) }
-//    wpi.deps.vendor.java().forEach { compile(it) }
-
-    // Unit Testing
     testCompile(kotlin("test"))
     testCompile("junit", "junit", "4.12")
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
-    classifier = "sources"
+    archiveClassifier.set("sources")
     from(sourceSets.main.get().allSource)
 }
 

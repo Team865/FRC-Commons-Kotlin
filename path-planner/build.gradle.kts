@@ -1,9 +1,8 @@
-//import edu.wpi.first.toolchain.NativePlatforms
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
+    java
     kotlin("jvm")
-//    id("edu.wpi.first.GradleRIO")
     id("application")
 }
 
@@ -20,21 +19,14 @@ application {
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xnew-inference")
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = "11"
     }
 }
 
 dependencies {
     compile(rootProject)
 
-    // Kotlin Standard Library and Coroutines
     compile(kotlin("stdlib"))
-
-    // WPILib and Vendors
-//    wpi.deps.wpilib().forEach { compile(it) }
-//    wpi.deps.vendor.java().forEach { compile(it) }
-//    wpi.deps.vendor.jni(NativePlatforms.roborio).forEach { nativeZip(it) }
-//    wpi.deps.vendor.jni(NativePlatforms.desktop).forEach { nativeDesktopZip(it) }
 
     compile("org.processing:core:3.3.7")
 
