@@ -16,11 +16,9 @@ fun test(): Action {
 
 fun test2(): Action {
     return queue {
-        !"runOnce"
         +runOnce {
         }
 
-        !"Periodic"
         +periodic {
         }
 
