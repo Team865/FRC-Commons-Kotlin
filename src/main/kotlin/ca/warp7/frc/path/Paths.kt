@@ -37,13 +37,21 @@ fun quinticSplinesOf(vararg waypoints: Pose2D, optimizePath: Boolean = false): L
 fun parameterizedSplinesOf(vararg waypoints: Pose2D): List<ArcPose2D> =
         quinticSplinesOf(*waypoints).parameterized()
 
-fun mixParameterizeSplines(path: MutableList<QuinticSegment2D>, param: MutableList<ArcPose2D>, optimizePath: Boolean) {
+private fun mixParameterizeSplines(
+        path: MutableList<QuinticSegment2D>,
+        param: MutableList<ArcPose2D>,
+        optimizePath: Boolean
+) {
     val segment = if (optimizePath) path.optimized().parameterized() else path.parameterized()
     if (param.isEmpty()) param.addAll(segment)
     else param.addAll(segment.subList(0, segment.lastIndex))
 }
 
-fun mixParameterizedPathOf(waypoints: Array<Pose2D>, optimizePath: Boolean, bendFactor: Double): List<ArcPose2D> {
+fun mixParameterizedPathOf(
+        waypoints: Array<Pose2D>,
+        optimizePath: Boolean,
+        bendFactor: Double
+): List<ArcPose2D> {
     val param = mutableListOf<ArcPose2D>()
     val path = mutableListOf<QuinticSegment2D>()
     for (i in 0 until waypoints.size - 1) {

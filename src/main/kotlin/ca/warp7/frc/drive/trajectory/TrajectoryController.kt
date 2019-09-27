@@ -47,7 +47,7 @@ class TrajectoryController(builder: TrajectoryBuilder.() -> Unit) {
             optimizeDkSquared: Boolean,
             robotState: Pose2D
     ) {
-        trajectoryGenerator = FutureTask generator@{
+        val generator = FutureTask generator@{
             val startTime = System.nanoTime()
             val path = if (absolute) getArray(robotState, *waypoints) else waypoints
             val parameterizedPath = mixParameterizedPathOf(path,
@@ -59,8 +59,8 @@ class TrajectoryController(builder: TrajectoryBuilder.() -> Unit) {
             println("Trajectory Generation Time: $elapsedTime ms")
             return@generator b
         }
-
-        val thread = Thread(trajectoryGenerator)
+        trajectoryGenerator = generator
+        val thread = Thread(generator)
         thread.isDaemon = true
         thread.priority = Thread.NORM_PRIORITY
         thread.start()
