@@ -1,9 +1,12 @@
 package test.ca.warp7.frc.action
 
-import ca.warp7.frc.action.*
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import ca.warp7.frc.action.async
+import ca.warp7.frc.action.queue
+import ca.warp7.frc.action.runOnce
+import ca.warp7.frc.action.wait
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import kotlin.test.assertEquals
@@ -13,12 +16,12 @@ class AsyncTest {
     private val maskedOut = ByteArrayOutputStream()
     private val systemOut = System.out
 
-    @Before
+    @BeforeAll
     fun setUpStreams() {
         System.setOut(PrintStream(maskedOut))
     }
 
-    @After
+    @AfterAll
     fun restoreStreams() {
         System.setOut(systemOut)
     }
