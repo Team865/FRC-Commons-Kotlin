@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
-    kotlin("jvm") version "1.3.41"
+    kotlin("jvm") version "1.3.50"
     `maven-publish`
     id("org.jetbrains.dokka") version "0.9.18"
 }
@@ -32,11 +32,18 @@ tasks.withType<KotlinCompile> {
     }
 }
 
+tasks.withType<Test> {
+    useJUnitPlatform {
+    }
+}
+
 dependencies {
     compile(kotlin("stdlib"))
 
-    testCompile(kotlin("test"))
-    testCompile("junit", "junit", "4.12")
+    testImplementation(kotlin("test"))
+    testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = "5.5.1")
+    testRuntimeOnly(group = "org.junit.jupiter", name = "junit-jupiter-engine", version = "5.5.1")
+    testRuntimeOnly(group = "org.junit.platform", name = "junit-platform-launcher", version = "1.5.1")
 }
 
 

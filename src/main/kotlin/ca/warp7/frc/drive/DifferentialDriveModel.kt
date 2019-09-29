@@ -33,7 +33,7 @@ import kotlin.math.withSign
  *
  *  @param angularDrag drag torque per speed in (N * m) / (rad/s)
  */
-@Suppress("unused")
+@Suppress("unused", "MemberVisibilityCanBePrivate")
 class DifferentialDriveModel(
 
         val wheelRadius: Double, // m

@@ -1,6 +1,7 @@
 package ca.warp7.frc
 
 import kotlin.math.abs
+import kotlin.math.sign
 
 fun Double.epsilonEquals(other: Double, epsilon: Double) = this - epsilon <= other && this + epsilon >= other
 
@@ -32,5 +33,7 @@ val Number.feet: Double get() = this.toDouble() * kFeetToMeters
 val Number.inches: Double get() = this.toDouble() * kInchesToMeters
 
 val Double.squared: Double get() = this * this
+
+val Double.squaredWithSign: Double get() = this * this * sign
 
 fun Boolean.toInt() = if (this) 1 else -1

@@ -5,7 +5,6 @@ import ca.warp7.frc.geometry.Rotation2D
 import ca.warp7.frc.geometry.Translation2D
 import ca.warp7.frc.geometry.fromDegrees
 import ca.warp7.frc.path.mixParameterizedPathOf
-import org.junit.Test
 
 fun main() {
     val a = mixParameterizedPathOf(arrayOf(
