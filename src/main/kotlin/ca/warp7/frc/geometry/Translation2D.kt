@@ -54,6 +54,16 @@ class Translation2D(val x: Double, val y: Double) : State<Translation2D> {
 
     override fun distanceTo(state: Translation2D): Double = hypot(state.x - x, state.y - y)
 
+    /**
+    * Gets the magnitude of the vector.
+    *
+    * **Example**
+    *
+    * @sample Translation2DTest.magWorksProperly
+    *
+    * @return the magnitude of the vector.
+    *
+    */
     val mag: Double get() = hypot(x, y)
 
     companion object {
