@@ -10,3 +10,4 @@ install:
 
 script:
   - ./gradlew build
+  - ./gradlew dokka
