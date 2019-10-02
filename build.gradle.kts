@@ -76,6 +76,8 @@ publishing {
 }
 
 val dokka by tasks.getting(DokkaTask::class)  {
+    moduleName = "ca.warp7.frc"
+    noJdkLink = true
     outputFormat = "html" 
     outputDirectory = "$buildDir/javadoc"
     samples = listOf("src/test/kotlin/test/ca/warp7/frc/geometry")   

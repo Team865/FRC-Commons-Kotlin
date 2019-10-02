@@ -59,7 +59,7 @@ class Translation2D(val x: Double, val y: Double) : State<Translation2D> {
     *
     * **Example**
     *
-    * @sample Translation2DTest.magWorksProperly
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.magWorksProperly
     *
     * @return the magnitude of the vector.
     *
