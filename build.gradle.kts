@@ -1,16 +1,19 @@
 @file:Suppress("UnusedImport", "SpellCheckingInspection")
 
+import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
     kotlin("jvm") version "1.3.50"
     `maven-publish`
+    id("org.jetbrains.dokka") version "0.9.18"
 }
 
 repositories {
     mavenCentral()
     maven { setUrl("https://jitpack.io") }
+    maven { setUrl("https://dl.bintray.com/kotlin/dokka") }
 }
 
 group = "ca.warp7.frc"
@@ -70,4 +73,10 @@ publishing {
             url = uri("$buildDir/maven")
         }
     }
+}
+
+val dokka by tasks.getting(DokkaTask::class)  {
+    outputFormat = "html" 
+    outputDirectory = "$buildDir/javadoc"
+    samples = listOf("src/test/kotlin/test/ca/warp7/frc/geometry")   
 }
