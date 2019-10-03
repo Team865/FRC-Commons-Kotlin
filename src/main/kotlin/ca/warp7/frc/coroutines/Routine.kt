@@ -1,7 +1,7 @@
 package ca.warp7.frc.coroutines
 
-@ExperimentalActionDSL
+@ExperimentalCoroutineAction
 class Routine(
         val debug: Boolean,
-        val block: suspend ActionCoroutine.() -> Unit
+        val block: suspend CoroutineActionScope.() -> Unit
 )

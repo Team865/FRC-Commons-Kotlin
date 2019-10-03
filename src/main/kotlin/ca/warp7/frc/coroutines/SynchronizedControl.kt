@@ -1,10 +1,10 @@
 package ca.warp7.frc.coroutines
 
-@ExperimentalActionDSL
+@ExperimentalCoroutineAction
 class SynchronizedControl {
-    private var currentAction = Action()
+    private var currentAction = CoroutineAction()
 
-    fun setAction(action: Action) {
+    fun setAction(action: CoroutineAction) {
         synchronized(this) {
             currentAction = action
             currentAction.advanceState()
@@ -13,7 +13,7 @@ class SynchronizedControl {
 
     fun interrupt() {
         synchronized(this) {
-            currentAction.stop()
+            currentAction.stop0()
         }
     }
 

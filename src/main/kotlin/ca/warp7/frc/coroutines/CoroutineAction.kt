@@ -1,5 +1,6 @@
 package ca.warp7.frc.coroutines
 
+import ca.warp7.frc.action.Action
 import ca.warp7.frc.coroutines.CycleState.*
 //import edu.wpi.first.wpilibj.Notifier
 //import edu.wpi.first.wpilibj.RobotBase
@@ -7,110 +8,25 @@ import ca.warp7.frc.coroutines.CycleState.*
 import java.lang.StringBuilder
 import kotlin.coroutines.*
 
-/**
- * An [Action] defines any self contained action that can be executed by the robot.
- * An Action is the unit of basis for autonomous programs. Actions may contain anything,
- * which means we can run sub-actions in various ways, in combination with the [firstCycle],
- * [update], [lastCycle], [interrupt], and [shouldFinish] methods.
- *
- * [Action] is subclassed to provide custom functionality. However, if multiple actions need
- * to be scheduled, the coroutine functionality as provided by the [ActionCoroutine] interface
- * through the [run] method
- *
- * @since 4.0
- */
 
 @Suppress("MemberVisibilityCanBePrivate")
-@ExperimentalActionDSL
-open class Action {
+@ExperimentalCoroutineAction
+open class CoroutineAction: Action {
 
-    /**
-     * Returns whether or not the code has finished execution.
-     *
-     * Contract: [shouldFinish] is called only after [firstCycle] is called
-     *
-     * @since 5.0
-     */
-    open fun shouldFinish(): Boolean {
+
+    override fun shouldFinish(): Boolean {
         if (cycleState == Periodic && cycleCount == 0) {
-            warnThis("is not finishing; no override implementation")
+            println("$this is not finishing; no override implementation")
         }
         return false
     }
 
-    /**
-     * Returns whether or not the code has finished execution.
-     */
-    @Deprecated("", ReplaceWith("shouldFinish()"))
-    open val shouldFinish: Boolean
-        get() = shouldFinish()
-
-    /**
-     * Run code once when the action is started
-     *
-     * Contract: [firstCycle] is called whenever this action is scheduled
-     * before any other method, including [shouldFinish]. [setEpoch] is
-     * called once immediately before this method is called to track time
-     *
-     * @since 5.0
-     */
-    open fun firstCycle() {
-        warnThis("is started (first cycle); no override implementation")
-    }
-
-    /**
-     * Run code once when the action is started, usually for set up.
-     * This method is called first before shouldFinish
-     */
-    @Deprecated("", ReplaceWith("firstCycle()"))
-    open fun start() {
-        firstCycle()
-    }
-
-    /**
-     * Periodically updates the action
-     */
-    open fun update() {
+    override fun update() {
         if (cycleState == Periodic && cycleCount == 0) {
-            warnThis("is updating; no override implementation")
+            println("$this is updating; no override implementation")
         }
     }
 
-    /**
-     * Run the last cycle
-     *
-     * Contract: [lastCycle] is called if and only if [shouldFinish] has returned
-     * true in the current cycle and [firstCycle] is called
-     */
-    open fun lastCycle() {
-        warnThis("is stopped (last cycle); no override implementation")
-    }
-
-    /**
-     * Run code once when the action finishes, usually for clean up
-     */
-    @Deprecated("", ReplaceWith(""))
-    open fun stop(interrupted: Boolean) {
-        if (interrupted) {
-            interrupt()
-        } else {
-            lastCycle()
-        }
-    }
-
-    /**
-     * Interrupt the action
-     *
-     * Contract: [interrupt] is called any time the action control manager
-     * determines that the action should stop regardless of [shouldFinish]
-     * However, it will only be called after [firstCycle]. [interrupt] and
-     * [lastCycle] are exclusive, meaning that they won't be both called in
-     * the same action cycle. [interrupt] will be used for ending timeout
-     * actions
-     */
-    open fun interrupt() {
-        warnThis("is interrupted; no override implementation")
-    }
 
     /**
      * Sends a warning with [msg]
@@ -157,7 +73,7 @@ open class Action {
 
     internal fun Routine.run() {
         if (cycleState == Periodic || cycleState == FirstCycle) {
-            val coroutine = CoroutineWithContinuation(coroutineHandle, this@Action, debug)
+            val coroutine = CoroutineWithContinuation(coroutineHandle, this@CoroutineAction, debug)
             coroutineHandle++
             coroutine.nextStep = block.createCoroutine(coroutine, coroutine)
             coroutines.add(coroutine)
@@ -217,7 +133,7 @@ open class Action {
         }
     }
 
-    internal fun stop() {
+    internal fun stop0() {
         when (cycleState) {
             FirstCycle -> Unit
             Periodic -> {

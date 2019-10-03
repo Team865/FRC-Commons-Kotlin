@@ -2,12 +2,12 @@ package ca.warp7.frc.coroutines
 
 import kotlin.coroutines.*
 
-@ExperimentalActionDSL
+@ExperimentalCoroutineAction
 internal class CoroutineWithContinuation(
         val handle: Int,
-        val action: Action,
+        val action: CoroutineAction,
         val debug: Boolean = false
-) : ActionCoroutine, Continuation<Unit> {
+) : CoroutineActionScope, Continuation<Unit> {
 
     var nextStep: Continuation<Unit>? = null
 
@@ -15,7 +15,7 @@ internal class CoroutineWithContinuation(
 
     var state = CoroutineState.Ready
 
-    val subActions: MutableList<Action> = mutableListOf()
+    val subActions: MutableList<CoroutineAction> = mutableListOf()
 
     override fun resumeWith(result: Result<Unit>) {
         result.getOrThrow()
@@ -45,7 +45,7 @@ internal class CoroutineWithContinuation(
         return false
     }
 
-    override suspend fun <T : Action> T.unaryPlus() {
+    override suspend fun <T : CoroutineAction> T.unaryPlus() {
         if (locked) {
             subActions.add(this)
         } else {
@@ -77,7 +77,7 @@ internal class CoroutineWithContinuation(
         }
     }
 
-    override suspend fun parallel(block: suspend ActionCoroutine.() -> Unit) {
+    override suspend fun parallel(block: suspend CoroutineActionScope.() -> Unit) {
         action.runRoutine(debug, block)
     }
 }
