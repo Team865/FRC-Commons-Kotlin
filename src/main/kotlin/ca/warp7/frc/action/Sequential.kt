@@ -1,29 +1,27 @@
 package ca.warp7.frc.action
 
-class ActionQueueImpl : ActionDSLImpl(), ActionQueue {
+class Sequential : Action, ActionBuilder {
 
-    private val queue: MutableList<Action> = mutableListOf()
+    private val remaining: MutableList<Action> = mutableListOf()
     private var currentAction: Action? = null
-    private var started = false
 
     override fun shouldFinish(): Boolean {
-        return queue.isEmpty() && currentAction == null
+        return remaining.isEmpty() && currentAction == null
     }
 
     override operator fun Action.unaryPlus() {
-        if (!started) queue.add(this)
+        remaining.add(this)
     }
 
     override fun firstCycle() {
-        super.firstCycle()
-        started = true
+        update()
     }
 
     override fun update() {
         super.update()
         if (currentAction == null) {
-            if (queue.isEmpty()) return
-            val action = queue.removeAt(0)
+            if (remaining.isEmpty()) return
+            val action = remaining.removeAt(0)
             action.firstCycle()
             currentAction = action
         }

@@ -1,5 +1,8 @@
 package ca.warp7.frc.action
 
+/**
+ * An executor wrapper that can swap out actions
+ */
 class ActionControl : Action {
     private var currentAction: Action? = null
     private var stopping = false
@@ -15,11 +18,6 @@ class ActionControl : Action {
 
     override fun update() {
         currentAction?.update()
-    }
-
-    override fun stop(interrupted: Boolean) {
-        currentAction?.stop(interrupted)
-        stopping = true
     }
 
     override fun lastCycle() {

@@ -15,6 +15,9 @@ package ca.warp7.frc.action
  *
  * Methods of this interface have certain contracts that must be followed when
  * implementing action executors, which are documented for each method.
+ *
+ * An [Action] object is only meant to run once. The behaviour of the object
+ * is unspecified if an executor attempts to run it again
  */
 
 interface Action {
@@ -74,7 +77,8 @@ interface Action {
      *
      * [update] is called once per cycle, if and only if [firstCycle]
      * has been called in a previous cycle and [shouldFinish] returns false
-     * for the current cycle
+     * for the current cycle. If [shouldFinish] returns true, [update] may
+     * not be called in subsequent cycles
      */
     fun update() {
     }
