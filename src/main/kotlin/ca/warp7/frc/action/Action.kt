@@ -37,7 +37,6 @@ interface Action {
      * determined by the executor of this action
      */
     fun firstCycle() {
-        println("'${name()}' is started (first cycle); no override implementation")
     }
 
 
@@ -92,7 +91,6 @@ interface Action {
      * cycle
      */
     fun lastCycle() {
-        println("'${name()}' is stopped (last cycle); no override implementation")
     }
 
 
@@ -109,7 +107,6 @@ interface Action {
      * [interrupt] will be used for ending timeout actions
      */
     fun interrupt() {
-        println("'${name()}' is interrupted; no override implementation")
     }
 
 

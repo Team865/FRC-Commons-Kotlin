@@ -22,10 +22,8 @@ fun waitUntil(predicate: (elapsed: Double) -> Boolean): Action = WaitUntil(predi
  * Returns an action that runs only once
  */
 inline fun runOnce(crossinline block: () -> Unit) = object : Action {
-    override fun name(): String {
-        return "runOnce"
-    }
-
+    override fun name() = "runOnce"
+    override fun shouldFinish() = true
     override fun firstCycle() = block()
 }
 
@@ -33,10 +31,8 @@ inline fun runOnce(crossinline block: () -> Unit) = object : Action {
  * Returns an action that gets called periodically forever
  */
 inline fun periodic(crossinline block: () -> Unit) = object : Action {
-    override fun name(): String {
-        return "periodic"
-    }
-
+    override fun name() = "periodic"
+    override fun shouldFinish() = false
     override fun update() = block()
 }
 

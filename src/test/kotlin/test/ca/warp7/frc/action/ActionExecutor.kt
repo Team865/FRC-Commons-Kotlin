@@ -4,9 +4,9 @@ import ca.warp7.frc.action.Action
 
 fun executeUnrestricted(action: Action) {
     action.firstCycle()
-    while (!action.shouldFinish) {
+    while (!action.shouldFinish()) {
         action.update()
         Thread.sleep(20)
     }
-    action.stop(false)
+    action.lastCycle()
 }
