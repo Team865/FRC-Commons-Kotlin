@@ -3,7 +3,6 @@
 
 package ca.warp7.frc.action
 
-
 /**
  * Returns an action that runs other actions sequentially
  */
@@ -38,11 +37,7 @@ fun runOnce(block: () -> Unit) = RunOnce(block)
  * Returns an action that gets called periodically forever
  */
 @ActionDSL
-inline fun periodic(crossinline block: () -> Unit) = object : Action {
-    override fun name() = "periodic"
-    override fun shouldFinish() = false
-    override fun update() = block()
-}
+fun periodic(block: () -> Unit) = Periodic(block)
 
 /**
  * Returns an action that does nothing for [seconds] seconds

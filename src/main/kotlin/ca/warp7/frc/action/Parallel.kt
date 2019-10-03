@@ -12,6 +12,7 @@ class Parallel(vararg actions: Action) : Action, ActionBuilder {
     override fun shouldFinish(): Boolean {
         for (action in remaining) {
             if (action.shouldFinish()) {
+                action.lastCycle()
                 toRemove.add(action)
             }
         }
