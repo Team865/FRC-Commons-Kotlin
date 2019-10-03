@@ -6,8 +6,8 @@ class ActionQueueImpl : ActionDSLImpl(), ActionQueue {
     private var currentAction: Action? = null
     private var started = false
 
-    init {
-        finishWhen { queue.isEmpty() && currentAction == null }
+    override fun shouldFinish(): Boolean {
+        return queue.isEmpty() && currentAction == null
     }
 
     override operator fun Action.unaryPlus() {
@@ -28,17 +28,17 @@ class ActionQueueImpl : ActionDSLImpl(), ActionQueue {
             currentAction = action
         }
         currentAction?.update()
-        if (currentAction?.shouldFinish == true) {
-            currentAction?.stop(false)
+        if (currentAction?.shouldFinish() == true) {
+            currentAction?.lastCycle()
             currentAction = null
         }
     }
 
-    override fun stop(interrupted: Boolean) {
-        currentAction?.stop(interrupted)
-        super.stop(interrupted)
+    override fun lastCycle() {
+        currentAction?.lastCycle()
     }
 
-    override fun printTaskGraph() {
+    override fun interrupt() {
+        currentAction?.interrupt()
     }
 }

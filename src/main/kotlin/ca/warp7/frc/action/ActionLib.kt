@@ -30,12 +30,10 @@ fun ActionDSLBase.periodic(block: ActionState.() -> Unit) = action {
 
 inline fun runOnce(crossinline block: () -> Unit) = object : Action {
     override fun firstCycle() = block()
-    override val shouldFinish: Boolean get() = false
 }
 
 inline fun periodic(crossinline block: () -> Unit) = object : Action {
     override fun update() = block()
-    override val shouldFinish: Boolean get() = false
 }
 
 fun runAfter(seconds: Int, block: ActionState.() -> Unit) = runAfter(seconds.toDouble(), block)

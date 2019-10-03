@@ -22,8 +22,19 @@ class ActionControl : Action {
         stopping = true
     }
 
-    override val shouldFinish: Boolean
-        get() = stopping || currentAction?.shouldFinish ?: true
+    override fun lastCycle() {
+        currentAction?.lastCycle()
+        currentAction = null
+    }
+
+    override fun interrupt() {
+        currentAction?.interrupt()
+        currentAction = null
+    }
+
+    override fun shouldFinish(): Boolean {
+        return stopping || currentAction?.shouldFinish() ?: true
+    }
 
     fun flagAsDone() {
         stopping = true

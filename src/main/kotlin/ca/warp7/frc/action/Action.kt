@@ -5,8 +5,6 @@ package ca.warp7.frc.action
  * state machine, such as the event loop of a robot program. Actions are the basic units
  * for autonomous programs.
  *
- * [Action] needs to be implemented to provide functionality
- *
  * Actions may contain anything, which means they can run sub-actions in various ways,
  * in combination with the [firstCycle], [update], [lastCycle], [interrupt], and
  * [shouldFinish] methods.
@@ -22,13 +20,21 @@ package ca.warp7.frc.action
 interface Action {
 
     /**
+     * Returns the name of this action. It is the class name
+     * by default
+     */
+    fun name(): String {
+        return this::class.java.simpleName
+    }
+
+    /**
      * Run code once when the action is started
      *
      * [firstCycle] is called when this action is scheduled, as
      * determined by the executor of this action
      */
     fun firstCycle() {
-        println("$this is started (first cycle); no override implementation")
+        println("'${name()}' is started (first cycle); no override implementation")
     }
 
 
@@ -64,9 +70,9 @@ interface Action {
 
 
     /**
-     * Periodically updates the action.
+     * Updates the action in each cycle
      *
-     * [update] is called every cycle, if and only if [firstCycle]
+     * [update] is called once per cycle, if and only if [firstCycle]
      * has been called in a previous cycle and [shouldFinish] returns false
      * for the current cycle
      */
@@ -75,14 +81,14 @@ interface Action {
 
 
     /**
-     * Run the last cycle
+     * Run the last cycle of the action
      *
      * [lastCycle] is called if and only if [shouldFinish] has returned
      * true in the current cycle and [firstCycle] has been called in a previous
      * cycle
      */
     fun lastCycle() {
-        println("$this is stopped (last cycle); no override implementation")
+        println("'${name()}' is stopped (last cycle); no override implementation")
     }
 
 
@@ -94,12 +100,12 @@ interface Action {
      * determined by [shouldFinish]. However, it may only be called after
      * [firstCycle] is called in a previous cycle. [interrupt] and
      * [lastCycle] are exclusive, meaning that they will never be both
-     * called in the same action cycle.
+     * called in the same action.
      *
      * [interrupt] will be used for ending timeout actions
      */
     fun interrupt() {
-        println("$this is interrupted; no override implementation")
+        println("'${name()}' is interrupted; no override implementation")
     }
 
 

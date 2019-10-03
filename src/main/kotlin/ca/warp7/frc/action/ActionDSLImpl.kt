@@ -17,14 +17,19 @@ open class ActionDSLImpl : ActionDSLBase, Action, ActionState {
         start.invoke(this)
     }
 
-    override val shouldFinish: Boolean
-        get() = predicate(this)
+    override fun shouldFinish(): Boolean {
+        return predicate(this)
+    }
 
     override fun update() {
         update.invoke(this)
     }
 
-    override fun stop(interrupted: Boolean) {
+    override fun lastCycle() {
+        stop.invoke(this)
+    }
+
+    override fun interrupt() {
         stop.invoke(this)
     }
 
@@ -42,8 +47,5 @@ open class ActionDSLImpl : ActionDSLBase, Action, ActionState {
 
     override fun onStop(block: ActionState.() -> Unit) {
         stop = block
-    }
-
-    override fun printTaskGraph() {
     }
 }
