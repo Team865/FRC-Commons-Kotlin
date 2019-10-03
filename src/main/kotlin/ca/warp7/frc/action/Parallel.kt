@@ -1,12 +1,12 @@
 package ca.warp7.frc.action
 
-internal class Parallel : Action, ActionBuilder {
+class Parallel(vararg actions: Action) : Action, ActionBuilder {
 
-    private val remaining = mutableListOf<Action>()
+    private val remaining = actions.toMutableList()
     private val toRemove = mutableListOf<Action>()
 
-    override fun Action.unaryPlus() {
-        remaining.add(this)
+    override fun add(action: Action) {
+        remaining.add(action)
     }
 
     override fun shouldFinish(): Boolean {

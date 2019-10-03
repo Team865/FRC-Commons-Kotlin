@@ -1,16 +1,16 @@
 package ca.warp7.frc.action
 
-class Sequential : Action, ActionBuilder {
+class Sequential(vararg actions: Action) : Action, ActionBuilder {
 
-    private val remaining: MutableList<Action> = mutableListOf()
+    private val remaining: MutableList<Action> = actions.toMutableList()
     private var currentAction: Action? = null
 
     override fun shouldFinish(): Boolean {
         return remaining.isEmpty() && currentAction == null
     }
 
-    override operator fun Action.unaryPlus() {
-        remaining.add(this)
+    override fun add(action: Action) {
+        remaining.add(action)
     }
 
     override fun firstCycle() {
