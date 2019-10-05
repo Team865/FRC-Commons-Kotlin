@@ -9,8 +9,8 @@ import ca.warp7.frc.path.QuinticSegment2D
 import ca.warp7.frc.path.parameterized
 import ca.warp7.frc.path.quinticSplinesOf
 import ca.warp7.frc.path.sumDCurvature2
-import ca.warp7.frc.drive.trajectory.TrajectoryState
-import ca.warp7.frc.drive.trajectory.generateTrajectory
+import ca.warp7.frc.trajectory.TrajectoryState
+import ca.warp7.frc.trajectory.generateTrajectory
 import processing.core.PApplet
 import processing.core.PConstants
 import processing.core.PImage

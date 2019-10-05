@@ -1,4 +1,6 @@
-package ca.warp7.frc.drive.trajectory
+@file:JvmName("TrajectoryGenerator")
+
+package ca.warp7.frc.trajectory
 
 import ca.warp7.frc.geometry.ArcPose2D
 import ca.warp7.frc.geometry.radians
