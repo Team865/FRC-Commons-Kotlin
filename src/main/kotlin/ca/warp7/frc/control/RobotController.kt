@@ -1,16 +1,16 @@
 package ca.warp7.frc.control
 
 interface RobotController {
-    val aButton: ControllerState
-    val bButton: ControllerState
-    val xButton: ControllerState
-    val yButton: ControllerState
-    val leftBumper: ControllerState
-    val rightBumper: ControllerState
-    val leftStickButton: ControllerState
-    val rightStickButton: ControllerState
-    val backButton: ControllerState
-    val startButton: ControllerState
+    val aButton: ButtonState
+    val bButton: ButtonState
+    val xButton: ButtonState
+    val yButton: ButtonState
+    val leftBumper: ButtonState
+    val rightBumper: ButtonState
+    val leftStickButton: ButtonState
+    val rightStickButton: ButtonState
+    val backButton: ButtonState
+    val startButton: ButtonState
     val leftTriggerAxis: Double
     val rightTriggerAxis: Double
     val leftXAxis: Double

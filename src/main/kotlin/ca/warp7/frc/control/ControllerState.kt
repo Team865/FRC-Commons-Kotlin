@@ -1,5 +1,4 @@
 package ca.warp7.frc.control
 
-enum class ControllerState {
-    Pressed, Released, HeldDown, None
-}
+@Deprecated("Use ButtonState instead", ReplaceWith("ButtonState"))
+typealias ControllerState = ButtonState
