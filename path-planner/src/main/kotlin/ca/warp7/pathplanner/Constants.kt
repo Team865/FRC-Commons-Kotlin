@@ -2,20 +2,20 @@ package ca.warp7.pathplanner
 
 // Unit conversion constants
 
-const val kFeetToMeters: Double = 0.3048
-const val kInchesToMeters: Double = 0.0254
+const val kFeetToMetres: Double = 0.3048
+const val kInchesToMetres: Double = 0.0254
 const val kFeetToInches: Double = 12.0
 
 // Dimension Constants
 
-const val kWheelRadius = 2.95 * kInchesToMeters // m
-const val kTurningDiameter = 24.75 * kInchesToMeters // m
+const val kWheelRadius = 2.95 * kInchesToMetres // m
+const val kTurningDiameter = 24.75 * kInchesToMetres // m
 
 // Kinematic constants
 
-const val kMaxVelocity = 12.0 * kFeetToMeters // m/s
-const val kMaxAcceleration = 9.0 * kFeetToMeters //  m/s^2
-const val kMaxFreeSpeed = 16.5 * kFeetToMeters// m/s
+const val kMaxVelocity = 12.0 * kFeetToMetres // m/s
+const val kMaxAcceleration = 9.0 * kFeetToMetres //  m/s^2
+const val kMaxFreeSpeed = 16.5 * kFeetToMetres// m/s
 
 const val kScrubFactor = 1.45
 const val kEffectiveWheelBaseRadius = kTurningDiameter / 2 * kScrubFactor // m

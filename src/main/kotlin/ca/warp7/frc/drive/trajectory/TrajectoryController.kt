@@ -4,7 +4,7 @@ import ca.warp7.frc.epsilonEquals
 import ca.warp7.frc.geometry.*
 import ca.warp7.frc.linearInterpolate
 import ca.warp7.frc.path.mixParameterizedPathOf
-import ca.warp7.frc.toInt
+import ca.warp7.frc.toSign
 import java.util.concurrent.FutureTask
 
 @Suppress("MemberVisibilityCanBePrivate")
@@ -30,11 +30,11 @@ class TrajectoryController(builder: TrajectoryBuilder.() -> Unit) {
     private var mirroredMultiplier = 0.0
 
     fun setInverted(inverted: Boolean) {
-        invertMultiplier = inverted.toInt().toDouble()
+        invertMultiplier = inverted.toSign().toDouble()
     }
 
     fun setMirrored(mirrored: Boolean) {
-        mirroredMultiplier = mirrored.toInt().toDouble()
+        mirroredMultiplier = mirrored.toSign().toDouble()
     }
 
     private fun <T> getArray(vararg t: T): Array<out T> {

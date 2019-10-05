@@ -1,5 +1,6 @@
 package ca.warp7.frc
 
+@Suppress("MemberVisibilityCanBePrivate")
 data class PID(
         var kP: Double = 0.0,
         var kI: Double = 0.0,

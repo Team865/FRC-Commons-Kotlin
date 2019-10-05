@@ -114,7 +114,7 @@ private fun computeArcLengths(
         k.isInfinite() -> abs((next.rotation - current.rotation).radians)
 
         // Robot is moving in a curve or straight line
-        // Returns the linear distance in meters
+        // Returns the linear distance in metres
         else -> {
 
             // Get the chord length (translational distance)
