@@ -10,27 +10,16 @@ import kotlin.math.withSign
  * Model of the kinematics, dynamics, and transmission of a differential drive robot
  *
  *  @param wheelRadius measured radius of wheels in m
- *
  *  @param wheelbaseRadius effective wheelbase radius in m
- *
  *  @param maxVelocity maximum loaded velocity in m/s
- *
  *  @param maxAcceleration maximum acceleration in m/s^2
- *
  *  @param maxFreeSpeed maximum free speed in m/s
- *
  *  @param speedPerVolt free speed of transmission per volt in (rad/s) / V
- *
  *  @param torquePerVolt stall torque of transmission per volt in (N * m) / V
- *
  *  @param frictionVoltage voltage that breaks static friction in V
- *
  *  @param linearInertia equivalent mass in kg
- *
  *  @param angularInertia equivalent moment of inertia kg * m^2
- *
  *  @param maxVoltage maximum voltage of transmission in V
- *
  *  @param angularDrag drag torque per speed in (N * m) / (rad/s)
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
