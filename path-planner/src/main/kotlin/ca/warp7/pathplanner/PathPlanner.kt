@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package ca.warp7.pathplanner
 
 import ca.warp7.frc.*
@@ -18,7 +20,7 @@ import javax.imageio.ImageIO
 import kotlin.math.absoluteValue
 import kotlin.math.sqrt
 
-@Suppress("MemberVisibilityCanBePrivate", "DEPRECATION")
+@Suppress("MemberVisibilityCanBePrivate")
 class PathPlanner : PApplet() {
 
     data class ControlPoint(

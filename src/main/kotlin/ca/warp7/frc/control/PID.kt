@@ -1,4 +1,6 @@
-package ca.warp7.frc
+package ca.warp7.frc.control
+
+import ca.warp7.frc.epsilonEquals
 
 @Suppress("MemberVisibilityCanBePrivate")
 data class PID(

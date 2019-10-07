@@ -1,9 +1,13 @@
+/**
+ * Commons.kt --- common constants and functions
+ */
+
+@file:JvmName("Commons")
+
 package ca.warp7.frc
 
 import kotlin.math.abs
 import kotlin.math.sign
-
-// Commons.kt --- common constants and functions
 
 const val kFeetToMetres: Double = 0.3048
 
@@ -42,7 +46,7 @@ fun linearInterpolate(a: Double, b: Double, x: Double): Double {
 
 
 /**
- * Limits a value
+ * Limit a value within a magnitude range
  *
  * @param max the maximum magnitude of the value. Must be positive
  */
@@ -58,7 +62,7 @@ fun Double.limit(max: Double): Double {
 
 
 /**
- * Applies a deadband to a value
+ * Apply a deadband to a value
  */
 fun applyDeadband(value: Double, max: Double, deadband: Double): Double {
     val v = value.limit(max)
@@ -85,22 +89,27 @@ val Double.f get() = "%.3f".format(this)
 val Double.f1 get() = "%.1f".format(this)
 
 /**
- * Converts a number in feet into metres
+ * Convert a number in feet into metres
  */
 val Number.feet: Double get() = this.toDouble() * kFeetToMetres
 
 /**
- * Converts a number in inches into metres
+ * Convert a number in inches into metres
  */
 val Number.inches: Double get() = this.toDouble() * kInchesToMetres
 
 /**
- * Squares a number
+ * Square a number
  */
 val Double.squared: Double get() = this * this
 
 /**
- * Squares a number and keep the sign
+ * Cube a number
+ */
+val Double.cubed: Double get() = this * this * this
+
+/**
+ * Square a number and keep the sign
  */
 val Double.squaredWithSign: Double get() = this * this * sign
 
