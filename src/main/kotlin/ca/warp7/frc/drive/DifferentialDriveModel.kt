@@ -22,7 +22,8 @@ import kotlin.math.withSign
  *  @param maxVoltage maximum voltage of transmission in V
  *  @param angularDrag drag torque per speed in (N * m) / (rad/s)
  */
-@Suppress("unused", "MemberVisibilityCanBePrivate")
+@Suppress("unused", "MemberVisibilityCanBePrivate", "DEPRECATION")
+@Deprecated("")
 class DifferentialDriveModel(
 
         val wheelRadius: Double, // m

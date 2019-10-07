@@ -3,6 +3,7 @@ package ca.warp7.frc.action
 /**
  * An executor wrapper that can swap out actions
  */
+@Deprecated("")
 class ActionControl : Action {
     private var currentAction: Action? = null
     private var stopping = false
@@ -32,9 +33,5 @@ class ActionControl : Action {
 
     override fun shouldFinish(): Boolean {
         return stopping || currentAction?.shouldFinish() ?: true
-    }
-
-    fun flagAsDone() {
-        stopping = true
     }
 }

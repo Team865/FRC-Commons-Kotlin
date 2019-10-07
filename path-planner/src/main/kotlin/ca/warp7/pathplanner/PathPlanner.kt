@@ -18,7 +18,7 @@ import javax.imageio.ImageIO
 import kotlin.math.absoluteValue
 import kotlin.math.sqrt
 
-@Suppress("MemberVisibilityCanBePrivate")
+@Suppress("MemberVisibilityCanBePrivate", "DEPRECATION")
 class PathPlanner : PApplet() {
 
     data class ControlPoint(
@@ -371,7 +371,7 @@ class PathPlanner : PApplet() {
             }
             'r' -> {
                 val newWaypoints = waypoints.reversedArray()
-                for (i in 0 until newWaypoints.size) {
+                for (i in newWaypoints.indices) {
                     newWaypoints[i] = newWaypoints[i].run {
                         Pose2D(translation, rotation.rotate(reversedRotation))
                     }
@@ -383,7 +383,7 @@ class PathPlanner : PApplet() {
                 regenerate()
             }
             'f' -> {
-                for (i in 0 until waypoints.size) {
+                for (i in waypoints.indices) {
                     waypoints[i] = waypoints[i].run {
                         Pose2D(Translation2D(translation.x, -translation.y), Rotation2D(rotation.cos, -rotation.sin))
                     }
@@ -479,7 +479,7 @@ class PathPlanner : PApplet() {
     }
 
     fun translateAll(by: Translation2D) {
-        for (i in 0 until waypoints.size) waypoints[i] = waypoints[i]
+        for (i in waypoints.indices) waypoints[i] = waypoints[i]
                 .run { Pose2D(translation + by, rotation) }
         regenerate()
     }

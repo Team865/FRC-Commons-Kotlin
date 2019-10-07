@@ -7,9 +7,11 @@ interface DeferredAction<T> {
 
     fun launch(): DeferredAction<T>
 
+    fun isDone(): Boolean
+
     suspend fun await()
 
     suspend fun awaitState(func: (T) -> Boolean)
 
-    fun finally()
+    fun finally(func: (T) -> Unit)
 }
