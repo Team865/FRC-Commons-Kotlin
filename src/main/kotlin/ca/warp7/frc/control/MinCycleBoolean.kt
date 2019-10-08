@@ -1,6 +1,6 @@
-package ca.warp7.frc
+package ca.warp7.frc.control
 
-class MinCycleBoolean(val minCycles: Int = 1) {
+class MinCycleBoolean(private val minCycles: Int = 1) {
     private var lastValue = false
     private var cycleCount = 0
 

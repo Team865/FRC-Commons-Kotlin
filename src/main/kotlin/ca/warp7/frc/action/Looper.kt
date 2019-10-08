@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Single-Instance scheduler for actions
  */
-object Scheduler {
+object Looper {
 
     private val actionLoops: MutableSet<Action> = ConcurrentHashMap.newKeySet()
     private val toRemove = mutableListOf<Action>()

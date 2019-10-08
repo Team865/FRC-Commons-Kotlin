@@ -1,4 +1,4 @@
-package ca.warp7.frc.drive.trajectory
+package ca.warp7.frc.trajectory
 
 import ca.warp7.frc.drive.ChassisState
 import ca.warp7.frc.f

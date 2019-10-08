@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package ca.warp7.pathplanner
 
 import ca.warp7.frc.*
@@ -9,8 +11,8 @@ import ca.warp7.frc.path.QuinticSegment2D
 import ca.warp7.frc.path.parameterized
 import ca.warp7.frc.path.quinticSplinesOf
 import ca.warp7.frc.path.sumDCurvature2
-import ca.warp7.frc.drive.trajectory.TrajectoryState
-import ca.warp7.frc.drive.trajectory.generateTrajectory
+import ca.warp7.frc.trajectory.TrajectoryState
+import ca.warp7.frc.trajectory.generateTrajectory
 import processing.core.PApplet
 import processing.core.PConstants
 import processing.core.PImage
@@ -40,7 +42,7 @@ class PathPlanner : PApplet() {
     val nAng = Rotation2D.fromDegrees(-1.0)
     val reversedRotation = Rotation2D(-1.0, 0.0)
 
-    val wheelBaseRadius = kInchesToMeters * 12.4
+    val wheelBaseRadius = kInchesToMetres * 12.4
     val robotLength = wheelBaseRadius * 1.3
     val robotDrawCenter = Translation2D(768.0, 100.0)
 
@@ -328,7 +330,7 @@ class PathPlanner : PApplet() {
         lineTo(left, af)
         lineTo(right, bf)
         val msg = "ΣΔk²=${curvatureSum.f1}  " +
-                "ΣΔd=${(kMetersToFeet * arcLength).f1}ft  " +
+                "ΣΔd=${(kMetresToFeet * arcLength).f1}ft  " +
                 "ΣΔt=${trajectory.last().t.f1}s  " +
                 "O=$optimizing  " +
                 "V=${maxVRatio.f1}  " +
@@ -371,7 +373,7 @@ class PathPlanner : PApplet() {
             }
             'r' -> {
                 val newWaypoints = waypoints.reversedArray()
-                for (i in 0 until newWaypoints.size) {
+                for (i in newWaypoints.indices) {
                     newWaypoints[i] = newWaypoints[i].run {
                         Pose2D(translation, rotation.rotate(reversedRotation))
                     }
@@ -383,7 +385,7 @@ class PathPlanner : PApplet() {
                 regenerate()
             }
             'f' -> {
-                for (i in 0 until waypoints.size) {
+                for (i in waypoints.indices) {
                     waypoints[i] = waypoints[i].run {
                         Pose2D(Translation2D(translation.x, -translation.y), Rotation2D(rotation.cos, -rotation.sin))
                     }
@@ -479,7 +481,7 @@ class PathPlanner : PApplet() {
     }
 
     fun translateAll(by: Translation2D) {
-        for (i in 0 until waypoints.size) waypoints[i] = waypoints[i]
+        for (i in waypoints.indices) waypoints[i] = waypoints[i]
                 .run { Pose2D(translation + by, rotation) }
         regenerate()
     }
@@ -564,8 +566,8 @@ class PathPlanner : PApplet() {
                 redrawScreen()
             }
             's' -> showForCopy(waypoints.joinToString(",\n") {
-                "Pose2D(${(kMetersToFeet * it.translation.x).f}.feet, " +
-                        "${(kMetersToFeet * it.translation.y).f}.feet, " +
+                "Pose2D(${(kMetresToFeet * it.translation.x).f}.feet, " +
+                        "${(kMetresToFeet * it.translation.y).f}.feet, " +
                         "${it.rotation.degrees.f}.degrees)"
             })
             '0' -> {

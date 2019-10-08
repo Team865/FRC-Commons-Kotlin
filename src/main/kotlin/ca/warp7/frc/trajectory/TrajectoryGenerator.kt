@@ -1,4 +1,6 @@
-package ca.warp7.frc.drive.trajectory
+@file:JvmName("TrajectoryGenerator")
+
+package ca.warp7.frc.trajectory
 
 import ca.warp7.frc.geometry.ArcPose2D
 import ca.warp7.frc.geometry.radians
@@ -114,7 +116,7 @@ private fun computeArcLengths(
         k.isInfinite() -> abs((next.rotation - current.rotation).radians)
 
         // Robot is moving in a curve or straight line
-        // Returns the linear distance in meters
+        // Returns the linear distance in metres
         else -> {
 
             // Get the chord length (translational distance)

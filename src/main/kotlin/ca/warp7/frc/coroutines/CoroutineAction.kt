@@ -1,154 +1,127 @@
 package ca.warp7.frc.coroutines
 
 import ca.warp7.frc.action.Action
-import ca.warp7.frc.coroutines.CycleState.*
-//import edu.wpi.first.wpilibj.Notifier
-//import edu.wpi.first.wpilibj.RobotBase
-//import edu.wpi.first.wpilibj.Timer
-import java.lang.StringBuilder
-import kotlin.coroutines.*
+import ca.warp7.frc.coroutines.CoroutineAction.State.*
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.coroutines.intrinsics.COROUTINE_SUSPENDED
+import kotlin.coroutines.intrinsics.suspendCoroutineUninterceptedOrReturn
+import kotlin.coroutines.startCoroutine
 
-
-@Suppress("MemberVisibilityCanBePrivate")
+/**
+ * Implements [CoroutineActionScope]
+ *
+ * See [SequenceBuilderIterator] for similar implementation
+ */
 @ExperimentalCoroutineAction
-open class CoroutineAction: Action {
+internal class CoroutineAction<T>(
+        initialState: T,
+        private val name: String,
+        private val timing: () -> Double,
+        private val func: suspend CoroutineActionScope<T>.() -> Unit
+) :
+        CoroutineActionScope<T>,
+        Continuation<Unit>,
+        Action {
 
+    private enum class State {
+        NotStarted,
+        NotReady,
+        ReadyForNextCycle,
+        Done,
+        Failed
+    }
+
+    // No context
+    override val context: CoroutineContext
+        get() = EmptyCoroutineContext
+
+    // called when the entire action is done
+    override fun resumeWith(result: Result<Unit>) {
+        result.getOrThrow()
+        coroutineState = Done
+    }
+
+    private var coroutineState: State = NotReady
+        set(value) {
+            println("Setting state to $value")
+            field = value
+        }
+
+    private var actionState: T = initialState
+
+    private var nextStep: Continuation<Boolean>? = null
+
+    private var startTime = 0.0
+
+    override suspend fun nextCycle(): Boolean {
+        coroutineState = ReadyForNextCycle
+        return suspendCoroutineUninterceptedOrReturn { cont ->
+            nextStep = cont
+            COROUTINE_SUSPENDED
+        }
+    }
+
+    override fun <S> deferred(
+            initialState: S,
+            name: String,
+            block: suspend CoroutineActionScope<S>.() -> Unit
+    ): DeferredAction<S> {
+        TODO("nothing here yet")
+    }
+
+    override fun elapsed(): Double {
+        return timing.invoke() - startTime
+    }
+
+    override fun setState(state: T) {
+        actionState = state
+    }
+
+    override fun name(): String {
+        return name
+    }
 
     override fun shouldFinish(): Boolean {
-        if (cycleState == Periodic && cycleCount == 0) {
-            println("$this is not finishing; no override implementation")
-        }
-        return false
+        return nextStep == null
     }
 
     override fun update() {
-        if (cycleState == Periodic && cycleCount == 0) {
-            println("$this is updating; no override implementation")
-        }
     }
 
 
     /**
-     * Sends a warning with [msg]
-     *
-     * This can be subclassed for custom-route warning messages
+     * Calling [startCoroutine] executes any parts of the action
+     * before a suspending call
      */
-    open fun warnThis(msg: String) {
-        println("ERROR $this $msg")
+    override fun firstCycle() {
+        if (coroutineState == NotStarted) {
+            coroutineState = NotReady
+            startTime = timing.invoke()
+            func.startCoroutine(
+                    receiver = this as CoroutineActionScope<T>,
+                    completion = this as Continuation<Unit>
+            )
+        } else {
+            coroutineState = Failed
+            throw IllegalStateException("Coroutine already started; Cannot be started again")
+        }
     }
 
     /**
-     * Gets the current time in seconds
+     * Nothing to do in the last cycle
      */
-    open fun time(): Double {
-        return System.nanoTime() / 1E9
+    override fun lastCycle() {
     }
 
-    private val coroutines: MutableList<CoroutineWithContinuation> = mutableListOf()
-
-    private var cycleState = FirstCycle
-
-    private var coroutineCycleCompleted = false
-
-    private var epoch = 0.0
-
-    var cycleCount = 0
-        private set
-
-    protected var name: String = javaClass.simpleName
-
-    override fun toString(): String {
-        if (coroutines.isEmpty()) {
-            return name
+    /**
+     * [nextCycle] will return true now
+     */
+    override fun interrupt() {
+        if (coroutineState != Done) {
+            nextStep?.resumeWith(Result.success(true))
+            coroutineState = Done
         }
-        val builder = StringBuilder()
-        builder.append(name).append("[")
-        coroutines.forEachIndexed { index, coroutine ->
-            builder.append(index).append(",")
-            builder.append(coroutine)
-        }
-        builder.append("]")
-        return builder.toString()
-    }
-
-    internal fun Routine.run() {
-        if (cycleState == Periodic || cycleState == FirstCycle) {
-            val coroutine = CoroutineWithContinuation(coroutineHandle, this@CoroutineAction, debug)
-            coroutineHandle++
-            coroutine.nextStep = block.createCoroutine(coroutine, coroutine)
-            coroutines.add(coroutine)
-        }
-    }
-
-    protected fun runFinally(block: () -> Unit) {
-        if (cycleState == Periodic) {
-            runCoroutineCycle()
-            block()
-        }
-    }
-
-    protected fun setEpoch() {
-        epoch = time()
-    }
-
-    private fun runCoroutineCycle() {
-        if (!coroutineCycleCompleted) {
-            var doneState = false
-            for (coroutine in coroutines) {
-                if (coroutine.advanceStateIsDone()) {
-                    doneState = true
-                }
-            }
-            if (doneState) {
-                coroutines.removeAll { it.state == CoroutineState.Done }
-            }
-            coroutineCycleCompleted = true
-        }
-    }
-
-    internal fun advanceState() {
-        when (cycleState) {
-            FirstCycle -> {
-                setEpoch()
-                firstCycle()
-                cycleState = Periodic
-                cycleCount = 0
-            }
-            Periodic -> {
-                if (shouldFinish()) {
-                    lastCycle()
-                    cycleState = Done
-                } else {
-                    coroutineCycleCompleted = false
-                    update()
-                    runCoroutineCycle()
-                    cycleCount++
-                }
-            }
-            Done -> {
-                warnThis("is already done; cannot advance state")
-                cycleState = Idle
-            }
-            Idle -> Unit
-        }
-    }
-
-    internal fun stop0() {
-        when (cycleState) {
-            FirstCycle -> Unit
-            Periodic -> {
-                interrupt()
-                cycleState = Done
-            }
-            Done -> {
-                warnThis("is already done; cannot stop it again")
-            }
-            Idle -> Unit
-        }
-    }
-
-    companion object {
-        var coroutineHandle = 0
     }
 }
-

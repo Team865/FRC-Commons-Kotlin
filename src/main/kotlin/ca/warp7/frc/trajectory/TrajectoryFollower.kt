@@ -1,4 +1,4 @@
-package ca.warp7.frc.drive.trajectory
+package ca.warp7.frc.trajectory
 
 import ca.warp7.frc.geometry.Pose2D
 

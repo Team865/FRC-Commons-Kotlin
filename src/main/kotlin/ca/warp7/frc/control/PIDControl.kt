@@ -1,17 +1,16 @@
-package ca.warp7.frc
+package ca.warp7.frc.control
 
-data class PID(
-        var kP: Double = 0.0,
-        var kI: Double = 0.0,
-        var kD: Double = 0.0,
-        var kF: Double = 0.0,
+import ca.warp7.frc.epsilonEquals
+
+@Suppress("MemberVisibilityCanBePrivate")
+data class PIDControl(
+        val pid: PID,
         val errorEpsilon: Double = 0.1,
         val dErrorEpsilon: Double = 0.1,
         val minTimeInEpsilon: Double = 0.1,
         val dtNormalizer: Double = 50.0,
         val maxOutput: Double = 1.0
 ) {
-
     var lastError = 0.0
     var dError = 0.0
     var sumError = 0.0
@@ -28,7 +27,7 @@ data class PID(
         // normalize the change in time so kD doesn't need to be too high and kI doesn't need to be too low
         val normalizedDt = dt * dtNormalizer
         // calculate proportional gain
-        val pGain = kP * error
+        val pGain = pid.kP * error
         // calculate conditions for resetting integral sum
         if (!pGain.epsilonEquals(0.0, maxOutput) // error is bigger than kP can handle
                 || error.epsilonEquals(0.0, errorEpsilon) // error is smaller than the epsilon range
@@ -38,12 +37,12 @@ data class PID(
         // otherwise add current error to the sum of errors
         else sumError += error * normalizedDt
         // calculate the integral gain
-        val iGain = kI * sumError
+        val iGain = pid.kI * sumError
         // calculate change in error
         dError = (error - lastError) / normalizedDt
         lastError = error
         // calculate derivative gain
-        val dGain = kD * dError
+        val dGain = pid.kD * dError
         // calculate the time when error and change in error is small enough
         // by adding the unmodified dt to a sum
         if (error.epsilonEquals(0.0, errorEpsilon)
@@ -57,7 +56,7 @@ data class PID(
 
     fun updateBySetpoint(actual: Double): Double {
         // calculate feedforward gain
-        val fGain = kF * setpoint
+        val fGain = pid.kF * setpoint
         // calculate error
         val error = setpoint - actual
         // calculate feedback gains

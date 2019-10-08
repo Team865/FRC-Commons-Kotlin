@@ -1,5 +1,6 @@
 package ca.warp7.frc.drive
 
+@Deprecated("")
 data class DynamicState(
         val voltage: WheelState = WheelState(0.0, 0.0),  // V
         val velocity: WheelState = WheelState(0.0, 0.0)  // m/s

@@ -17,7 +17,7 @@ repositories {
 }
 
 group = "ca.warp7.frc"
-version = "2019.2.0"
+version = "2019.3.0"
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
@@ -26,7 +26,8 @@ tasks.withType<KotlinCompile> {
                 "-Xuse-experimental=kotlin.Experimental",
                 "-Xallow-kotlin-package",
                 "-Xno-call-assertions",
-                "-Xno-param-assertions"
+                "-Xno-param-assertions",
+                "-Xinline-classes"
         )
         kotlinOptions.jvmTarget = "11"
     }

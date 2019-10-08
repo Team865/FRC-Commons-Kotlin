@@ -1,27 +1,33 @@
 package ca.warp7.frc.coroutines
 
+/**
+ * Defines the scope in which a coroutine action can run
+ */
 @ExperimentalCoroutineAction
-@CoroutineDSL
-interface CoroutineActionScope {
+interface CoroutineActionScope<T> {
 
-    @CoroutineDSL
-    suspend operator fun <T : CoroutineAction> T.unaryPlus()
+    /**
+     * Suspends the current coroutine action for a single cycle
+     */
+    suspend fun nextCycle(): Boolean
 
-    @CoroutineDSL
-    suspend fun cancel()
+    /**
+     * Create another [CoroutineActionScope] and defer its execution
+     * until it is called
+     */
+    fun <S> deferred(
+            initialState: S,
+            name: String = "",
+            block: suspend CoroutineActionScope<S>.() -> Unit
+    ): DeferredAction<S>
 
-    @CoroutineDSL
-    suspend fun delay(seconds: Number)
+    /**
+     * Return the elapsed time of this coroutine
+     */
+    fun elapsed(): Double
 
-    @CoroutineDSL
-    suspend fun lock()
-
-    @CoroutineDSL
-    suspend fun free()
-
-    @CoroutineDSL
-    suspend fun skip()
-
-    @CoroutineDSL
-    suspend fun parallel(block: suspend CoroutineActionScope.() -> Unit)
+    /**
+     * Set the state of this coroutine
+     */
+    fun setState(state: T)
 }

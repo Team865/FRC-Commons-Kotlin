@@ -1,4 +1,4 @@
-package ca.warp7.frc
+package ca.warp7.frc.control
 
 class LatchedBoolean {
 
