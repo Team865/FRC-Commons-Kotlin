@@ -4,6 +4,8 @@ import ca.warp7.frc.epsilonEquals
 import ca.warp7.frc.f
 import kotlin.math.hypot
 
+//Translation2D can often be used as mathimatical vector.
+
 @Suppress("MemberVisibilityCanBePrivate")
 class Translation2D(val x: Double, val y: Double) {
 
@@ -44,14 +46,54 @@ class Translation2D(val x: Double, val y: Double) {
 
     operator fun minus(by: Translation2D): Translation2D = transform(by.inverse)
 
+    /**
+    * Gets the X and Y of the vector in a string.
+    *
+    * **Example**
+    *
+    * @sample test.ca.warp7.frc.geometry.Translation2D.toStringWorksProperly
+    *
+    * @return String containing X and Y of the vector.
+    *
+    */
     override fun toString(): String {
         return "↘(${x.f}, ${y.f})"
     }
 
+    /**
+    * Scales the vector by a double.
+    *
+    * **Example**
+    *
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.scaledWorksProperly
+    *
+    * @return None, changes the vector.
+    *
+    */
     fun scaled(by: Double): Translation2D = Translation2D(x * by, y * by)
 
+    /**
+    * Multiplys the vector by a double.
+    *
+    * **Example**
+    *
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.timesWorksProperly
+    * 
+    * @return None, changes the vector.
+    *
+    */
     operator fun times(by: Double): Translation2D = scaled(by)
 
+    /**
+    * Divides the vector by a double.
+    *
+    * **Example**
+    *
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.divWorksProperly
+    *
+    * @return None, changes the vector.
+    *
+    */
     operator fun div(by: Double): Translation2D = scaled(1.0 / by)
 
     fun distanceTo(state: Translation2D): Double = hypot(state.x - x, state.y - y)
