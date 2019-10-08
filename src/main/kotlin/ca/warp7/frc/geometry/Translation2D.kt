@@ -46,12 +46,44 @@ class Translation2D(val x: Double, val y: Double) {
     fun epsilonEquals(state: Translation2D, epsilon: Double): Boolean =
             x.epsilonEquals(state.x, epsilon) && y.epsilonEquals(state.y, epsilon)
 
+    /**
+    * Tests to see if another vector is equal to this one.
+    *
+    * **Example**
+    *
+    * @sample test.ca.warp7.frc.geometry.Translation2D.epsilonEqualsWorksProperly
+    *
+    * @return True or False
+    *
+    */
     fun epsilonEquals(state: Translation2D): Boolean = epsilonEquals(state, 1E-12)
 
+
+    /**
+    * Adds the X and Y of the vector to the X and Y of the input vector.
+    *
+    * **Example**
+    *
+    * @sample test.ca.warp7.frc.geometry.Translation2D.transformWorksProperly
+    *
+    * @return The transformed vector.
+    *
+    */
     fun transform(by: Translation2D): Translation2D {
         return Translation2D(x + by.x, y + by.y)
     }
 
+
+    /**
+    * Adds one vector to another
+    *
+    * **Example**
+    *
+    * @sample test.ca.warp7.frc.geometry.Translation2D.plusWorksProperly
+    *
+    * @return The added vector.
+    *
+    */
     operator fun plus(by: Translation2D): Translation2D = transform(by)
 
     /**
