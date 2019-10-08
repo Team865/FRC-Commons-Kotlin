@@ -25,6 +25,16 @@ class Translation2D(val x: Double, val y: Double) {
 
     operator fun unaryMinus(): Translation2D = inverse
 
+    /**
+    * Swaps the sign of the vector.
+    *
+    * **Example**
+    *
+    * @sample test.ca.warp7.frc.geometry.Translation2D.inverseWorksProperly
+    *
+    * @return Translation2D object with a flipped sign.
+    *
+    */
     val inverse: Translation2D get() = Translation2D(-x, -y)
 
     operator fun unaryPlus(): Translation2D = copy
@@ -44,6 +54,16 @@ class Translation2D(val x: Double, val y: Double) {
 
     operator fun plus(by: Translation2D): Translation2D = transform(by)
 
+    /**
+    * Subtracts one vector from another.
+    *
+    * **Example**
+    *
+    * @sample test.ca.warp7.frc.geometry.Translation2D.minusWorksProperly
+    *
+    * @return The subtracted vector.
+    *
+    */
     operator fun minus(by: Translation2D): Translation2D = transform(by.inverse)
 
     /**

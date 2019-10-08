@@ -7,6 +7,21 @@ import kotlin.test.assertEquals
 class Translation2DTest {
 
     @Test
+    fun inverseWorksProperly(){
+        val transTest = Translation2D(1425.0, -23.0).inverse
+        val transGolden = Translation2D(-1425.0, 23.0)
+        assert(transTest.epsilonEquals(transGolden))
+    }
+
+    @Test
+    fun minusWorksProperly(){
+        val transSub = Translation2D(4.0, -2.0)
+        val transTest = Translation2D(8.0, 8.0).minus(transSub)
+        val transGolden = Translation2D(4.0, 10.0)
+        assert(transTest.epsilonEquals(transGolden))
+    }
+
+    @Test
     fun toStringWorksProperly(){
         val transTest = Translation2D(5.5, 4.0).toString()
         val transGolden = "↘(5.500, 4.000)"
