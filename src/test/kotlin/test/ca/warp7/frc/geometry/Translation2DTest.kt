@@ -14,6 +14,34 @@ class Translation2DTest {
     }
 
     @Test
+    fun epsilonEqualsWorksProperly(){
+	val transEqualGolden = Translation2D(10.0 / 5.0, 15.0 / 3.0)
+	val transEqual = Translation2D(2.0, 5.0).epsilonEquals(transEqualGolden)
+
+	val transNotEqualGolden = Translation2D(-10.000000001, 24.000000001)
+	val transNotEqual = Translation2D(-10.0, 24.0).epsilonEquals(transNotEqualGolden)
+	
+	assert(transEqual)
+	assertEquals(transNotEqual, false)
+    }
+
+    @Test
+    fun transformWorksProperly(){
+	val transForm = Translation2D(-5.0, 5.0)
+	val transTest = Translation2D(10.0, 10.0).transform(transForm)
+	val transGolden = Translation2D(5.0, 15.0)
+	assert(transTest.epsilonEquals(transGolden))
+    }
+
+    @Test
+    fun plusWorksProperly(){
+        val transAdd = Translation2D(9.0, 4.5)
+        val transTest = Translation2D(50.0, 5.5).plus(transAdd)
+	val transGolden = Translation2D(59.0, 10.0)
+	assert(transTest.epsilonEquals(transGolden))
+    }
+
+    @Test
     fun minusWorksProperly(){
         val transSub = Translation2D(4.0, -2.0)
         val transTest = Translation2D(8.0, 8.0).minus(transSub)
