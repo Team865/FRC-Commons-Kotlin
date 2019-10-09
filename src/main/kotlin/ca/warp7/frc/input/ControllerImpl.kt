@@ -1,4 +1,4 @@
-package ca.warp7.frc.inputs
+package ca.warp7.frc.input
 
 class ControllerImpl : RobotController {
     override var backButton = ButtonState.None

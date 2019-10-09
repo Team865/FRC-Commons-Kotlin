@@ -12,6 +12,7 @@ fun sequential(block: ActionBuilder.() -> Unit): Action = Sequential().apply(blo
 @Deprecated("queue() is renamed to sequential()", ReplaceWith("sequential(block)"))
 fun queue(block: ActionBuilder.() -> Unit): Action = sequential(block)
 
+
 /**
  * Returns an action that runs other actions in parallel
  */
@@ -21,17 +22,30 @@ fun parallel(block: ActionBuilder.() -> Unit): Action = Parallel().apply(block)
 @Deprecated("async() is renamed to parallel()", ReplaceWith("parallel(block)"))
 fun async(block: ActionBuilder.() -> Unit): Action = parallel(block)
 
+
 /**
  * Returns an action that does nothing until a condition is met
  */
 @ActionDSL
 fun waitUntil(predicate: (elapsed: Double) -> Boolean): Action = WaitUntil(predicate)
 
+
+/**
+ * Returns an action that does nothing for [seconds] seconds
+ */
+@ActionDSL
+fun wait(seconds: Double) = waitUntil { elapsed -> elapsed > seconds }
+
+@ActionDSL
+fun wait(seconds: Number) = wait(seconds.toDouble())
+
+
 /**
  * Returns an action that runs only once
  */
 @ActionDSL
 fun runOnce(block: () -> Unit) = RunOnce(block)
+
 
 /**
  * Returns an action that gets called periodically forever
@@ -40,7 +54,7 @@ fun runOnce(block: () -> Unit) = RunOnce(block)
 fun periodic(block: () -> Unit) = Periodic(block)
 
 /**
- * Returns an action that does nothing for [seconds] seconds
+ * Returns an action wrapper that interrupts at a timeout
  */
 @ActionDSL
-fun wait(seconds: Number) = waitUntil { elapsed -> elapsed > seconds.toDouble() }
+fun Action.withTimeout(seconds: Double) = Timeout(this, seconds)
