@@ -149,9 +149,16 @@ val Double.cubed: Double get() = this * this * this
 val Double.squaredWithSign: Double get() = this * this * sign
 
 /**
+ * Create a double sign representation of a boolean
+ */
+fun Boolean.toDoubleSign(): Double {
+    return if (this) 1.0 else -1.0
+}
+
+/**
  * Create an integer sign representation of a boolean
  */
-fun Boolean.toSign(): Int {
+fun Boolean.toIntSign(): Int {
     return if (this) 1 else -1
 }
 

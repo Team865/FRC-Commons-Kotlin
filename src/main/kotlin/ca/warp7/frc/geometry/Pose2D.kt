@@ -7,21 +7,25 @@ class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
 
     constructor(x: Double, y: Double, rotation: Rotation2D) : this(Translation2D(x, y), rotation)
 
-    operator fun unaryMinus(): Pose2D = inverse
-
     fun epsilonEquals(state: Pose2D, epsilon: Double): Boolean =
             translation.epsilonEquals(state.translation, epsilon) && rotation.epsilonEquals(state.rotation, epsilon)
 
     fun epsilonEquals(state: Pose2D): Boolean = epsilonEquals(state, 1E-12)
 
-    fun transform(by: Pose2D): Pose2D =
+    @Deprecated("", ReplaceWith("plus(by)"))
+    fun transform(by: Pose2D): Pose2D = plus(by)
+
+    operator fun plus(by: Pose2D): Pose2D =
             Pose2D(translation.transform(by.translation.rotate(by.rotation)), rotation.transform(by.rotation))
 
-    operator fun plus(by: Pose2D): Pose2D = transform(by)
+    operator fun minus(by: Pose2D): Pose2D = plus(by.inverse)
 
-    operator fun minus(by: Pose2D): Pose2D = transform(by.inverse)
-
-    fun scaled(by: Double): Pose2D = Pose2D(translation.scaled(by), rotation.scaled(by))
+    fun scaled(by: Double): Pose2D {
+        if (by == 1.0) {
+            return this
+        }
+        return Pose2D(translation.scaled(by), rotation.scaled(by))
+    }
 
     operator fun times(by: Double): Pose2D = scaled(by)
 
@@ -32,10 +36,10 @@ class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
     fun interpolate(other: Pose2D, x: Double): Pose2D = when {
         x <= 0 -> this
         x >= 1 -> other
-        else -> transform((other - this).log().scaled(x).exp())
+        else -> this + (other - this).log().scaled(x).exp()
     }
 
-    val inverse: Pose2D get() = Pose2D(translation.rotate(-rotation).inverse, -rotation)
+    val inverse: Pose2D get() = Pose2D(translation.rotate(rotation.inverse).inverse, rotation.inverse)
 
     override fun toString(): String {
         return "Pose($translation, $rotation)"
@@ -60,6 +64,7 @@ class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
         return Twist2D(delta.x, delta.y, dTheta)
     }
 
+    @ExperimentalGeometry
     fun logFast(): Twist2D {
         val dTheta = rotation.radians
         val halfThetaByTanOfHalfDTheta =

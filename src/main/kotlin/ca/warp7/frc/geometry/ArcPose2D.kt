@@ -14,8 +14,6 @@ class ArcPose2D(
     val translation: Translation2D = pose.translation
     val rotation: Rotation2D = pose.rotation
 
-    operator fun unaryMinus(): ArcPose2D = inverse
-
     fun epsilonEquals(state: ArcPose2D, epsilon: Double): Boolean =
             pose.epsilonEquals(state.pose, epsilon) &&
                     curvature.epsilonEquals(state.curvature, epsilon) &&
@@ -23,6 +21,7 @@ class ArcPose2D(
 
     fun epsilonEquals(state: ArcPose2D): Boolean = epsilonEquals(state, 1E-12)
 
+    @Deprecated("", ReplaceWith("plus()"))
     fun transform(by: ArcPose2D): ArcPose2D =
             ArcPose2D(pose.transform(by.pose), curvature, dk_ds)
 

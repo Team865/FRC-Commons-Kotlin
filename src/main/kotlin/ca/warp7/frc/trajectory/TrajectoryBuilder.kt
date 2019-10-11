@@ -1,13 +1,16 @@
 package ca.warp7.frc.trajectory
 
-import ca.warp7.frc.geometry.*
+import ca.warp7.frc.geometry.Pose2D
+import ca.warp7.frc.geometry.Rotation2D
+import ca.warp7.frc.geometry.fromDegrees
+import ca.warp7.frc.geometry.translation
+import ca.warp7.frc.toDoubleSign
 
 @Suppress("MemberVisibilityCanBePrivate")
-class TrajectoryBuilder(builder: TrajectoryBuilder.() -> Unit) {
+class TrajectoryBuilder {
 
-    init {
-        builder(this)
-    }
+    @Experimental
+    annotation class ExperimentalTrajectoryFeature
 
     internal var wheelbaseRadius = 0.0
     internal var trajectoryVelocity = 0.0
@@ -15,22 +18,32 @@ class TrajectoryBuilder(builder: TrajectoryBuilder.() -> Unit) {
     internal var maxCentripetalAcceleration = 0.0
     internal var maxJerk = Double.POSITIVE_INFINITY
     internal var bendFactor = 1.2
+    internal var optimizeDkSquared = false
+    internal var enableMixParam = false
 
-    object NoFollower : TrajectoryFollower {
-        override fun updateTrajectory(
-                controller: TrajectoryController,
-                setpoint: TrajectoryState,
-                error: Pose2D
-        ) {}
+    internal var follower: TrajectoryFollower? = null
+
+    internal val waypoints: MutableList<Pose2D> = mutableListOf()
+
+    internal var invertMultiplier = 0.0
+    internal var mirroredMultiplier = 0.0
+
+
+    fun setInverted(inverted: Boolean) {
+        invertMultiplier = inverted.toDoubleSign()
     }
 
-    private var follower: TrajectoryFollower = NoFollower
-
-    private val waypoints: MutableList<Pose2D> = mutableListOf()
-
+    fun setMirrored(mirrored: Boolean) {
+        mirroredMultiplier = mirrored.toDoubleSign()
+    }
 
     fun setFollower(f: TrajectoryFollower) {
         follower = f
+    }
+
+    @ExperimentalTrajectoryFeature
+    fun setMixParam(on: Boolean) {
+        enableMixParam = on
     }
 
     fun wheelbaseRadius(metres: Double) {
@@ -57,6 +70,14 @@ class TrajectoryBuilder(builder: TrajectoryBuilder.() -> Unit) {
         maxCentripetalAcceleration = hertz
     }
 
+    fun bendFactor(factor: Double) {
+        bendFactor = factor
+    }
+
+    fun setOptimization(on: Boolean) {
+        optimizeDkSquared = on
+    }
+
     fun startAt(pose: Pose2D) {
         check(waypoints.isEmpty())
         waypoints.add(pose)
@@ -64,25 +85,31 @@ class TrajectoryBuilder(builder: TrajectoryBuilder.() -> Unit) {
 
     fun forward(metres: Double) {
         check(waypoints.isNotEmpty() && metres > 0)
-        val pose = waypoints.last().run { Pose2D(translation + rotation.translation * metres, rotation) }
+        val pose = waypoints.last()
+                .run { Pose2D(translation + rotation.translation * metres, rotation) }
         waypoints.add(pose)
     }
 
     fun reverse(metres: Double) {
         check(waypoints.isNotEmpty() && metres > 0)
-        val pose = waypoints.last().run { Pose2D(translation + rotation.translation * (-metres), rotation) }
+        val pose = waypoints.last()
+                .run { Pose2D(translation + rotation.translation * (-metres), rotation) }
         waypoints.add(pose)
     }
 
+    @ExperimentalTrajectoryFeature
     fun turnRight(degrees: Double) {
         check(waypoints.isNotEmpty() && degrees > 0)
-        val pose = waypoints.last().run { Pose2D(translation, rotation + Rotation2D.fromDegrees(-degrees)) }
+        val pose = waypoints.last()
+                .run { Pose2D(translation, rotation + Rotation2D.fromDegrees(-degrees)) }
         waypoints.add(pose)
     }
 
+    @ExperimentalTrajectoryFeature
     fun turnLeft(degrees: Double) {
         check(waypoints.isNotEmpty() && degrees > 0)
-        val pose = waypoints.last().run { Pose2D(translation, rotation + Rotation2D.fromDegrees(degrees)) }
+        val pose = waypoints.last()
+                .run { Pose2D(translation, rotation + Rotation2D.fromDegrees(degrees)) }
         waypoints.add(pose)
     }
 
@@ -91,16 +118,9 @@ class TrajectoryBuilder(builder: TrajectoryBuilder.() -> Unit) {
         waypoints.add(pose)
     }
 
-    fun move(t: Translation2D, r: Rotation2D = Rotation2D.identity) {
-        // TODO make absolute/relative rotation consistent
-        check(waypoints.isNotEmpty()
-                && (!t.epsilonEquals(Translation2D.identity)
-                || !r.epsilonEquals(Rotation2D.identity)))
-        val pose = waypoints.last().run { Pose2D(translation + t, rotation + r) }
-        waypoints.add(pose)
-    }
-
-    fun bendFactor(factor: Double) {
-        bendFactor = factor
+    fun moveToAll(vararg poses: Pose2D) {
+        for (pose in poses) {
+            moveTo(pose)
+        }
     }
 }
