@@ -2,6 +2,7 @@ package ca.warp7.frc.path
 
 import ca.warp7.frc.geometry.ArcPose2D
 import ca.warp7.frc.geometry.Pose2D
+import ca.warp7.frc.geometry.Translation2D
 import ca.warp7.frc.geometry.rotate
 
 fun List<QuinticSegment2D>.parameterized(): List<ArcPose2D> {

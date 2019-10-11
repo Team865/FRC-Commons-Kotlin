@@ -29,8 +29,6 @@ val Rotation2D.translation: Translation2D get() = Translation2D(cos, sin)
 
 val Rotation2D.normal: Rotation2D get() = Rotation2D(-sin, cos)
 
-fun Rotation2D.rotate(by: Rotation2D): Rotation2D = transform(by)
-
 val Rotation2D.tan: Double
     get() {
         return if (abs(cos) < 1E-12) {

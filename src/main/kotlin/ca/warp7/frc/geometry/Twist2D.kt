@@ -34,7 +34,7 @@ class Twist2D(val dx: Double, val dy: Double, val dTheta: Double) {
         val c: Double
         if (abs(dTheta) < 1E-9) {
             s = 1.0 - 1.0 / 6.0 * dTheta * dTheta
-            c = .5 * dTheta
+            c = 0.5 * dTheta
         } else {
             s = sinTheta / dTheta
             c = (1.0 - cosTheta) / dTheta

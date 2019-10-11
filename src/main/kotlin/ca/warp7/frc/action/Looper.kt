@@ -1,3 +1,5 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package ca.warp7.frc.action
 
 import java.util.concurrent.ConcurrentHashMap
@@ -15,9 +17,27 @@ object Looper {
         actionLoops.add(loop)
     }
 
+    fun remove(loop: Action) {
+        actionLoops.remove(loop)
+        loop.interrupt()
+    }
+
+    @Deprecated("", ReplaceWith("resetAll()"))
     fun reset() {
-        for (loop in actionLoops) loop.interrupt()
+        resetAll()
+    }
+
+    fun resetAll() {
+        for (loop in actionLoops) {
+            loop.interrupt()
+        }
         actionLoops.clear()
+    }
+
+    fun printAll() {
+        for ((index, loop) in actionLoops.withIndex()) {
+            println("Loop $index - ${loop.name()}")
+        }
     }
 
     fun update() {

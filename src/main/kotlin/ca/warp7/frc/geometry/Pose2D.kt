@@ -60,6 +60,18 @@ class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
         return Twist2D(delta.x, delta.y, dTheta)
     }
 
+    fun logFast(): Twist2D {
+        val dTheta = rotation.radians
+        val halfThetaByTanOfHalfDTheta =
+                if (1.0 - rotation.cos < 1E-9) 1.0 - 1.0 / 12.0 * dTheta * dTheta
+                else (0.5 * dTheta) * rotation.sin / (1.0 - rotation.cos)
+        return Twist2D(
+                dx = translation.x * halfThetaByTanOfHalfDTheta + translation.y * dTheta / 2.0,
+                dy = translation.y * halfThetaByTanOfHalfDTheta - translation.x * dTheta / 2.0,
+                dTheta = dTheta
+        )
+    }
+
     val mirrored: Pose2D
         get() = Pose2D(Translation2D(translation.x, -translation.y), rotation.inverse)
 
