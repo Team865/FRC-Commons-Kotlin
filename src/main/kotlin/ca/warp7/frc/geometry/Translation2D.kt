@@ -9,39 +9,24 @@ import kotlin.math.hypot
 @Suppress("MemberVisibilityCanBePrivate")
 class Translation2D(val x: Double, val y: Double) {
 
-    val state: Translation2D get() = this
-
-    @Deprecated("")
-    operator fun rangeTo(state: Translation2D): Interpolator<Translation2D> =
-            object : Interpolator<Translation2D> {
-        override fun get(x: Double) = interpolate(state, x)
-    }
-
     fun interpolate(other: Translation2D, x: Double): Translation2D = when {
-        x <= 0 -> copy
-        x >= 1 -> other.copy
-        else -> Translation2D(x * (other.x - this.x) + this.x, x * (other.y - y) + y)
+        x <= 0 -> this
+        x >= 1 -> other
+        else -> Translation2D(x * (other.x - x) + x, x * (other.y - y) + y)
     }
-
-    operator fun unaryMinus(): Translation2D = inverse
 
     /**
     * Swaps the sign of the vector.
     *
     * **Example**
     *
-    * @sample test.ca.warp7.frc.geometry.Translation2D.inverseWorksProperly
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.inverseWorksProperly
     *
     * @return Translation2D object with a flipped sign.
     *
     */
     val inverse: Translation2D get() = Translation2D(-x, -y)
 
-    operator fun unaryPlus(): Translation2D = copy
-
-    val copy: Translation2D get() = Translation2D(x, y)
-
-    val isIdentity: Boolean get() = epsilonEquals(identity)
 
     fun epsilonEquals(state: Translation2D, epsilon: Double): Boolean =
             x.epsilonEquals(state.x, epsilon) && y.epsilonEquals(state.y, epsilon)
@@ -51,7 +36,7 @@ class Translation2D(val x: Double, val y: Double) {
     *
     * **Example**
     *
-    * @sample test.ca.warp7.frc.geometry.Translation2D.epsilonEqualsWorksProperly
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.epsilonEqualsWorksProperly
     *
     * @return True or False
     *
@@ -64,7 +49,7 @@ class Translation2D(val x: Double, val y: Double) {
     *
     * **Example**
     *
-    * @sample test.ca.warp7.frc.geometry.Translation2D.transformWorksProperly
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.transformWorksProperly
     *
     * @return The transformed vector.
     *
@@ -79,7 +64,7 @@ class Translation2D(val x: Double, val y: Double) {
     *
     * **Example**
     *
-    * @sample test.ca.warp7.frc.geometry.Translation2D.plusWorksProperly
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.plusWorksProperly
     *
     * @return The added vector.
     *
@@ -91,7 +76,7 @@ class Translation2D(val x: Double, val y: Double) {
     *
     * **Example**
     *
-    * @sample test.ca.warp7.frc.geometry.Translation2D.minusWorksProperly
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.minusWorksProperly
     *
     * @return The subtracted vector.
     *
@@ -103,7 +88,7 @@ class Translation2D(val x: Double, val y: Double) {
     *
     * **Example**
     *
-    * @sample test.ca.warp7.frc.geometry.Translation2D.toStringWorksProperly
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.toStringWorksProperly
     *
     * @return String containing X and Y of the vector.
     *
@@ -119,7 +104,7 @@ class Translation2D(val x: Double, val y: Double) {
     *
     * @sample test.ca.warp7.frc.geometry.Translation2DTest.scaledWorksProperly
     *
-    * @return None, changes the vector.
+    * @return The scaled vector.
     *
     */
     fun scaled(by: Double): Translation2D = Translation2D(x * by, y * by)
@@ -131,7 +116,7 @@ class Translation2D(val x: Double, val y: Double) {
     *
     * @sample test.ca.warp7.frc.geometry.Translation2DTest.timesWorksProperly
     * 
-    * @return None, changes the vector.
+    * @return The scaled vector.
     *
     */
     operator fun times(by: Double): Translation2D = scaled(by)
@@ -143,7 +128,7 @@ class Translation2D(val x: Double, val y: Double) {
     *
     * @sample test.ca.warp7.frc.geometry.Translation2DTest.divWorksProperly
     *
-    * @return None, changes the vector.
+    * @return The scaled vector
     *
     */
     operator fun div(by: Double): Translation2D = scaled(1.0 / by)

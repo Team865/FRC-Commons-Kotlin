@@ -8,10 +8,6 @@ class Rotation2D(val cos: Double, val sin: Double) {
 
     operator fun unaryMinus(): Rotation2D = inverse
 
-    operator fun unaryPlus(): Rotation2D = copy
-
-    val isIdentity: Boolean get() = epsilonEquals(identity)
-
     fun epsilonEquals(state: Rotation2D, epsilon: Double): Boolean =
             cos.epsilonEquals(state.cos, epsilon) && sin.epsilonEquals(state.sin, epsilon)
 
@@ -32,21 +28,11 @@ class Rotation2D(val cos: Double, val sin: Double) {
 
     fun distanceTo(state: Rotation2D): Double = (state - this).radians
 
-    val state: Rotation2D get() = this
-
-    @Deprecated("")
-    operator fun rangeTo(state: Rotation2D): Interpolator<Rotation2D> =
-            object : Interpolator<Rotation2D> {
-                override fun get(x: Double) = interpolate(state, x)
-            }
-
     fun interpolate(other: Rotation2D, x: Double): Rotation2D = when {
-        x <= 0 -> copy
-        x >= 1 -> other.copy
+        x <= 0 -> this
+        x >= 1 -> other
         else -> transform(Rotation2D.fromRadians(radians = distanceTo(other) * x))
     }
-
-    val copy: Rotation2D get() = Rotation2D(cos, sin)
 
     val inverse: Rotation2D get() = Rotation2D(cos, -sin)
 

@@ -1,13 +1,15 @@
 /**
- * Commons.kt --- common constants and functions
+ * Commons.kt --- common values and functions
  */
 
-@file:JvmName("Commons")
+@file:JvmName("Util")
 
 package ca.warp7.frc
 
+import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.sign
+import kotlin.math.sin
 
 const val kFeetToMetres: Double = 0.3048
 
@@ -20,13 +22,16 @@ const val kMetresToInches: Double = 1 / kInchesToMetres
 /**
  * Check if a number is close enough to another by [epsilon]
  */
-fun Double.epsilonEquals(other: Double, epsilon: Double) =
-        (this - epsilon <= other) && (this + epsilon >= other)
+fun Double.epsilonEquals(other: Double, epsilon: Double): Boolean {
+    return (this - epsilon <= other) && (this + epsilon >= other)
+}
 
 /**
  * Check if a number is close enough to another by 1E-12
  */
-fun Double.epsilonEquals(other: Double) = epsilonEquals(other, 1E-12)
+fun Double.epsilonEquals(other: Double): Boolean {
+    return epsilonEquals(other, 1E-12)
+}
 
 /**
  * Interpolate between two numbers
@@ -77,16 +82,46 @@ fun applyDeadband(value: Double, max: Double, deadband: Double): Double {
     }
 }
 
+/**
+ * Steps an accumulator towards zero
+ */
+private fun wrapAccumulator(accumulator: Double): Double {
+    return when {
+        accumulator > 1 -> accumulator - 1.0
+        accumulator < -1 -> accumulator + 1.0
+        else -> 0.0
+    }
+}
+
+/**
+ * Rescales a value iteratively using a sign function
+ *
+ * @param v the value to scale
+ * @param nonLinearity How much to deviate from a linear result
+ * @param passes number of iterations to scale the number
+ */
+private fun sinScale(v: Double, nonLinearity: Double, passes: Int): Double {
+    var r = v
+    repeat(passes) {
+        r = sin(PI / 2 * nonLinearity * r) / sin(PI / 2 * nonLinearity)
+    }
+    return r
+}
 
 /**
  * Format a number to 3 decimal places
  */
-val Double.f get() = "%.3f".format(this)
+val Double.f get() = String.format("%.3f", this)
 
 /**
  * Format a number to 1 decimal places
  */
-val Double.f1 get() = "%.1f".format(this)
+val Double.f1 get() = String.format("%.1f", this)
+
+/**
+ * Format a number to 2 decimal places
+ */
+val Double.f2 get() = String.format("%.2f", this)
 
 /**
  * Convert a number in feet into metres
@@ -116,14 +151,20 @@ val Double.squaredWithSign: Double get() = this * this * sign
 /**
  * Create an integer sign representation of a boolean
  */
-fun Boolean.toSign() = if (this) 1 else -1
+fun Boolean.toSign(): Int {
+    return if (this) 1 else -1
+}
 
 /**
  * Create a double representation of a boolean
  */
-fun Boolean.toDouble() = if (this) 1.0 else 0.0
+fun Boolean.toDouble(): Double {
+    return if (this) 1.0 else 0.0
+}
 
 /**
  * Create an integer representation of a boolean
  */
-fun Boolean.toInt() = if (this) 1 else 0
+fun Boolean.toInt(): Int {
+    return if (this) 1 else 0
+}

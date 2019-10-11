@@ -39,7 +39,7 @@ tasks.withType<Test> {
 }
 
 dependencies {
-    compile(kotlin("stdlib"))
+    implementation(kotlin("stdlib"))
 
     testImplementation(kotlin("test"))
     testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = "5.5.1")

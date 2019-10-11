@@ -76,7 +76,7 @@ fun fitParabola(p1: Translation2D, p2: Translation2D, p3: Translation2D): Double
 
 fun Pose2D.isColinear(other: Pose2D): Boolean {
     if (!rotation.parallelTo(other.rotation)) return false
-    val twist = (other - this).log
+    val twist = (other - this).log()
     return twist.dy.epsilonEquals(0.0) && twist.dTheta.epsilonEquals(0.0)
 }
 
