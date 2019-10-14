@@ -123,7 +123,7 @@ class Translation2D(val x: Double, val y: Double) {
     * @return The added vector.
     *
     */
-    operator fun plus(by: Translation2D): Translation2DTest = transform(by)
+    operator fun plus(by: Translation2D): Translation2D = transform(by)
 
     /**
     * Subtracts one vector from another.
