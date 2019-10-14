@@ -17,12 +17,31 @@ class Translation2D(val x: Double, val y: Double) {
         override fun get(x: Double) = interpolate(state, x)
     }
 
-    fun interpolate(other: Translation2D, x: Double): Translation2D = when {
-        x <= 0 -> copy
-        x >= 1 -> other.copy
-        else -> Translation2D(x * (other.x - this.x) + this.x, x * (other.y - y) + y)
+    /**
+    * A discription of what this does can be found here: https://en.wikipedia.org/wiki/Linear_interpolation
+    *
+    * **Example**
+    * 
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.inverseWorksProperly
+    *
+    * @return A modifyed Translation2D object.
+    *
+    */
+    fun interpolate(other: Translation2D, s: Double): Translation2D = when {
+        s <= 0 -> copy
+        s >= 1 -> other.copy
+        else -> Translation2D(s * (other.x - x) + x, s * (other.y - y) + y)
     }
 
+    /**
+    * Used by the +Translation2D operator overload. https://kotlinlang.org/docs/reference/operator-overloading.html 
+    *
+    * **Example**
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.unaryMinusWorksProperly
+    *
+    * @return -Translation2D
+    *
+    */
     operator fun unaryMinus(): Translation2D = inverse
 
     /**
@@ -30,15 +49,35 @@ class Translation2D(val x: Double, val y: Double) {
     *
     * **Example**
     *
-    * @sample test.ca.warp7.frc.geometry.Translation2D.inverseWorksProperly
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.inverseWorksProperly
     *
     * @return Translation2D object with a flipped sign.
     *
     */
     val inverse: Translation2D get() = Translation2D(-x, -y)
 
+    /**
+    * Used by the +Translation2D operator overload. https://kotlinlang.org/docs/reference/operator-overloading.html 
+    *
+    * **Example**
+    *
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.unaryPlusWorksProperly
+    *
+    * @return A copy of this Translation2D
+    *
+    */
     operator fun unaryPlus(): Translation2D = copy
 
+    /**
+    * Creates a copy of the Translation2D object
+    *
+    * **Example**
+    *
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.copyWorksProperly
+    *
+    * @return A copy of this object
+    *
+    */
     val copy: Translation2D get() = Translation2D(x, y)
 
     val isIdentity: Boolean get() = epsilonEquals(identity)
@@ -51,7 +90,7 @@ class Translation2D(val x: Double, val y: Double) {
     *
     * **Example**
     *
-    * @sample test.ca.warp7.frc.geometry.Translation2D.epsilonEqualsWorksProperly
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.epsilonEqualsWorksProperly
     *
     * @return True or False
     *
@@ -64,7 +103,7 @@ class Translation2D(val x: Double, val y: Double) {
     *
     * **Example**
     *
-    * @sample test.ca.warp7.frc.geometry.Translation2D.transformWorksProperly
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.transformWorksProperly
     *
     * @return The transformed vector.
     *
@@ -79,7 +118,7 @@ class Translation2D(val x: Double, val y: Double) {
     *
     * **Example**
     *
-    * @sample test.ca.warp7.frc.geometry.Translation2D.plusWorksProperly
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.plusWorksProperly
     *
     * @return The added vector.
     *
@@ -91,7 +130,7 @@ class Translation2D(val x: Double, val y: Double) {
     *
     * **Example**
     *
-    * @sample test.ca.warp7.frc.geometry.Translation2D.minusWorksProperly
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.minusWorksProperly
     *
     * @return The subtracted vector.
     *
@@ -103,7 +142,7 @@ class Translation2D(val x: Double, val y: Double) {
     *
     * **Example**
     *
-    * @sample test.ca.warp7.frc.geometry.Translation2D.toStringWorksProperly
+    * @sample test.ca.warp7.frc.geometry.Translation2DTest.toStringWorksProperly
     *
     * @return String containing X and Y of the vector.
     *
