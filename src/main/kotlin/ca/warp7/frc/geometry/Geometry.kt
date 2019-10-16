@@ -40,6 +40,17 @@ val Rotation2D.tan: Double
         } else sin / cos
     }
 
+/**
+ * Fast interpolation (omits 3 object creations)
+ */
+@ExperimentalGeometry
+fun Rotation2D.interpolateFast(other: Rotation2D, x: Double): Rotation2D {
+    val angle = distanceTo(other) * x
+    val c = cos(angle)
+    val s = sin(angle)
+    return Rotation2D(cos * c - sin * s, cos * s + sin * c)
+}
+
 infix fun Rotation2D.parallelTo(other: Rotation2D) = (translation cross other.translation).epsilonEquals(0.0)
 
 /*
@@ -91,6 +102,20 @@ fun Pose2D.intersection(other: Pose2D): Translation2D {
     }
 }
 
+@ExperimentalGeometry
+fun Pose2D.logFast(): Twist2D {
+    val dTheta = rotation.radians
+    val halfThetaByTanOfHalfDTheta =
+            if (1.0 - rotation.cos < 1E-9) 1.0 - 1.0 / 12.0 * dTheta * dTheta
+            else (0.5 * dTheta) * rotation.sin / (1.0 - rotation.cos)
+    return Twist2D(
+            dx = translation.x * halfThetaByTanOfHalfDTheta + translation.y * dTheta / 2.0,
+            dy = translation.y * halfThetaByTanOfHalfDTheta - translation.x * dTheta / 2.0,
+            dTheta = dTheta
+    )
+}
+
+
 private fun intersectionInternal(a: Pose2D, b: Pose2D): Translation2D {
     val ar = a.rotation
     val br = b.rotation
@@ -112,7 +137,7 @@ fun getDirection(pose: Pose2D, point: ArcPose2D): Double {
 
 fun findCenter(pose: Pose2D, point: ArcPose2D): Translation2D {
     val poseToPointHalfway = pose.translation.interpolate(point.translation, 0.5)
-    val normal = pose.translation.inverse.transform(poseToPointHalfway).direction.normal
+    val normal = (pose.translation.inverse + poseToPointHalfway).direction.normal
     val perpendicularBisector = Pose2D(poseToPointHalfway, normal)
     val normalFromPose = Pose2D(pose.translation, pose.rotation.normal)
     return if (normalFromPose.isColinear(perpendicularBisector.run { Pose2D(translation, rotation.normal) })) {

@@ -10,17 +10,17 @@ class Rotation2D(val cos: Double, val sin: Double) {
     @Deprecated("", ReplaceWith("inverse"))
     operator fun unaryMinus(): Rotation2D = inverse
 
-    fun epsilonEquals(state: Rotation2D, epsilon: Double): Boolean =
+    fun epsilonEquals(state: Rotation2D, epsilon: Double = 1E-12): Boolean =
             cos.epsilonEquals(state.cos, epsilon) && sin.epsilonEquals(state.sin, epsilon)
 
-    fun epsilonEquals(state: Rotation2D): Boolean = epsilonEquals(state, 1E-12)
+    @Deprecated("", ReplaceWith("this + by"))
+    fun transform(by: Rotation2D): Rotation2D = this + by
 
-    fun transform(by: Rotation2D): Rotation2D =
+    operator fun plus(by: Rotation2D): Rotation2D =
             Rotation2D(cos * by.cos - sin * by.sin, cos * by.sin + sin * by.cos).norm
 
-    operator fun plus(by: Rotation2D): Rotation2D = transform(by)
-
-    operator fun minus(by: Rotation2D): Rotation2D = transform(by.inverse)
+    operator fun minus(by: Rotation2D): Rotation2D =
+            Rotation2D(cos * by.cos + sin * by.sin, sin * by.cos - cos * by.sin).norm
 
     fun scaled(by: Double): Rotation2D {
         if (by == 1.0) {
@@ -33,27 +33,13 @@ class Rotation2D(val cos: Double, val sin: Double) {
 
     operator fun div(by: Double): Rotation2D = scaled(1.0 / by)
 
-    fun distanceTo(state: Rotation2D): Double = (state - this).radians
+    fun distanceTo(state: Rotation2D): Double =
+            atan2(cos * state.cos + sin * state.sin, cos * state.sin - sin * state.cos)
 
     fun interpolate(other: Rotation2D, x: Double): Rotation2D = when {
         x <= 0 -> this
         x >= 1 -> other
-        else -> transform(Rotation2D.fromRadians(radians = distanceTo(other) * x))
-    }
-
-    /**
-     * Fast interpolation (omits 3 object creations)
-     */
-    @ExperimentalGeometry
-    fun interpolate2(other: Rotation2D, x: Double): Rotation2D = when {
-        x <= 0 -> this
-        x >= 1 -> other
-        else -> {
-            val angle = atan2(other.cos * cos + other.sin * sin, other.sin * cos - other.cos * sin) * x
-            val c = kotlin.math.cos(angle)
-            val s = kotlin.math.sin(angle)
-            Rotation2D(cos * c - sin * s, cos * s + sin * c)
-        }
+        else -> this + Rotation2D.fromRadians(radians = distanceTo(other) * x)
     }
 
     val inverse: Rotation2D get() = Rotation2D(cos, -sin)
