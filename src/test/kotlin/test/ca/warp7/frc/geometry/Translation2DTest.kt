@@ -4,13 +4,59 @@ import ca.warp7.frc.geometry.Translation2D
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
+//This is testing the Translation2D class using unittesting
+
 class Translation2DTest {
+
+    @Test
+    fun interpolateWorksProperly(){
+	val transTestA0 = Translation2D(100.0, 100.0)
+	val transTestA1 = Translation2D(0.0, 0.0)
+	val transTestA2 = transTestA0.interpolate(transTestA1, 0.5)
+	val transGoldenA = Translation2D(50.0, 50.0)
+
+	assert(transGoldenA.epsilonEquals(transGoldenA))
+
+	val transTestB0 = Translation2D(100.0, 100.0)
+	val transTestB1 = Translation2D(200.0, 200.0)
+	val transTestB2 = transTestA0.interpolate(transTestB1, 0.75)
+	val transGoldenB = Translation2D(175.0, 175.0)
+
+	assert(transGoldenB.epsilonEquals(transGoldenB))
+    }
+
+    @Test
+    fun unaryMinusWorksProperly(){
+	val transTest0 = Translation2D(-10.1, 15.9).unaryMinus()
+	val transTest1 = -Translation2D(-10.1, 15.9)
+	val transGolden = Translation2D(10.1, -15.9)
+
+	assert(transTest0.epsilonEquals(transGolden))
+	assert(transTest1.epsilonEquals(transGolden))
+    }
 
     @Test
     fun inverseWorksProperly(){
         val transTest = Translation2D(1425.0, -23.0).inverse
         val transGolden = Translation2D(-1425.0, 23.0)
         assert(transTest.epsilonEquals(transGolden))
+    }
+
+    @Test
+    fun unaryPlusWorksProperly(){
+	val transTest0 = Translation2D(25.0, 3.34501).unaryPlus()
+	val transTest1 = +Translation2D(25.0, 3.34501)
+	val transGolden = Translation2D(25.0, 3.34501)
+
+	assert(transTest0.epsilonEquals(transGolden))
+	assert(transTest1.epsilonEquals(transGolden))
+    }
+
+    @Test
+    fun copyWorksProperly(){
+	val transTest = Translation2D(20.01, 13.49).copy
+	val transGolden = Translation2D(20.01, 13.49)
+	assert(transTest.epsilonEquals(transGolden))
     }
 
     @Test
@@ -65,16 +111,22 @@ class Translation2DTest {
 
     @Test
     fun timesWorksProperly(){
-        val transTest = Translation2D(5.5, 2.0).times(4.0)
+        val transTest0 = Translation2D(5.5, 2.0).times(4.0)
+        val transTest1 = Translation2D(5.5, 2.0)*4.0
         val transGolden = Translation2D(22.0, 8.0)
-        assert(transTest.epsilonEquals(transGolden))
+        
+	assert(transTest0.epsilonEquals(transGolden))
+        assert(transTest1.epsilonEquals(transGolden))
     }
 
     @Test
     fun divWorksProperly(){
-        val transTest = Translation2D(12.8, 16.4).div(4.0)
+        val transTest0 = Translation2D(12.8, 16.4).div(4.0)
+        val transTest1 = Translation2D(12.8, 16.4)/4.0
         val transGolden = Translation2D(3.2, 4.1)
-        assert(transTest.epsilonEquals(transGolden))
+
+        assert(transTest0.epsilonEquals(transGolden))
+        assert(transTest1.epsilonEquals(transGolden))
     }
     
     @Test

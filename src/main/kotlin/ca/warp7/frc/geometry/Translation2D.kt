@@ -9,6 +9,7 @@ import kotlin.math.hypot
 @Suppress("MemberVisibilityCanBePrivate")
 class Translation2D(val x: Double, val y: Double) {
 
+
     fun interpolate(other: Translation2D, x: Double): Translation2D = when {
         x <= 0 -> this
         x >= 1 -> other
