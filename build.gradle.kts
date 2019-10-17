@@ -7,7 +7,7 @@ plugins {
     java
     kotlin("jvm") version "1.3.50"
     `maven-publish`
-    id("org.jetbrains.dokka") version "0.9.18"
+    id("org.jetbrains.dokka") version "0.10.0"
 }
 
 repositories {
@@ -17,7 +17,7 @@ repositories {
 }
 
 group = "ca.warp7.frc"
-version = "2019.4.0"
+version = "2019.5.0"
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
@@ -39,7 +39,7 @@ tasks.withType<Test> {
 }
 
 dependencies {
-    compile(kotlin("stdlib"))
+    implementation(kotlin("stdlib"))
 
     testImplementation(kotlin("test"))
     testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = "5.5.1")
@@ -76,10 +76,12 @@ publishing {
     }
 }
 
-val dokka by tasks.getting(DokkaTask::class)  {
-    moduleName = "ca.warp7.frc"
-    noJdkLink = true
+tasks.dokka  {
     outputFormat = "html" 
     outputDirectory = "$buildDir/javadoc"
-    samples = listOf("src/test/kotlin/test/ca/warp7/frc/geometry")   
+    configuration {
+        moduleName = "ca.warp7.frc"
+        noJdkLink = true
+        samples = listOf("src/test/kotlin/test/ca/warp7/frc/geometry")
+    }
 }

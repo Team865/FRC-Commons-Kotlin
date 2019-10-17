@@ -220,7 +220,7 @@ class DifferentialDriveModel(
      *
      * @param velocity required velocity in (m/s, rad/s)
      * @param acceleration required acceleration in (m/s^2, rad/s^2)
-     * @return dynamic state in [(V, V), (N * m, N * m)]
+     * @return dynamic state in (V, V), (N * m, N * m)
      */
     fun solve(velocity: ChassisState, acceleration: ChassisState): DynamicState {
 

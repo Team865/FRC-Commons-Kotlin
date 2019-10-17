@@ -2,6 +2,7 @@ package ca.warp7.frc.path
 
 import ca.warp7.frc.geometry.ArcPose2D
 import ca.warp7.frc.geometry.Pose2D
+import ca.warp7.frc.geometry.Translation2D
 import ca.warp7.frc.geometry.rotate
 
 fun List<QuinticSegment2D>.parameterized(): List<ArcPose2D> {
@@ -36,7 +37,7 @@ fun QuinticSegment2D.parameterize(
     val point0 = p0.point
     val point1 = p1.point
     // get the twist transformation between start and and points
-    val twist = Pose2D((point1 - point0).rotate(-heading0), heading1 - heading0).log
+    val twist = Pose2D((point1 - point0).rotate(heading0.inverse), heading1 - heading0).log()
     // check if the twist is within threshold
     if (twist.dy > maxDy || twist.dx > maxDx || twist.dTheta > maxDTheta) {
         // partition and re-parameterize

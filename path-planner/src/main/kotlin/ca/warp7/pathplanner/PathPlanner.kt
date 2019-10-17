@@ -375,7 +375,7 @@ class PathPlanner : PApplet() {
                 val newWaypoints = waypoints.reversedArray()
                 for (i in newWaypoints.indices) {
                     newWaypoints[i] = newWaypoints[i].run {
-                        Pose2D(translation, rotation.rotate(reversedRotation))
+                        Pose2D(translation, rotation + reversedRotation)
                     }
                 }
                 waypoints = newWaypoints
