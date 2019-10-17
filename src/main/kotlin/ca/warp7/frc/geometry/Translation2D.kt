@@ -10,10 +10,10 @@ import kotlin.math.hypot
 class Translation2D(val x: Double, val y: Double) {
 
 
-    fun interpolate(other: Translation2D, x: Double): Translation2D = when {
-        x <= 0 -> this
-        x >= 1 -> other
-        else -> Translation2D(x * (other.x - x) + x, x * (other.y - y) + y)
+    fun interpolate(other: Translation2D, x1: Double): Translation2D = when {
+        x1 <= 0 -> this
+        x1 >= 1 -> other
+        else -> Translation2D(x1 * (other.x - x) + x, x1 * (other.y - y) + y)
     }
 
     /**
