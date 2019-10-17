@@ -9,9 +9,9 @@ import ca.warp7.frc.path.quinticSplinesOf
 import java.util.concurrent.FutureTask
 
 @Suppress("MemberVisibilityCanBePrivate")
-class TrajectoryController {
-
-    private val builder = TrajectoryBuilder()
+class TrajectoryController(
+        private val builder: TrajectoryBuilder
+) {
 
     var t = 0.0
         private set
@@ -26,10 +26,6 @@ class TrajectoryController {
         private set
 
     private var trajectoryGenerator: FutureTask<List<TrajectoryState>>? = null
-
-    fun applyBuilder(block: TrajectoryBuilder.() -> Unit) {
-        builder.apply(block)
-    }
 
     fun getFollower(): TrajectoryFollower? {
         return builder.follower

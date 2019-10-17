@@ -29,68 +29,68 @@ class TrajectoryBuilder {
     internal var mirroredMultiplier = 0.0
 
 
-    fun setInverted(inverted: Boolean) {
+    fun setInverted(inverted: Boolean) = apply {
         invertMultiplier = inverted.toDoubleSign()
     }
 
-    fun setMirrored(mirrored: Boolean) {
+    fun setMirrored(mirrored: Boolean) = apply {
         mirroredMultiplier = mirrored.toDoubleSign()
     }
 
-    fun setFollower(f: TrajectoryFollower) {
+    fun setFollower(f: TrajectoryFollower) = apply {
         follower = f
     }
 
     @ExperimentalTrajectoryFeature
-    fun setMixParam(on: Boolean) {
+    fun setMixParam(on: Boolean) = apply {
         enableMixParam = on
     }
 
-    fun wheelbaseRadius(metres: Double) {
+    fun setWheelbaseRadius(metres: Double) = apply {
         wheelbaseRadius = metres
     }
 
-    fun trajectoryVelocity(metresPerSecond: Double) {
+    fun setTrajectoryVelocity(metresPerSecond: Double) = apply {
         trajectoryVelocity = metresPerSecond
     }
 
-    fun trajectoryAcceleration(metresPerSecondSquared: Double) {
+    fun setTrajectoryAcceleration(metresPerSecondSquared: Double) = apply {
         trajectoryAcceleration = metresPerSecondSquared
     }
 
-    fun jerkLimit(metresPerSecondCubed: Double) {
+    fun setJerkLimit(metresPerSecondCubed: Double) = apply {
         maxJerk = metresPerSecondCubed
     }
 
-    fun noJerkLimit() {
+    fun noJerkLimit() = apply {
         maxJerk = Double.POSITIVE_INFINITY
     }
 
-    fun centripetalAcceleration(hertz: Double) {
+    fun setMaxCentripetalAcceleration(hertz: Double) = apply {
         maxCentripetalAcceleration = hertz
     }
 
-    fun bendFactor(factor: Double) {
+    fun setBendFactor(factor: Double) = apply {
         bendFactor = factor
     }
 
-    fun setOptimization(on: Boolean) {
+    fun setIterativePathOptimization(on: Boolean) = apply {
         optimizeDkSquared = on
     }
 
-    fun startAt(pose: Pose2D) {
+    fun startAt(pose: Pose2D) = apply {
         check(waypoints.isEmpty())
         waypoints.add(pose)
     }
 
-    fun forward(metres: Double) {
+    fun forward(metres: Double) = apply {
         check(waypoints.isNotEmpty() && metres > 0)
         val pose = waypoints.last()
                 .run { Pose2D(translation + rotation.translation * metres, rotation) }
         waypoints.add(pose)
     }
 
-    fun reverse(metres: Double) {
+    fun reverse(metres: Double) = apply {
         check(waypoints.isNotEmpty() && metres > 0)
         val pose = waypoints.last()
                 .run { Pose2D(translation + rotation.translation * (-metres), rotation) }
@@ -98,7 +98,7 @@ class TrajectoryBuilder {
     }
 
     @ExperimentalTrajectoryFeature
-    fun turnRight(degrees: Double) {
+    fun turnRight(degrees: Double) = apply {
         check(waypoints.isNotEmpty() && degrees > 0)
         val pose = waypoints.last()
                 .run { Pose2D(translation, rotation + Rotation2D.fromDegrees(-degrees)) }
@@ -106,19 +106,19 @@ class TrajectoryBuilder {
     }
 
     @ExperimentalTrajectoryFeature
-    fun turnLeft(degrees: Double) {
+    fun turnLeft(degrees: Double) = apply {
         check(waypoints.isNotEmpty() && degrees > 0)
         val pose = waypoints.last()
                 .run { Pose2D(translation, rotation + Rotation2D.fromDegrees(degrees)) }
         waypoints.add(pose)
     }
 
-    fun moveTo(pose: Pose2D) {
+    fun moveTo(pose: Pose2D) = apply {
         check(waypoints.isNotEmpty() && !pose.epsilonEquals(waypoints.last()))
         waypoints.add(pose)
     }
 
-    fun moveToAll(vararg poses: Pose2D) {
+    fun moveToAll(vararg poses: Pose2D) = apply {
         for (pose in poses) {
             moveTo(pose)
         }
