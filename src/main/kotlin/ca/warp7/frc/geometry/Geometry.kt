@@ -5,6 +5,9 @@ package ca.warp7.frc.geometry
 import ca.warp7.frc.epsilonEquals
 import kotlin.math.*
 
+@Experimental
+annotation class ExperimentalGeometry
+
 /*
  * ROTATION FUNCTIONS
  */

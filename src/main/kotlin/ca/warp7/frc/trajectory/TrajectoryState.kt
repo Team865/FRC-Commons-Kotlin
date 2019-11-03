@@ -4,7 +4,7 @@ import ca.warp7.frc.drive.ChassisState
 import ca.warp7.frc.f
 import ca.warp7.frc.geometry.ArcPose2D
 
-data class TrajectoryState(
+class TrajectoryState(
         val arcPose: ArcPose2D,
         var v: Double = 0.0,
         var w: Double = 0.0,

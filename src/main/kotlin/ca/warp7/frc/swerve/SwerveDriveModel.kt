@@ -6,8 +6,6 @@ import ca.warp7.frc.geometry.radians
 
 @Suppress("MemberVisibilityCanBePrivate")
 class SwerveDriveModel(
-        val wheelRadius: Double, // m
-
         val length: Double, // m
         val width: Double // m
 ) {

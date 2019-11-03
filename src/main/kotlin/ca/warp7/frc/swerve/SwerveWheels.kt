@@ -3,7 +3,7 @@ package ca.warp7.frc.swerve
 import ca.warp7.frc.geometry.Rotation2D
 import ca.warp7.frc.geometry.translation
 
-data class SwerveWheels(
+class SwerveWheels(
         val leftFront: Rotation2D,
         val rightFront: Rotation2D,
         val leftRear: Rotation2D,

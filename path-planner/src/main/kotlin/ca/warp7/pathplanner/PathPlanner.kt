@@ -1,10 +1,6 @@
-@file:Suppress("DEPRECATION")
-
 package ca.warp7.pathplanner
 
 import ca.warp7.frc.*
-import ca.warp7.frc.drive.DifferentialDriveModel
-import ca.warp7.frc.drive.DynamicState
 import ca.warp7.frc.drive.WheelState
 import ca.warp7.frc.geometry.*
 import ca.warp7.frc.path.QuinticSegment2D
@@ -62,7 +58,7 @@ class PathPlanner : PApplet() {
     var splines: List<ArcPose2D> = emptyList()
     var trajectory: List<TrajectoryState> = emptyList()
     var controlPoints: MutableList<ControlPoint> = mutableListOf()
-    var dynamics: List<Triple<WheelState, DynamicState, Double>> = emptyList()
+    var dynamics: List<Triple<WheelState, WheelState, Double>> = emptyList()
 
     var maxVRatio = 1.0
     var maxARatio = 1.0
@@ -83,21 +79,6 @@ class PathPlanner : PApplet() {
     fun lineTo(a: Translation2D, b: Translation2D) = line(a.x.toFloat(), a.y.toFloat(), b.x.toFloat(), b.y.toFloat())
     fun vertex(a: Translation2D) = vertex(a.x.toFloat(), a.y.toFloat())
     val bg = PImage(ImageIO.read(PathPlanner::class.java.getResource("/field.PNG")))
-
-    val model = DifferentialDriveModel(
-            wheelRadius = kWheelRadius,
-            wheelbaseRadius = kEffectiveWheelBaseRadius,
-            maxVelocity = kMaxVelocity,
-            maxAcceleration = kMaxAcceleration,
-            maxFreeSpeed = kMaxFreeSpeed,
-            speedPerVolt = kSpeedPerVolt,
-            torquePerVolt = kTorquePerVolt,
-            frictionVoltage = kFrictionVoltage,
-            linearInertia = kLinearInertia,
-            angularInertia = kAngularInertia,
-            maxVoltage = kMaxVolts,
-            angularDrag = kAngularDrag
-    )
 
     var draggingPoint = false
     var draggingAngle = false
@@ -181,19 +162,19 @@ class PathPlanner : PApplet() {
             if (a.curvature.epsilonEquals(0.0)) chordLength else
                 kotlin.math.abs(kotlin.math.asin(chordLength * a.curvature / 2) / a.curvature * 2)
         }.sum()
-        trajectory = generateTrajectory(splines, model.wheelbaseRadius,
-                model.maxVelocity * maxVRatio,
-                model.maxAcceleration * maxARatio,
-                model.maxAcceleration * maxAcRatio,
+        trajectory = generateTrajectory(splines, kEffectiveWheelBaseRadius,
+                kMaxVelocity * maxVRatio,
+                kMaxAcceleration * maxARatio,
+                kMaxAcceleration * maxAcRatio,
                 if (jerkLimiting) 45.0 else Double.POSITIVE_INFINITY)
         trajectoryTime = trajectory.last().t
         dynamics = trajectory.map {
             val velocity = it.velocity
             val acceleration = it.acceleration
-            val wv = model.solve(velocity) * (217.5025513493939 / 1023 * 12)
-            val wa = model.solve(acceleration) * (6.0 / 1023 * 12)
+            val wv = velocity.solve(kEffectiveWheelBaseRadius) * (217.5025513493939 / 1023 * 12)
+            val wa = acceleration.solve(kEffectiveWheelBaseRadius) * (6.0 / 1023 * 12)
             Triple(WheelState(wv.left + wa.left, wv.right + wa.right),
-                    model.solve(velocity, acceleration), it.t)
+                    WheelState(wv.left + wa.left, wv.right + wa.right), it.t)
         }
         maxK = splines.maxBy { it.curvature.absoluteValue }?.curvature?.absoluteValue ?: 1.0
         maxAngular = trajectory.map { kotlin.math.abs(it.w) }.max() ?: 1.0
@@ -265,13 +246,13 @@ class PathPlanner : PApplet() {
             }
             strokeWeight(2f)
             stroke(0f, 128f, 192f)
-            map { v2T(it.dv, it.t, model.maxAcceleration, 434) }.connect()
+            map { v2T(it.dv, it.t, kMaxAcceleration, 434) }.connect()
             //stroke(0f, 192f, 128f)
             //map { v2T((it.state.curvature * it.acceleration), it.t, maxAngularAcc, 434) }.connect()
             stroke(255f, 255f, 128f)
             map { v2T(it.w, it.t, maxAngular, 290) }.connect()
             stroke(128f, 128f, 255f)
-            map { v2T2(it.v, it.t, model.maxVelocity, 340) }.connect()
+            map { v2T2(it.v, it.t, kMaxVelocity, 340) }.connect()
         }
         dynamics.subList(0, i + 1).apply {
             stroke(255f, 255f, 128f)
@@ -279,8 +260,8 @@ class PathPlanner : PApplet() {
             map { h2TL(it.first.left, it.third, 12.0, 121) }.connect()
             map { h2TR(it.first.right, it.third, 12.0, 121) }.connect()
             stroke(128f, 255f, 255f)
-            map { h2TL(it.second.voltage.left, it.third, 12.0, 121) }.connect()
-            map { h2TR(it.second.voltage.right, it.third, 12.0, 121) }.connect()
+            map { h2TL(it.second.left, it.third, 12.0, 121) }.connect()
+            map { h2TR(it.second.right, it.third, 12.0, 121) }.connect()
         }
     }
 
