@@ -1,6 +1,5 @@
-package test.ca.warp7.frc.action
+package ca.warp7.frc.action
 
-import ca.warp7.frc.action.*
 import org.junit.jupiter.api.*
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream

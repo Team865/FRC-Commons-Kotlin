@@ -20,7 +20,8 @@ const val kMetresToFeet: Double = 1 / kFeetToMetres
 const val kMetresToInches: Double = 1 / kInchesToMetres
 
 /**
- * Check if a number is close enough to another by [epsilon]
+ * Check if [this] is close enough to [other] by [epsilon]
+ * @return true if numbers are close
  */
 fun Double.epsilonEquals(other: Double, epsilon: Double): Boolean {
     return (this - epsilon <= other) && (this + epsilon >= other)
@@ -28,6 +29,7 @@ fun Double.epsilonEquals(other: Double, epsilon: Double): Boolean {
 
 /**
  * Check if a number is close enough to another by 1E-12
+ * @return true if numbers are close
  */
 fun Double.epsilonEquals(other: Double): Boolean {
     return epsilonEquals(other, 1E-12)
@@ -38,8 +40,17 @@ fun Double.epsilonEquals(other: Double): Boolean {
  *
  * This function is undefined if any of its parameters are
  * Infinity or NaN
+ *
+ * @param a the lower bound
+ * @param b the upper bound, b >= a
+ * @param x the amount to interpolate between 0 and 1
+ *
+ * @return the interpolation result
  */
 fun linearInterpolate(a: Double, b: Double, x: Double): Double {
+    if (b < a) {
+        return linearInterpolate(b, a, x)
+    }
     if (x < 0.0) {
         return a
     }
@@ -54,6 +65,7 @@ fun linearInterpolate(a: Double, b: Double, x: Double): Double {
  * Limit a value within a magnitude range
  *
  * @param max the maximum magnitude of the value. Must be positive
+ * @return the value within the limit
  */
 fun Double.limit(max: Double): Double {
     if (this > max) {
@@ -67,7 +79,14 @@ fun Double.limit(max: Double): Double {
 
 
 /**
- * Apply a deadband to a value
+ * Apply a deadband to a value and rescales the result
+ *
+ * @param value the value to apply the deadband to
+ * @param max the maximum magnitude of the value. Must be positive
+ * @param deadband the range in which [value] is rounded to 0.
+ * Must be positive and less than [max]
+ *
+ * @return the value within the deadband and max
  */
 fun applyDeadband(value: Double, max: Double, deadband: Double): Double {
     val v = value.limit(max)
@@ -84,8 +103,11 @@ fun applyDeadband(value: Double, max: Double, deadband: Double): Double {
 
 /**
  * Steps an accumulator towards zero
+ *
+ * @param accumulator the current accumulator
+ * @return the next accumulator
  */
-private fun wrapAccumulator(accumulator: Double): Double {
+fun wrapAccumulator(accumulator: Double): Double {
     return when {
         accumulator > 1 -> accumulator - 1.0
         accumulator < -1 -> accumulator + 1.0
@@ -99,8 +121,9 @@ private fun wrapAccumulator(accumulator: Double): Double {
  * @param v the value to scale
  * @param nonLinearity How much to deviate from a linear result
  * @param passes number of iterations to scale the number
+ * @return the scaled number
  */
-private fun sinScale(v: Double, nonLinearity: Double, passes: Int): Double {
+fun sinScale(v: Double, nonLinearity: Double, passes: Int): Double {
     var r = v
     repeat(passes) {
         r = sin(PI / 2 * nonLinearity * r) / sin(PI / 2 * nonLinearity)

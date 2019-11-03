@@ -17,7 +17,7 @@ repositories {
 }
 
 group = "ca.warp7.frc"
-version = "2019.5.0"
+version = "2019.6.0"
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {

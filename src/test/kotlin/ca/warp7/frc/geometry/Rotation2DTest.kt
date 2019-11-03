@@ -1,6 +1,5 @@
-package test.ca.warp7.frc.geometry
+package ca.warp7.frc.geometry
 
-import ca.warp7.frc.geometry.Rotation2D
 import org.junit.jupiter.api.Test
 
 //This is testing the Rotation2D class using unittesting

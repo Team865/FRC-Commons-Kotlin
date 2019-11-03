@@ -1,4 +1,4 @@
-package test.ca.warp7.frc
+package ca.warp7.frc
 
 import ca.warp7.frc.epsilonEquals
 import ca.warp7.frc.linearInterpolate

@@ -1,10 +1,8 @@
-package test.ca.warp7.frc.path
+package ca.warp7.frc.path
 
 import ca.warp7.frc.geometry.Pose2D
 import ca.warp7.frc.geometry.Rotation2D
 import ca.warp7.frc.geometry.Translation2D
-import ca.warp7.frc.geometry.fromDegrees
-import ca.warp7.frc.path.mixParameterizedPathOf
 
 fun main() {
     val a = mixParameterizedPathOf(arrayOf(

@@ -12,9 +12,6 @@ class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
 
     fun epsilonEquals(state: Pose2D): Boolean = epsilonEquals(state, 1E-12)
 
-    @Deprecated("", ReplaceWith("plus(by)"))
-    fun transform(by: Pose2D): Pose2D = plus(by)
-
     operator fun plus(by: Pose2D): Pose2D =
             Pose2D(translation + by.translation.rotate(by.rotation), rotation + by.rotation)
 
@@ -45,13 +42,8 @@ class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
         return "Pose($translation, $rotation)"
     }
 
-    @Deprecated("log is now a function", ReplaceWith("log()"))
-    val log: Twist2D
-        get() = log()
-
     /**
      * Convert a Pose2D into a Twist2D transformation
-     * By: Team 254
      */
     fun log(): Twist2D {
         val dTheta = rotation.radians
@@ -68,6 +60,7 @@ class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
         get() = Pose2D(Translation2D(translation.x, -translation.y), rotation.inverse)
 
     companion object {
+        @JvmStatic
         val identity = Pose2D(Translation2D.identity, Rotation2D.identity)
     }
 }

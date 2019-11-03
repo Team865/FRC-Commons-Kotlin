@@ -7,12 +7,11 @@ import java.io.PrintWriter
 import java.text.SimpleDateFormat
 import java.util.*
 
-class CSVLogManager {
-    private val rootDir: File = File("/home/lvuser/RobotLogs/")
+class CSVLogManager(private val rootDir: File = File("/home/lvuser/RobotLogs/")) {
     private val format = SimpleDateFormat("yyyy_MM_dd HH_mm_ss")
 
     init {
-        if (!rootDir.exists()) rootDir.mkdir()
+        if (!rootDir.exists()) rootDir.mkdirs()
         Thread.setDefaultUncaughtExceptionHandler { _, exception ->
             val crashFile = File(rootDir, "CRASH.txt")
             exception.printStackTrace(crashFile.printWriter())

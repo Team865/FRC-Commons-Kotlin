@@ -2,7 +2,6 @@ package ca.warp7.frc.trajectory
 
 import ca.warp7.frc.geometry.Pose2D
 import ca.warp7.frc.geometry.Rotation2D
-import ca.warp7.frc.geometry.fromDegrees
 import ca.warp7.frc.geometry.translation
 import ca.warp7.frc.toDoubleSign
 

@@ -9,10 +9,6 @@ import kotlin.math.*
  * ROTATION FUNCTIONS
  */
 
-fun Rotation2D.Companion.fromRadians(radians: Double): Rotation2D = Rotation2D(cos(radians), sin(radians))
-
-fun Rotation2D.Companion.fromDegrees(degrees: Double) = fromRadians(Math.toRadians(degrees))
-
 val Number.radians: Rotation2D get() = Rotation2D.fromRadians(this.toDouble())
 
 val Number.degrees: Rotation2D get() = Rotation2D.fromDegrees(this.toDouble())
@@ -53,10 +49,6 @@ fun Rotation2D.interpolateFast(other: Rotation2D, x: Double): Rotation2D {
 
 infix fun Rotation2D.parallelTo(other: Rotation2D) = (translation cross other.translation).epsilonEquals(0.0)
 
-/*
- * TRANSLATION FUNCTIONS
- */
-
 val Translation2D.direction: Rotation2D get() = Rotation2D(x, y).norm
 
 val Translation2D.transposed: Translation2D get() = Translation2D(y, x)
@@ -79,10 +71,6 @@ fun fitParabola(p1: Translation2D, p2: Translation2D, p3: Translation2D): Double
     return -b / (2 * a)
 }
 
-/*
- * POSE FUNCTIONS
- */
-
 fun Pose2D.isColinear(other: Pose2D): Boolean {
     if (!rotation.parallelTo(other.rotation)) return false
     val twist = (other - this).log()
@@ -102,6 +90,10 @@ fun Pose2D.intersection(other: Pose2D): Translation2D {
     }
 }
 
+/**
+ * The same as [Pose2D.log] except it doesn't create intermediate objects
+ * and simplifies the equations
+ */
 @ExperimentalGeometry
 fun Pose2D.logFast(): Twist2D {
     val dTheta = rotation.radians

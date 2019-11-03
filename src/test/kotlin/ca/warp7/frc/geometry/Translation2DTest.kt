@@ -1,6 +1,5 @@
-package test.ca.warp7.frc.geometry
+package ca.warp7.frc.geometry
 
-import ca.warp7.frc.geometry.Translation2D
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 

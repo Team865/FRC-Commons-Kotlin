@@ -182,7 +182,7 @@ private fun forwardPass(
             // Robot is moving in a curve or straight line
             else -> {
 
-                // Velocity constrained by curvature equations
+                // Velocity constrained by these equations:
                 // eqn 1. w = (right - left) / (2 * L)
                 // eqn 2. v = (left + right) / 2
                 //
