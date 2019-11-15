@@ -16,7 +16,7 @@ class Rotation2DTest {
 
     fun scaledWorksProperly(){
 	val rotateTest =  Rotation2D(2.4, -23.2).scaled(-2.0)
-	val rotateGolden = Rotataion2D(-4.8, 46.4)
+	val rotateGolden = Rotation2D(-4.8, 46.4)
 	assert(rotateTest.epsilonEquals(rotateGolden))
     }
 
