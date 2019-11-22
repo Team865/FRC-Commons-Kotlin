@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
-    kotlin("jvm") version "1.3.50"
+    kotlin("jvm") version "1.3.60"
     `maven-publish`
     id("org.jetbrains.dokka") version "0.10.0"
 }
