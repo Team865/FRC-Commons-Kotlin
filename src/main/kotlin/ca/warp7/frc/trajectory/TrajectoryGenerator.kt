@@ -63,6 +63,17 @@ fun generateTrajectory(
         maxCentripetalAcceleration: Double, // s^-1
         maxJerk: Double // m/s^3
 ): List<TrajectoryState> {
+    // If path is empty, returns an empty trajectory
+    if (path.isEmpty()) {
+        return emptyList()
+    }
+
+    // Make sure the first state doesn't have infinite curvature
+    require(path.first().curvature.isFinite()) {
+        "Infinite curvature is not allowed in this trajectory generator"
+    }
+
+    // Create result states
     val states = path.map { TrajectoryState(it) }
     // Step 1
     val arcLengths = computeArcLengths(path)
@@ -85,12 +96,12 @@ fun generateTrajectory(
 /**
  * Compute arc length between each pair of poses in the path
  */
-private fun computeArcLengths(
+internal fun computeArcLengths(
         path: List<ArcPose2D> // (((x, y), θ), k, dk_ds)
 ): List<Double> = path.zipWithNext { current, next ->
 
     // Check that the path is actually a  path
-    check(!current.pose.epsilonEquals(next.pose)) {
+    require(!current.pose.epsilonEquals(next.pose)) {
         "Two consecutive points contain the same pose"
     }
 
@@ -101,8 +112,8 @@ private fun computeArcLengths(
     val k = abs(next.curvature)
 
     // Do not allow robot turning in place
-    check(k.isFinite()) {
-        "Infinite curvature is not allowed here"
+    require(k.isFinite()) {
+        "Infinite curvature is not allowed in this trajectory generator"
     }
 
     // Robot is moving in a curve or straight line
@@ -111,7 +122,7 @@ private fun computeArcLengths(
     // Get the chord length (translational distance)
     val distance = current.translation.distanceTo(next.translation)
 
-    check(distance != 0.0) {
+    require(distance != 0.0) {
         "Trajectory Generator - Overlapping points without infinite curvature"
     }
 
@@ -130,7 +141,7 @@ private fun computeArcLengths(
 /**
  * Forward pass
  */
-private fun forwardPass(
+internal fun forwardPass(
         states: List<TrajectoryState>,
         arcLengths: List<Double>,
         wheelbaseRadius: Double,
@@ -195,7 +206,7 @@ private fun forwardPass(
 /**
  * Reverse pass
  */
-private fun reversePass(
+internal fun reversePass(
         states: List<TrajectoryState>,
         arcLengths: List<Double>,
         maxAcceleration: Double
@@ -228,7 +239,7 @@ private fun reversePass(
  * (acceleration and jerk), as well as giving back the sign
  * of the curvature
  */
-private fun accumulativePass(states: List<TrajectoryState>) {
+internal fun accumulativePass(states: List<TrajectoryState>) {
     for (i in 0 until states.size - 1) {
         val current = states[i + 1]
         val last = states[i]
@@ -252,7 +263,7 @@ private fun accumulativePass(states: List<TrajectoryState>) {
 /**
  * Limits jerk in a trajectory
  */
-private fun rampedAccelerationPass(states: List<TrajectoryState>, arcLengths: List<Double>, maxJerk: Double) {
+internal fun rampedAccelerationPass(states: List<TrajectoryState>, arcLengths: List<Double>, maxJerk: Double) {
 
     // Find a list of points that exceeds the max jerk
     val jerkPoints = mutableListOf<Int>()
@@ -309,7 +320,7 @@ private fun rampedAccelerationPass(states: List<TrajectoryState>, arcLengths: Li
 /**
  * Integrate dt into trajectory time
  */
-fun integrationPass(states: List<TrajectoryState>) {
+internal fun integrationPass(states: List<TrajectoryState>) {
     for (i in 1 until states.size) {
         states[i].t += states[i - 1].t
     }
