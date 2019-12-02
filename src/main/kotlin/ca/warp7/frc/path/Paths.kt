@@ -42,54 +42,25 @@ fun quinticSplinesOf(
 fun parameterizedSplinesOf(vararg waypoints: Pose2D): List<ArcPose2D> =
         quinticSplinesOf(*waypoints).parameterized()
 
-private fun mixParameterizeSplines(
-        path: MutableList<QuinticSegment2D>,
-        param: MutableList<ArcPose2D>,
-        optimizePath: Boolean
-) {
-    val segment = if (optimizePath) path.optimized().parameterized() else path.parameterized()
-    if (param.isEmpty()) param.addAll(segment)
-    else param.addAll(segment.subList(0, segment.lastIndex))
-}
-
-fun mixParameterizedPathOf(
-        waypoints: Array<Pose2D>,
-        optimizePath: Boolean,
-        bendFactor: Double
-): List<ArcPose2D> {
-    val param = mutableListOf<ArcPose2D>()
-    val path = mutableListOf<QuinticSegment2D>()
-    for (i in 0 until waypoints.size - 1) {
-        val a = waypoints[i]
-        val b = waypoints[i + 1]
-        if (a.translation.epsilonEquals(b.translation)) {
-            if (path.isNotEmpty()) {
-                mixParameterizeSplines(path, param, optimizePath)
-                path.clear()
-            }
-            val theta = (b.rotation - a.rotation).radians
-            val phi = a.rotation.radians
-            check(!theta.epsilonEquals(0.0))
-            var x = 0.0
-            if (theta > 0) {
-                while (x < theta) {
-                    x += 0.1
-                    param.add(ArcPose2D(Pose2D(a.translation,
-                            Rotation2D.fromRadians(phi + x)), Double.POSITIVE_INFINITY, 0.0))
-                }
-            } else {
-                while (x > theta) {
-                    x -= 0.1
-                    param.add(ArcPose2D(Pose2D(a.translation,
-                            Rotation2D.fromRadians(phi + x)), Double.NEGATIVE_INFINITY, 0.0))
-                }
-            }
-        } else {
-            path.add(quinticSplineFromPose(waypoints[i], waypoints[i + 1], bendFactor))
+fun parameterizeQuickTurn(a: Rotation2D, b: Rotation2D): List<ArcPose2D> {
+    val theta = (b - a).radians
+    val startingAngle = a.radians
+    require(theta != 0.0) {
+        "QuickTurn Generator - Two points are the same"
+    }
+    val quickTurnAngles = mutableListOf<Rotation2D>()
+    var x = 0.0
+    return if (theta > 0) {
+        while (x < theta) {
+            x += 0.1
+            quickTurnAngles.add(Rotation2D.fromRadians(startingAngle + x))
         }
+        quickTurnAngles.map { ArcPose2D(Pose2D(a.translation, it), Double.POSITIVE_INFINITY, 0.0) }
+    } else {
+        while (x > theta) {
+            x -= 0.1
+            quickTurnAngles.add(Rotation2D.fromRadians(startingAngle + x))
+        }
+        quickTurnAngles.map { ArcPose2D(Pose2D(a.translation, it), Double.NEGATIVE_INFINITY, 0.0) }
     }
-    if (path.isNotEmpty()) {
-        mixParameterizeSplines(path, param, optimizePath)
-    }
-    return param
 }

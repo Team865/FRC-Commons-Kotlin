@@ -3,7 +3,6 @@ package ca.warp7.frc.trajectory
 import ca.warp7.frc.epsilonEquals
 import ca.warp7.frc.geometry.*
 import ca.warp7.frc.linearInterpolate
-import ca.warp7.frc.path.*
 import java.util.concurrent.FutureTask
 
 @Suppress("MemberVisibilityCanBePrivate")
@@ -25,65 +24,19 @@ class TrajectoryController(
 
     private var trajectoryGenerator: FutureTask<List<TrajectoryState>>? = null
 
+    var generationTimeMs = 0
+
     fun getFollower(): TrajectoryFollower? {
         return builder.follower
     }
 
-    fun TrajectoryBuilder.generatePathAndTrajectory(): List<TrajectoryState> {
-        val startTime = System.nanoTime()
-
-        val trajectory = mutableListOf<TrajectoryState>()
-        val path = mutableListOf<QuinticSegment2D>()
-
-        for (i in 0 until waypoints.size - 1) {
-            val a = waypoints[i]
-            val b = waypoints[i + 1]
-            if (!a.translation.epsilonEquals(b.translation)) {
-                path.add(quinticSplineFromPose(waypoints[i], waypoints[i + 1], builder.bendFactor))
-            } else {
-                if (path.isNotEmpty()) {
-                    val optimizedPath = if (builder.optimizeDkSquared) path.optimized() else path
-                    val parameterizedPath = optimizedPath.parameterized()
-                    val trajectorySegment = generateTrajectory(parameterizedPath, wheelbaseRadius,
-                            trajectoryVelocity, trajectoryAcceleration, maxCentripetalAcceleration, maxJerk)
-                    trajectory.addAll(trajectorySegment)
-                    path.clear()
-                }
-                val theta = (b.rotation - a.rotation).radians
-                val phi = a.rotation.radians
-                require(theta != 0.0) {
-                    "Trajectory Controller - Two points are the same"
-                }
-                val quickTurnPath = mutableListOf<ArcPose2D>()
-                var x = 0.0
-                if (theta > 0) {
-                    while (x < theta) {
-                        x += 0.1
-                        quickTurnPath.add(ArcPose2D(Pose2D(a.translation,
-                                Rotation2D.fromRadians(phi + x)), Double.POSITIVE_INFINITY, 0.0))
-                    }
-                } else {
-                    while (x > theta) {
-                        x -= 0.1
-                        quickTurnPath.add(ArcPose2D(Pose2D(a.translation,
-                                Rotation2D.fromRadians(phi + x)), Double.NEGATIVE_INFINITY, 0.0))
-                    }
-                }
-                val quickTurnSegment = generateQuickTurn(quickTurnPath,
-                        trajectoryVelocity / wheelbaseRadius,
-                        trajectoryAcceleration / wheelbaseRadius)
-                trajectory.addAll(quickTurnSegment)
-            }
-        }
-
-        val elapsedTime = ((System.nanoTime() - startTime) / 1E6).toInt()
-        println("Path Generation Time: $elapsedTime ms")
-
-        return trajectory
-    }
-
     fun initTrajectory() {
-        val generator = FutureTask { builder.generatePathAndTrajectory() }
+        val generator = FutureTask {
+            val startTime = System.nanoTime()
+            val t = builder.generatePathAndTrajectory()
+            generationTimeMs = ((System.nanoTime() - startTime) / 1E6).toInt()
+            t
+        }
         trajectoryGenerator = generator
         val thread = Thread(generator)
         thread.isDaemon = true
