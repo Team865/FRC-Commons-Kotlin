@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
-    kotlin("jvm") version "1.3.50"
+    kotlin("jvm") version "1.3.60"
     `maven-publish`
     id("org.jetbrains.dokka") version "0.10.0"
 }
@@ -17,7 +17,7 @@ repositories {
 }
 
 group = "ca.warp7.frc"
-version = "2019.5.0"
+version = "2019.6.0"
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {

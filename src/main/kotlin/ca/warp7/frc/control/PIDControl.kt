@@ -3,7 +3,7 @@ package ca.warp7.frc.control
 import ca.warp7.frc.epsilonEquals
 
 @Suppress("MemberVisibilityCanBePrivate")
-data class PIDControl(
+class PIDControl(
         val pid: PID,
         val errorEpsilon: Double = 0.1,
         val dErrorEpsilon: Double = 0.1,

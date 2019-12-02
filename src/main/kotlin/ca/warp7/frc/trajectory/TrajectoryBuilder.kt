@@ -1,29 +1,23 @@
 package ca.warp7.frc.trajectory
 
-import ca.warp7.frc.geometry.Pose2D
-import ca.warp7.frc.geometry.Rotation2D
-import ca.warp7.frc.geometry.fromDegrees
-import ca.warp7.frc.geometry.translation
+import ca.warp7.frc.geometry.*
+import ca.warp7.frc.path.*
 import ca.warp7.frc.toDoubleSign
 
 @Suppress("MemberVisibilityCanBePrivate")
 class TrajectoryBuilder {
 
-    @Experimental
-    annotation class ExperimentalTrajectoryFeature
+    private var wheelbaseRadius = 0.0
+    private var trajectoryVelocity = 0.0
+    private var trajectoryAcceleration = 0.0
+    private var maxCentripetalAcceleration = 0.0
+    private var maxJerk = Double.POSITIVE_INFINITY
+    private var bendFactor = 1.2
+    private var optimizeDkSquared = false
 
-    internal var wheelbaseRadius = 0.0
-    internal var trajectoryVelocity = 0.0
-    internal var trajectoryAcceleration = 0.0
-    internal var maxCentripetalAcceleration = 0.0
-    internal var maxJerk = Double.POSITIVE_INFINITY
-    internal var bendFactor = 1.2
-    internal var optimizeDkSquared = false
-    internal var enableMixParam = false
+    private val waypoints: MutableList<Pose2D> = mutableListOf()
 
     internal var follower: TrajectoryFollower? = null
-
-    internal val waypoints: MutableList<Pose2D> = mutableListOf()
 
     internal var invertMultiplier = 0.0
     internal var mirroredMultiplier = 0.0
@@ -39,11 +33,6 @@ class TrajectoryBuilder {
 
     fun setFollower(f: TrajectoryFollower) = apply {
         follower = f
-    }
-
-    @ExperimentalTrajectoryFeature
-    fun setMixParam(on: Boolean) = apply {
-        enableMixParam = on
     }
 
     fun setWheelbaseRadius(metres: Double) = apply {
@@ -97,7 +86,6 @@ class TrajectoryBuilder {
         waypoints.add(pose)
     }
 
-    @ExperimentalTrajectoryFeature
     fun turnRight(degrees: Double) = apply {
         check(waypoints.isNotEmpty() && degrees > 0)
         val pose = waypoints.last()
@@ -105,7 +93,6 @@ class TrajectoryBuilder {
         waypoints.add(pose)
     }
 
-    @ExperimentalTrajectoryFeature
     fun turnLeft(degrees: Double) = apply {
         check(waypoints.isNotEmpty() && degrees > 0)
         val pose = waypoints.last()
@@ -122,5 +109,40 @@ class TrajectoryBuilder {
         for (pose in poses) {
             moveTo(pose)
         }
+    }
+
+    private fun generateTrajectory(path: List<QuinticSegment2D>): List<TrajectoryState> {
+        val optimizedPath = if (optimizeDkSquared) path.optimized() else path
+        val parameterizedPath = optimizedPath.parameterized()
+        return generateTrajectory(parameterizedPath, wheelbaseRadius,
+                trajectoryVelocity, trajectoryAcceleration, maxCentripetalAcceleration, maxJerk)
+    }
+
+    internal fun generatePathAndTrajectory(): List<TrajectoryState> {
+        val trajectory = mutableListOf<TrajectoryState>()
+        val path = mutableListOf<QuinticSegment2D>()
+
+        for (i in 0 until waypoints.size - 1) {
+            val a = waypoints[i]
+            val b = waypoints[i + 1]
+            if (!a.translation.epsilonEquals(b.translation)) {
+                path.add(quinticSplineFromPose(waypoints[i], waypoints[i + 1], bendFactor))
+            } else {
+                if (path.isNotEmpty()) {
+                    trajectory.addAll(generateTrajectory(path))
+                    path.clear()
+                }
+                val quickTurnSegment = generateQuickTurn(parameterizeQuickTurn(a.rotation, b.rotation),
+                        trajectoryVelocity / wheelbaseRadius,
+                        trajectoryAcceleration / wheelbaseRadius)
+                trajectory.addAll(quickTurnSegment)
+            }
+        }
+        if (path.isNotEmpty()) {
+            trajectory.addAll(generateTrajectory(path))
+            path.clear()
+        }
+
+        return trajectory
     }
 }

@@ -21,7 +21,7 @@ class Translation2D(val x: Double, val y: Double) {
      *
      * **Example**
      *
-     * @sample test.ca.warp7.frc.geometry.Translation2DTest.inverseWorksProperly
+     * @sample ca.warp7.frc.geometry.Translation2DTest.inverseWorksProperly
      *
      * @return Translation2D object with a flipped sign.
      *
@@ -34,7 +34,7 @@ class Translation2D(val x: Double, val y: Double) {
      *
      * **Example**
      *
-     * @sample test.ca.warp7.frc.geometry.Translation2DTest.epsilonEqualsWorksProperly
+     * @sample ca.warp7.frc.geometry.Translation2DTest.epsilonEqualsWorksProperly
      *
      * @return True or False
      *
@@ -42,27 +42,12 @@ class Translation2D(val x: Double, val y: Double) {
     fun epsilonEquals(state: Translation2D, epsilon: Double = 1E-12): Boolean =
             x.epsilonEquals(state.x, epsilon) && y.epsilonEquals(state.y, epsilon)
 
-
-    /**
-     * Adds the X and Y of the vector to the X and Y of the input vector.
-     *
-     * **Example**
-     *
-     * @sample test.ca.warp7.frc.geometry.Translation2DTest.transformWorksProperly
-     *
-     * @return The transformed vector.
-     *
-     */
-    @Deprecated("", ReplaceWith("this + by"))
-    fun transform(by: Translation2D): Translation2D = this + by
-
-
     /**
      * Adds one vector to another
      *
      * **Example**
      *
-     * @sample test.ca.warp7.frc.geometry.Translation2DTest.plusWorksProperly
+     * @sample ca.warp7.frc.geometry.Translation2DTest.plusWorksProperly
      *
      * @return The added vector.
      *
@@ -74,7 +59,7 @@ class Translation2D(val x: Double, val y: Double) {
      *
      * **Example**
      *
-     * @sample test.ca.warp7.frc.geometry.Translation2DTest.minusWorksProperly
+     * @sample ca.warp7.frc.geometry.Translation2DTest.minusWorksProperly
      *
      * @return The subtracted vector.
      *
@@ -86,7 +71,7 @@ class Translation2D(val x: Double, val y: Double) {
      *
      * **Example**
      *
-     * @sample test.ca.warp7.frc.geometry.Translation2DTest.toStringWorksProperly
+     * @sample ca.warp7.frc.geometry.Translation2DTest.toStringWorksProperly
      *
      * @return String containing X and Y of the vector.
      *
@@ -100,7 +85,7 @@ class Translation2D(val x: Double, val y: Double) {
      *
      * **Example**
      *
-     * @sample test.ca.warp7.frc.geometry.Translation2DTest.scaledWorksProperly
+     * @sample ca.warp7.frc.geometry.Translation2DTest.scaledWorksProperly
      *
      * @return The scaled vector.
      *
@@ -117,7 +102,7 @@ class Translation2D(val x: Double, val y: Double) {
      *
      * **Example**
      *
-     * @sample test.ca.warp7.frc.geometry.Translation2DTest.timesWorksProperly
+     * @sample ca.warp7.frc.geometry.Translation2DTest.timesWorksProperly
      *
      * @return The scaled vector.
      *
@@ -129,7 +114,7 @@ class Translation2D(val x: Double, val y: Double) {
      *
      * **Example**
      *
-     * @sample test.ca.warp7.frc.geometry.Translation2DTest.divWorksProperly
+     * @sample ca.warp7.frc.geometry.Translation2DTest.divWorksProperly
      *
      * @return The scaled vector
      *
@@ -143,7 +128,7 @@ class Translation2D(val x: Double, val y: Double) {
      *
      * **Example**
      *
-     * @sample test.ca.warp7.frc.geometry.Translation2DTest.magWorksProperly
+     * @sample ca.warp7.frc.geometry.Translation2DTest.magWorksProperly
      *
      * @return the magnitude of the vector.
      *
@@ -151,6 +136,7 @@ class Translation2D(val x: Double, val y: Double) {
     val mag: Double get() = hypot(x, y)
 
     companion object {
+        @JvmStatic
         val identity = Translation2D(0.0, 0.0)
     }
 }

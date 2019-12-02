@@ -28,4 +28,19 @@ data class WheelState(val left: Double, val right: Double) {
             linear = (left + right) / 2.0,
             angular = (right - left) / (2 * wheelbaseRadius)
     )
+
+    /**
+     * Solves for the effective wheelbase radius given wheel velocity measured
+     * by encoders and angular velocity measured by a gyro
+     *
+     * This is given by rearranging the above function
+     * w = (right - left) / L
+     * wL = right - left
+     * L = (right - left) / w
+     * L/2 = (right - left) / 2w
+     *
+     * @param angular the angular velocity of the robot in rad/s
+     * @return the effective wheelbase radius
+     */
+    fun solveWheelbase(angular: Double): Double = (right - left) / (2 * angular)
 }

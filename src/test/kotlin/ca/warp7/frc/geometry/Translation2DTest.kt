@@ -1,8 +1,8 @@
-package test.ca.warp7.frc.geometry
+package ca.warp7.frc.geometry
 
-import ca.warp7.frc.geometry.Translation2D
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 //This is testing the Translation2D class using unittesting
 
@@ -15,7 +15,7 @@ class Translation2DTest {
         val transTestA2 = transTestA0.interpolate(transTestA1, 0.5)
         val transGoldenA = Translation2D(50.0, 50.0)
 
-        assert(transTestA2.epsilonEquals(transGoldenA))
+        assertTrue(transTestA2.epsilonEquals(transGoldenA))
     }
 
     @Test
@@ -26,7 +26,7 @@ class Translation2DTest {
         val transTestB2 = transTestB0.interpolate(transTestB1, 0.75)
         val transGoldenB = Translation2D(175.0, 175.0)
 
-        assert(transTestB2.epsilonEquals(transGoldenB))
+        assertTrue(transTestB2.epsilonEquals(transGoldenB))
     }
 //
 //    @Test
@@ -35,15 +35,15 @@ class Translation2DTest {
 //        val transTest1 = -Translation2D(-10.1, 15.9)
 //        val transGolden = Translation2D(10.1, -15.9)
 //
-//        assert(transTest0.epsilonEquals(transGolden))
-//        assert(transTest1.epsilonEquals(transGolden))
+//        assertTrue(transTest0.epsilonEquals(transGolden))
+//        assertTrue(transTest1.epsilonEquals(transGolden))
 //    }
 
     @Test
     fun inverseWorksProperly() {
         val transTest = Translation2D(1425.0, -23.0).inverse
         val transGolden = Translation2D(-1425.0, 23.0)
-        assert(transTest.epsilonEquals(transGolden))
+        assertTrue(transTest.epsilonEquals(transGolden))
     }
 
 //    @Test
@@ -71,7 +71,7 @@ class Translation2DTest {
         val transNotEqualGolden = Translation2D(-10.000000001, 24.000000001)
         val transNotEqual = Translation2D(-10.0, 24.0).epsilonEquals(transNotEqualGolden)
 
-        assert(transEqual)
+        assertTrue(transEqual)
         assertEquals(transNotEqual, false)
     }
 
@@ -88,7 +88,7 @@ class Translation2DTest {
         val transAdd = Translation2D(9.0, 4.5)
         val transTest = Translation2D(50.0, 5.5).plus(transAdd)
         val transGolden = Translation2D(59.0, 10.0)
-        assert(transTest.epsilonEquals(transGolden))
+        assertTrue(transTest.epsilonEquals(transGolden))
     }
 
     @Test
@@ -96,7 +96,7 @@ class Translation2DTest {
         val transSub = Translation2D(4.0, -2.0)
         val transTest = Translation2D(8.0, 8.0).minus(transSub)
         val transGolden = Translation2D(4.0, 10.0)
-        assert(transTest.epsilonEquals(transGolden))
+        assertTrue(transTest.epsilonEquals(transGolden))
     }
 
     @Test
@@ -110,7 +110,7 @@ class Translation2DTest {
     fun scaledWorksProperly() {
         val transTest = Translation2D(4.0, 6.0).scaled(3.0)
         val transGolden = Translation2D(12.0, 18.0)
-        assert(transTest.epsilonEquals(transGolden))
+        assertTrue(transTest.epsilonEquals(transGolden))
     }
 
     @Test
@@ -119,8 +119,8 @@ class Translation2DTest {
         val transTest1 = Translation2D(5.5, 2.0) * 4.0
         val transGolden = Translation2D(22.0, 8.0)
 
-        assert(transTest0.epsilonEquals(transGolden))
-        assert(transTest1.epsilonEquals(transGolden))
+        assertTrue(transTest0.epsilonEquals(transGolden))
+        assertTrue(transTest1.epsilonEquals(transGolden))
     }
 
     @Test
@@ -129,8 +129,8 @@ class Translation2DTest {
         val transTest1 = Translation2D(12.8, 16.4) / 4.0
         val transGolden = Translation2D(3.2, 4.1)
 
-        assert(transTest0.epsilonEquals(transGolden))
-        assert(transTest1.epsilonEquals(transGolden))
+        assertTrue(transTest0.epsilonEquals(transGolden))
+        assertTrue(transTest1.epsilonEquals(transGolden))
     }
 
     @Test

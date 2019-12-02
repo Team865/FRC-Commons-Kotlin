@@ -3,37 +3,37 @@
 package ca.warp7.frc.trajectory
 
 import ca.warp7.frc.geometry.ArcPose2D
-import ca.warp7.frc.geometry.radians
 import ca.warp7.frc.linearInterpolate
 import ca.warp7.frc.squared
 import kotlin.math.abs
 import kotlin.math.asin
 import kotlin.math.sqrt
-import kotlin.math.withSign
 
 /**
  * Generates a list of timed [TrajectoryState] for a differential drive robot,
- * based on a list of [ArcPose2D] and drive train parameters
+ * based on a list of [ArcPose2D] and drive train parameters.
  *
- * This algorithm is inspired by Team 254, Team 5190, and Team 6135
+ * Formally, it generates a piecewise function T(t) that returns a [TrajectoryState],
+ * with the maximum possible velocity, angular velocity, acceleration, and angular
+ * acceleration for the elapsed time of the trajectory that does not violate the
+ * limits of the differential drive math model, given a list of desired points.
+ * The complexity based on path size is O(n).
  *
- * The input path of this function can be generated from waypoints with
- * [ca.warp7.frc.path.parameterizedSplinesOf]
+ * The input path of this function can be generated from points with
+ * [ca.warp7.frc.path.parameterizedSplinesOf]. For the best results, the points should be
+ * relatively close to one another.
  *
- * The path may contain points of infinite curvature to indicate turning in place. In such cases,
- * the function assumes that the translation field stays the same. The direction of turning is
- * determined by the sign of the curvature field
+ * The path should not contain consecutive points on the same location because this algorithm
+ * does not support turning in place (if that's included it would make the code more difficult
+ * to read).
  *
- * ### Trajectory Generation Steps
+ * Steps:
  * 1. Find the arc length between every consecutive point
  * 2. Perform a forward pass states to satisfy isolated and positive acceleration constraints
  * 3. Perform a reverse pass to satisfy negative acceleration constraints
  * 4. Perform an accumulative pass to calculate higher-order derivatives of velocity
- * 5. Apply jerk limiting
+ * 5. Apply a ramped acceleration pass to limit jerk
  * 6. Integrate dt of each state into total trajectory time
- *
- * Complexity based on path size: O(n)
- * [generateTrajectory] is a pure function; the other functions in this file are not
  *
  * @param path the target path of the trajectory.
  *
@@ -67,27 +67,32 @@ fun generateTrajectory(
         maxCentripetalAcceleration: Double, // s^-1
         maxJerk: Double // m/s^3
 ): List<TrajectoryState> {
+    // If path is empty, returns an empty trajectory
+    if (path.isEmpty()) {
+        return emptyList()
+    }
 
-    val maxAngularVelocity = maxVelocity / wheelbaseRadius // rad/s
-    val maxAngularAcceleration = maxAcceleration / wheelbaseRadius // rad/s^2
+    // Make sure the first state doesn't have infinite curvature
+    require(path.first().curvature.isFinite()) {
+        "Infinite curvature is not allowed in the trajectory generator"
+    }
 
-    val states = path.map { TrajectoryState(it) }
-
+    // Create result states
+    val states = path.map { point -> TrajectoryState(point) }
+    // Step 1
     val arcLengths = computeArcLengths(path)
-
-    forwardPass(states, arcLengths, wheelbaseRadius, maxVelocity, maxAcceleration,
-            maxAngularVelocity, maxAngularAcceleration, maxCentripetalAcceleration)
-
-    reversePass(states, arcLengths, maxAcceleration, maxAngularAcceleration)
-
+    // Step 2
+    forwardPass(states, arcLengths, wheelbaseRadius, maxVelocity, maxAcceleration, maxCentripetalAcceleration)
+    // Step 3
+    reversePass(states, arcLengths, maxAcceleration)
+    // Step 4
     accumulativePass(states)
-
+    // Step 5
     if (maxJerk.isFinite()) {
         rampedAccelerationPass(states, arcLengths, maxJerk)
     }
-
+    // Step 6
     integrationPass(states)
-
     return states
 }
 
@@ -95,48 +100,42 @@ fun generateTrajectory(
 /**
  * Compute arc length between each pair of poses in the path
  */
-private fun computeArcLengths(
+internal fun computeArcLengths(
         path: List<ArcPose2D> // (((x, y), θ), k, dk_ds)
-): List<Double> = path.zipWithNext { current, next ->
+): List<Double> {
+    return path.zipWithNext { current, next ->
 
-    check(!current.pose.epsilonEquals(next.pose)) {
-        "Trajectory Generator - Two consecutive points contain the same pose"
-    }
+        // Check that the path is actually a  path
+        require(!current.translation.epsilonEquals(next.translation)) {
+            "Two points cannot contain the same translation in the trajectory generator"
+        }
 
-    // Get the magnitude of curvature on the next state
-    // Note that the curvature is taken from the `next` state to predict
-    // changing from and to infinity so that it doesn't result in a very
-    // small arc length
-    val k = abs(next.curvature)
+        // Get the magnitude of curvature on the next state
+        // Note that the curvature is taken from the `next` state to predict
+        // changing from and to infinity so that it doesn't result in a very
+        // small arc length
+        val k = abs(next.curvature)
 
-    when {
-
-        // Robot is turning in place, arcLength = 0.0
-        // Returns the magnitude of the angular distance in radians
-        k.isInfinite() -> abs((next.rotation - current.rotation).radians)
+        // Do not allow robot turning in place
+        require(k.isFinite()) {
+            "Infinite curvature is not allowed in the trajectory generator"
+        }
 
         // Robot is moving in a curve or straight line
         // Returns the linear distance in metres
-        else -> {
 
-            // Get the chord length (translational distance)
-            val distance = current.translation.distanceTo(next.translation)
+        // Get the chord length (translational distance)
+        val distance = current.translation.distanceTo(next.translation)
 
-            check(distance != 0.0) {
-                "Trajectory Generator - Overlapping points without infinite curvature"
-            }
+        when {
+            // Going straight, arcLength = distance
+            k < 1E-6 -> distance
 
-            when {
-
-                // Going straight, arcLength = distance
-                k < 1E-6 -> distance
-
-                // Moving on a radius:
-                // arcLength = theta * r = theta / k
-                // theta = asin(half_chord / r) * 2 = asin(half_chord * k) * 2
-                // arcLength = asin(half_chord * k) * 2 / k
-                else -> asin((distance / 2) * k) * 2 / k
-            }
+            // Moving on a radius:
+            // arcLength = theta * r = theta / k
+            // theta = asin(half_chord / r) * 2 = asin(half_chord * k) * 2
+            // arcLength = asin(half_chord * k) * 2 / k
+            else -> asin((distance / 2) * k) * 2 / k
         }
     }
 }
@@ -150,8 +149,6 @@ private fun forwardPass(
         wheelbaseRadius: Double,
         maxVelocity: Double,
         maxAcceleration: Double,
-        maxAngularVelocity: Double,
-        maxAngularAcceleration: Double,
         maxCentripetalAcceleration: Double
 ) {
 
@@ -167,65 +164,44 @@ private fun forwardPass(
 
         val k = abs(next.arcPose.curvature)
 
-        when {
+        // Velocity constrained by these equations:
+        // eqn 1. w = (right - left) / (2 * L)
+        // eqn 2. v = (left + right) / 2
+        //
+        // 1. Rearrange equation 1:
+        //        w(2 * L) = right - left;
+        //        left = right - w(2 * L);
+        // 2. Assuming the right side is at max velocity:
+        //        right = V_max;
+        //        left = V_max - w(2 * L)
+        // 3. Substitute left and right into equation 2:
+        //        v = (2 * V_max - w(2 * L)) / 2
+        // 5. Substitute w = v * k into equation 2:
+        //        v = (2 * V_max-v * k * 2 * L) / 2
+        // 6. Rearrange to solve:
+        //        v = V_max - v * k * L;
+        //        v + v * k * L = V_max;
+        //        v * (1 + k * L) = V_max;
+        //        v = V_max / (1 + k * L);
+        val driveKinematicConstraint = maxVelocity / (1 + k * wheelbaseRadius)
 
-            // Robot is turning in place; using angular values instead
-            k.isInfinite() -> {
-                val maxReachableAngularVelocity = sqrt(current.w.squared + 2 * maxAngularAcceleration * arcLength)
-                next.w = minOf(maxAngularVelocity, maxReachableAngularVelocity)
-
-                // Make sure that the linear velocity is taken care of
-                next.v = 0.0
-                next.t = (2 * arcLength) / (current.w + next.w)
-            }
-
-            // Robot is moving in a curve or straight line
-            else -> {
-
-                // Velocity constrained by curvature equations
-                // eqn 1. w = (right - left) / (2 * L)
-                // eqn 2. v = (left + right) / 2
-                //
-                // 1. Rearrange equation 1:
-                //        w(2 * L) = right - left;
-                //        left = right - w(2 * L);
-                // 2. Assuming the right side is at max velocity:
-                //        right = V_max;
-                //        left = V_max - w(2 * L)
-                // 3. Substitute left and right into equation 2:
-                //        v = (2 * V_max - w(2 * L)) / 2
-                // 5. Substitute w = v * k into equation 2:
-                //        v = (2 * V_max-v * k * 2 * L) / 2
-                // 6. Rearrange to solve:
-                //        v = V_max - v * k * L;
-                //        v + v * k * L = V_max;
-                //        v * (1 + k * L) = V_max;
-                //        v = V_max / (1 + k * L);
-                val driveKinematicConstraint = maxVelocity / (1 + k * wheelbaseRadius)
-
-                // Velocity constrained inversely proportional to the curvature to slow down around turns
-                val centripetalAccelerationConstraint = if (k > 1E-6) {
-                    maxCentripetalAcceleration / k
-                } else {
-                    maxVelocity
-                }
-
-                // Find the total constrained velocity
-                val constrainedVelocity = minOf(driveKinematicConstraint, centripetalAccelerationConstraint)
-
-                // Apply kinematic equation vf^2 = vi^2 + 2ax, solve for vf
-                val maxReachableVelocity = sqrt(current.v.squared + 2 * maxAcceleration * arcLength)
-
-                // Limit velocity based on curvature constraint and forward acceleration
-                next.v = minOf(maxVelocity, constrainedVelocity, maxReachableVelocity)
-
-                // Make sure that the angular velocity is taken care of
-                next.w = next.v * k
-
-                // Calculate the forward dt
-                next.t = (2 * arcLength) / (current.v + next.v)
-            }
+        // Velocity constrained inversely proportional to the curvature to slow down around turns
+        val centripetalAccelerationConstraint = when {
+            k > 1E-6 -> maxCentripetalAcceleration / k
+            else -> maxVelocity
         }
+
+        // Find the total constrained velocity
+        val constrainedVelocity = minOf(driveKinematicConstraint, centripetalAccelerationConstraint)
+
+        // Apply kinematic equation vf^2 = vi^2 + 2ax, solve for vf
+        val maxReachableVelocity = sqrt(current.v.squared + 2 * maxAcceleration * arcLength)
+
+        // Limit velocity based on curvature constraint and forward acceleration
+        next.v = minOf(maxVelocity, constrainedVelocity, maxReachableVelocity)
+
+        // Calculate the forward dt
+        next.t = (2 * arcLength) / (current.v + next.v)
     }
 }
 
@@ -235,8 +211,7 @@ private fun forwardPass(
 private fun reversePass(
         states: List<TrajectoryState>,
         arcLengths: List<Double>,
-        maxAcceleration: Double,
-        maxAngularAcceleration: Double
+        maxAcceleration: Double
 ) {
 
     // Assign the final linear and angular velocity
@@ -249,32 +224,14 @@ private fun reversePass(
         val current = states[i]
         val next = states[i - 1]
 
-        val k = abs(current.arcPose.curvature)
+        // Apply kinematic equation vf^2 = vi^2 + 2ax, solve for vf
+        val maxReachableVelocity = sqrt(current.v.squared + 2 * maxAcceleration * arcLength)
 
-        when {
+        // Limit velocity based on reverse acceleration
+        next.v = minOf(next.v, maxReachableVelocity)
 
-            // Robot is turning in place; using angular values instead
-            k.isInfinite() -> {
-                val maxReachableAngularVelocity = sqrt(current.w.squared + 2 * maxAngularAcceleration * arcLength)
-                next.w = minOf(next.w, maxReachableAngularVelocity)
-                next.v = 0.0
-                current.t = maxOf(current.t, (2 * arcLength) / (current.w + next.w))
-            }
-
-            // Robot is moving in a curve or straight line
-            else -> {
-
-                // Apply kinematic equation vf^2 = vi^2 + 2ax, solve for vf
-                val maxReachableVelocity = sqrt(current.v.squared + 2 * maxAcceleration * arcLength)
-
-                // Limit velocity based on reverse acceleration
-                next.v = minOf(next.v, maxReachableVelocity)
-                next.w = next.v * k
-
-                // Calculate the reverse dt
-                current.t = maxOf(current.t, (2 * arcLength) / (current.v + next.v))
-            }
-        }
+        // Calculate the reverse dt
+        current.t = maxOf(current.t, (2 * arcLength) / (current.v + next.v))
     }
 }
 
@@ -292,17 +249,8 @@ private fun accumulativePass(states: List<TrajectoryState>) {
         // Calculate acceleration
         current.dv = (current.v - last.v) / current.t
 
-        val k = current.arcPose.curvature
-
         // Calculate angular velocity
-        when {
-
-            // Correct the sign of angular velocity
-            k.isInfinite() -> current.w = current.w.withSign(k)
-
-            // Multiply curvature by the linear velocity
-            else -> current.w = current.v * k
-        }
+        current.w = current.v * current.arcPose.curvature
 
         // Calculate angular acceleration
         current.dw = (current.w - last.w) / current.t
@@ -317,7 +265,11 @@ private fun accumulativePass(states: List<TrajectoryState>) {
 /**
  * Limits jerk in a trajectory
  */
-private fun rampedAccelerationPass(states: List<TrajectoryState>, arcLengths: List<Double>, maxJerk: Double) {
+internal fun rampedAccelerationPass(
+        states: List<TrajectoryState>,
+        arcLengths: List<Double>,
+        maxJerk: Double
+) {
 
     // Find a list of points that exceeds the max jerk
     val jerkPoints = mutableListOf<Int>()
@@ -335,7 +287,7 @@ private fun rampedAccelerationPass(states: List<TrajectoryState>, arcLengths: Li
         val stateIndex = jerkPoints[i]
 
         // Calculate a range of points to spread out the required acceleration
-        val range = abs(states[stateIndex].ddv / (2 * maxJerk)).toInt() * 3 + 1
+        val range = abs(states[stateIndex].ddv / (2 * maxJerk)).toInt() * 2 + 1
 
         // Calculate the bounds of the actual range with respect to other jerk points
         val start = maxOf(jerkPoints.getOrNull(i - 1) ?: 0, stateIndex - range)
@@ -354,10 +306,10 @@ private fun rampedAccelerationPass(states: List<TrajectoryState>, arcLengths: Li
             val current = states[j]
 
             t += current.t
-            val interpolant = t / maxTime
+            val x = t / maxTime
 
             // Interpolate the acceleration
-            current.dv = linearInterpolate(accStart, accEnd, interpolant)
+            current.dv = linearInterpolate(accStart, accEnd, x)
 
             // Apply kinematic equation vf^2 = vi^2 + 2ax, solve for vf
             val arcLength = arcLengths[j]
@@ -374,8 +326,12 @@ private fun rampedAccelerationPass(states: List<TrajectoryState>, arcLengths: Li
 /**
  * Integrate dt into trajectory time
  */
-fun integrationPass(states: List<TrajectoryState>) {
-    for (i in 1 until states.size) states[i].t += states[i - 1].t
+internal fun integrationPass(
+        states: List<TrajectoryState>
+) {
+    for (i in 1 until states.size) {
+        states[i].t += states[i - 1].t
+    }
 
     // Set the endpoints' acceleration and jerk to 0 to allow the motor to
     // stop if voltage is applied for torque

@@ -9,14 +9,18 @@ import java.util.concurrent.ConcurrentHashMap
  */
 object Looper {
 
+    @JvmStatic
     private val actionLoops: MutableSet<Action> = ConcurrentHashMap.newKeySet()
+    @JvmStatic
     private val toRemove = mutableListOf<Action>()
 
+    @JvmStatic
     fun add(loop: Action) {
         loop.firstCycle()
         actionLoops.add(loop)
     }
 
+    @JvmStatic
     fun remove(loop: Action) {
         actionLoops.remove(loop)
         loop.interrupt()
@@ -27,6 +31,7 @@ object Looper {
         resetAll()
     }
 
+    @JvmStatic
     fun resetAll() {
         for (loop in actionLoops) {
             loop.interrupt()
@@ -40,6 +45,7 @@ object Looper {
         }
     }
 
+    @JvmStatic
     fun update() {
         for (loop in actionLoops) {
             if (loop.shouldFinish()) {

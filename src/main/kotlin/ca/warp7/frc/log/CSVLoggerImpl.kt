@@ -25,6 +25,7 @@ internal class CSVLoggerImpl(private val writer: PrintWriter) : CSVLogger {
     override fun close() {
         if (!isDone) {
             isDone = true
+            writer.flush()
             writer.close()
         }
     }

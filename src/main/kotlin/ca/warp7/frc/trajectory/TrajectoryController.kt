@@ -3,9 +3,6 @@ package ca.warp7.frc.trajectory
 import ca.warp7.frc.epsilonEquals
 import ca.warp7.frc.geometry.*
 import ca.warp7.frc.linearInterpolate
-import ca.warp7.frc.path.mixParameterizedPathOf
-import ca.warp7.frc.path.parameterized
-import ca.warp7.frc.path.quinticSplinesOf
 import java.util.concurrent.FutureTask
 
 @Suppress("MemberVisibilityCanBePrivate")
@@ -27,6 +24,8 @@ class TrajectoryController(
 
     private var trajectoryGenerator: FutureTask<List<TrajectoryState>>? = null
 
+    var generationTimeMs = 0
+
     fun getFollower(): TrajectoryFollower? {
         return builder.follower
     }
@@ -34,29 +33,14 @@ class TrajectoryController(
     fun initTrajectory() {
         val generator = FutureTask {
             val startTime = System.nanoTime()
-
-            val parameterizedPath = if (builder.enableMixParam) {
-                mixParameterizedPathOf(builder.waypoints.toTypedArray(),
-                        optimizePath = builder.optimizeDkSquared, bendFactor = builder.bendFactor)
-            } else {
-                quinticSplinesOf(*builder.waypoints.toTypedArray(),
-                        optimizePath = builder.optimizeDkSquared, bendFactor = builder.bendFactor)
-                        .parameterized()
-            }
-
-            val b = generateTrajectory(parameterizedPath, builder.wheelbaseRadius,
-                    builder.trajectoryVelocity,
-                    builder.trajectoryAcceleration, builder.maxCentripetalAcceleration, builder.maxJerk)
-
-            val elapsedTime = ((System.nanoTime() - startTime) / 1E6).toInt()
-
-            println("Path Generation Time: $elapsedTime ms")
-
-            return@FutureTask b
+            val t = builder.generatePathAndTrajectory()
+            generationTimeMs = ((System.nanoTime() - startTime) / 1E6).toInt()
+            t
         }
         trajectoryGenerator = generator
         val thread = Thread(generator)
         thread.isDaemon = true
+        thread.name = "Trajectory Generator"
         thread.start()
     }
 

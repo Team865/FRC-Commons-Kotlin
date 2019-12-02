@@ -1,6 +1,4 @@
-package test.ca.warp7.frc.action
-
-import ca.warp7.frc.action.Action
+package ca.warp7.frc.action
 
 fun executeUnrestricted(action: Action) {
     action.firstCycle()

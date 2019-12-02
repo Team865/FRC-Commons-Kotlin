@@ -2,13 +2,13 @@ package ca.warp7.frc.path
 
 import kotlin.math.pow
 
-data class QuinticSpline(
-        private val p0: Double,
-        private val m0: Double,
-        private val dm0: Double,
-        private val p1: Double,
-        private val m1: Double,
-        private val dm1: Double
+class QuinticSpline(
+        p0: Double,
+        m0: Double,
+        dm0: Double,
+        p1: Double,
+        m1: Double,
+        dm1: Double
 ) {
 
     private val a: Double = -6 * p0 - 3 * m0 - 0.5 * dm0 + 0.5 * dm1 - 3 * m1 + 6 * p1
