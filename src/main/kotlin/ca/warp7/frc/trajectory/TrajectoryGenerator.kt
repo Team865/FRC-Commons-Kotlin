@@ -11,25 +11,29 @@ import kotlin.math.sqrt
 
 /**
  * Generates a list of timed [TrajectoryState] for a differential drive robot,
- * based on a list of [ArcPose2D] and drive train parameters
+ * based on a list of [ArcPose2D] and drive train parameters.
+ *
+ * Formally, it generates a piecewise function T(t) that returns a [TrajectoryState],
+ * with the maximum possible velocity, angular velocity, acceleration, and angular
+ * acceleration for the elapsed time of the trajectory that does not violate the
+ * limits of the differential drive math model, given a list of desired points.
+ * The complexity based on path size is O(n).
  *
  * The input path of this function can be generated from points with
- * [ca.warp7.frc.path.parameterizedSplinesOf]
+ * [ca.warp7.frc.path.parameterizedSplinesOf]. For the best results, the points should be
+ * relatively close to one another.
  *
  * The path should not contain consecutive points on the same location because this algorithm
  * does not support turning in place (if that's included it would make the code more difficult
- * to read)
+ * to read).
  *
- * Trajectory Generation Steps
+ * Steps:
  * 1. Find the arc length between every consecutive point
  * 2. Perform a forward pass states to satisfy isolated and positive acceleration constraints
  * 3. Perform a reverse pass to satisfy negative acceleration constraints
  * 4. Perform an accumulative pass to calculate higher-order derivatives of velocity
- * 5. Apply jerk limiting
+ * 5. Apply a ramped acceleration pass to limit jerk
  * 6. Integrate dt of each state into total trajectory time
- *
- * Complexity based on path size: O(n)
- * [generateTrajectory] is a pure function
  *
  * @param path the target path of the trajectory.
  *
@@ -70,11 +74,11 @@ fun generateTrajectory(
 
     // Make sure the first state doesn't have infinite curvature
     require(path.first().curvature.isFinite()) {
-        "Infinite curvature is not allowed in this trajectory generator"
+        "Infinite curvature is not allowed in the trajectory generator"
     }
 
     // Create result states
-    val states = path.map { TrajectoryState(it) }
+    val states = path.map { point -> TrajectoryState(point) }
     // Step 1
     val arcLengths = computeArcLengths(path)
     // Step 2
@@ -98,50 +102,48 @@ fun generateTrajectory(
  */
 internal fun computeArcLengths(
         path: List<ArcPose2D> // (((x, y), θ), k, dk_ds)
-): List<Double> = path.zipWithNext { current, next ->
+): List<Double> {
+    return path.zipWithNext { current, next ->
 
-    // Check that the path is actually a  path
-    require(!current.pose.epsilonEquals(next.pose)) {
-        "Two consecutive points contain the same pose"
-    }
+        // Check that the path is actually a  path
+        require(!current.translation.epsilonEquals(next.translation)) {
+            "Two points cannot contain the same translation in the trajectory generator"
+        }
 
-    // Get the magnitude of curvature on the next state
-    // Note that the curvature is taken from the `next` state to predict
-    // changing from and to infinity so that it doesn't result in a very
-    // small arc length
-    val k = abs(next.curvature)
+        // Get the magnitude of curvature on the next state
+        // Note that the curvature is taken from the `next` state to predict
+        // changing from and to infinity so that it doesn't result in a very
+        // small arc length
+        val k = abs(next.curvature)
 
-    // Do not allow robot turning in place
-    require(k.isFinite()) {
-        "Infinite curvature is not allowed in this trajectory generator"
-    }
+        // Do not allow robot turning in place
+        require(k.isFinite()) {
+            "Infinite curvature is not allowed in the trajectory generator"
+        }
 
-    // Robot is moving in a curve or straight line
-    // Returns the linear distance in metres
+        // Robot is moving in a curve or straight line
+        // Returns the linear distance in metres
 
-    // Get the chord length (translational distance)
-    val distance = current.translation.distanceTo(next.translation)
+        // Get the chord length (translational distance)
+        val distance = current.translation.distanceTo(next.translation)
 
-    require(distance != 0.0) {
-        "Trajectory Generator - Overlapping points without infinite curvature"
-    }
+        when {
+            // Going straight, arcLength = distance
+            k < 1E-6 -> distance
 
-    when {
-        // Going straight, arcLength = distance
-        k < 1E-6 -> distance
-
-        // Moving on a radius:
-        // arcLength = theta * r = theta / k
-        // theta = asin(half_chord / r) * 2 = asin(half_chord * k) * 2
-        // arcLength = asin(half_chord * k) * 2 / k
-        else -> asin((distance / 2) * k) * 2 / k
+            // Moving on a radius:
+            // arcLength = theta * r = theta / k
+            // theta = asin(half_chord / r) * 2 = asin(half_chord * k) * 2
+            // arcLength = asin(half_chord * k) * 2 / k
+            else -> asin((distance / 2) * k) * 2 / k
+        }
     }
 }
 
 /**
  * Forward pass
  */
-internal fun forwardPass(
+private fun forwardPass(
         states: List<TrajectoryState>,
         arcLengths: List<Double>,
         wheelbaseRadius: Double,
@@ -206,7 +208,7 @@ internal fun forwardPass(
 /**
  * Reverse pass
  */
-internal fun reversePass(
+private fun reversePass(
         states: List<TrajectoryState>,
         arcLengths: List<Double>,
         maxAcceleration: Double
@@ -239,7 +241,7 @@ internal fun reversePass(
  * (acceleration and jerk), as well as giving back the sign
  * of the curvature
  */
-internal fun accumulativePass(states: List<TrajectoryState>) {
+private fun accumulativePass(states: List<TrajectoryState>) {
     for (i in 0 until states.size - 1) {
         val current = states[i + 1]
         val last = states[i]
@@ -263,7 +265,11 @@ internal fun accumulativePass(states: List<TrajectoryState>) {
 /**
  * Limits jerk in a trajectory
  */
-internal fun rampedAccelerationPass(states: List<TrajectoryState>, arcLengths: List<Double>, maxJerk: Double) {
+internal fun rampedAccelerationPass(
+        states: List<TrajectoryState>,
+        arcLengths: List<Double>,
+        maxJerk: Double
+) {
 
     // Find a list of points that exceeds the max jerk
     val jerkPoints = mutableListOf<Int>()
@@ -320,7 +326,9 @@ internal fun rampedAccelerationPass(states: List<TrajectoryState>, arcLengths: L
 /**
  * Integrate dt into trajectory time
  */
-internal fun integrationPass(states: List<TrajectoryState>) {
+internal fun integrationPass(
+        states: List<TrajectoryState>
+) {
     for (i in 1 until states.size) {
         states[i].t += states[i - 1].t
     }
