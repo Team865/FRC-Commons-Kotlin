@@ -16,7 +16,7 @@ class Rotation2D(val cos: Double, val sin: Double) {
             Rotation2D(cos * by.cos - sin * by.sin, cos * by.sin + sin * by.cos).norm
 
     operator fun minus(by: Rotation2D): Rotation2D =
-            Rotation2D(cos * by.cos + sin * by.sin, sin * by.cos - cos * by.sin).norm
+            Rotation2D(cos * by.cos - sin * -by.sin, cos * -by.sin + sin * by.cos ).norm
 
     fun scaled(by: Double): Rotation2D {
         if (by == 1.0) {
@@ -30,7 +30,7 @@ class Rotation2D(val cos: Double, val sin: Double) {
     operator fun div(by: Double): Rotation2D = scaled(1.0 / by)
 
     fun distanceTo(state: Rotation2D): Double =
-            atan2(cos * state.cos + sin * state.sin, cos * state.sin - sin * state.cos)
+            atan2(y = cos * state.sin + -sin * state.cos, x = cos * state.cos - -sin * state.sin)
 
     fun interpolate(other: Rotation2D, x: Double): Rotation2D = when {
         x <= 0 -> this

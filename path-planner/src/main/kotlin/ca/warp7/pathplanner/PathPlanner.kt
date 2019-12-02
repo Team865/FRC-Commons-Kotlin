@@ -26,7 +26,7 @@ class PathPlanner : PApplet() {
     )
 
     override fun settings() {
-        size(1024, 540, PConstants.P3D)
+        size(1024, 540)
     }
 
     override fun frameResized(w: Int, h: Int) {
