@@ -18,34 +18,29 @@ data class Path2DState(
         val jx: Double,
         val jy: Double
 ) {
-    val curvature get() = (vx * ay - ax * vy) / (vx * vx + vy * vy).pow(1.5)
+    fun curvature() = (vx * ay - ax * vy) / (vx * vx + vy * vy).pow(1.5)
 
-    val point get() = Translation2D(px, py)
+    fun point() = Translation2D(px, py)
 
-    val heading: Rotation2D
-        get() {
-            val mag = hypot(vx, vy)
-            return Rotation2D(vx / mag, vy / mag)
-        }
+    fun heading(): Rotation2D {
+        val mag = hypot(vx, vy)
+        return Rotation2D(vx / mag, vy / mag)
+    }
 
-    fun toPose() = Pose2D(point, heading)
+    fun pose() = Pose2D(point(), heading())
 
-
-    val dCurvature: Double
-        get() {
-            val dx2dy2 = vx.pow(2) + vy.pow(2)
-            val num = (vx * jy - jx * vy) * dx2dy2 - 3.0 * (vx * ay - ax * vy) * (vx * ax + vy * ay)
-            return num / (dx2dy2 * dx2dy2 * sqrt(dx2dy2))
-        }
+    fun dCurvature(): Double {
+        val dx2dy2 = vx.pow(2) + vy.pow(2)
+        val num = (vx * jy - jx * vy) * dx2dy2 - 3.0 * (vx * ay - ax * vy) * (vx * ax + vy * ay)
+        return num / (dx2dy2 * dx2dy2 * sqrt(dx2dy2))
+    }
 
     @Suppress("PropertyName")
-    val dk_ds: Double
-        get() = dCurvature / hypot(vx, vy)
+    fun dCurvature_dS(): Double = dCurvature() / hypot(vx, vy)
 
-    val dCurvature2: Double
-        get() {
-            val dx2dy2 = vx.pow(2) + vy.pow(2)
-            val num = (vx * jy - jx * vy) * dx2dy2 - 3.0 * (vx * ay - ax * vy) * (vx * ax + vy * ay)
-            return num.pow(2) / dx2dy2.pow(5)
-        }
+    fun dCurvatureSquared(): Double {
+        val dx2dy2 = vx.pow(2) + vy.pow(2)
+        val num = (vx * jy - jx * vy) * dx2dy2 - 3.0 * (vx * ay - ax * vy) * (vx * ax + vy * ay)
+        return num.pow(2) / dx2dy2.pow(5)
+    }
 }

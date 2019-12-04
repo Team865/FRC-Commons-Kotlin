@@ -16,6 +16,10 @@ class Translation2D(val x: Double, val y: Double) {
         else -> Translation2D(x1 * (other.x - x) + x, x1 * (other.y - y) + y)
     }
 
+    fun transposed() : Translation2D {
+        return Translation2D(y, x)
+    }
+
     /**
      * Swaps the sign of the vector.
      *

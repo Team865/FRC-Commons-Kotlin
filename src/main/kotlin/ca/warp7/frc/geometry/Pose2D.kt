@@ -48,7 +48,7 @@ class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
      * Convert a Pose2D into a Twist2D transformation
      */
     fun log(): Twist2D {
-        val dTheta = rotation.toRadians()
+        val dTheta = rotation.radians()
         val halfTheta = 0.5 * dTheta
         val cosMinusOne = rotation.cos - 1.0
         val halfThetaByTanOfHalfDTheta =
@@ -63,7 +63,7 @@ class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
      * and simplifies the equations
      */
     fun logFast(): Twist2D {
-        val dTheta = rotation.toRadians()
+        val dTheta = rotation.radians()
         val halfThetaByTanOfHalfDTheta =
                 if (1.0 - rotation.cos < 1E-9) 1.0 - 1.0 / 12.0 * dTheta * dTheta
                 else (0.5 * dTheta) * rotation.sin / (1.0 - rotation.cos)

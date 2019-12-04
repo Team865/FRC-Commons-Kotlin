@@ -5,47 +5,32 @@ package ca.warp7.frc.geometry
 import ca.warp7.frc.epsilonEquals
 import kotlin.math.*
 
-@Experimental
-annotation class ExperimentalGeometry
-
-/*
- * ROTATION FUNCTIONS
- */
-
 val Number.radians: Rotation2D get() = Rotation2D.fromRadians(this.toDouble())
 
 val Number.degrees: Rotation2D get() = Rotation2D.fromDegrees(this.toDouble())
 
-@Deprecated("", ReplaceWith("toRadians()"))
+@Deprecated("", ReplaceWith("radians()"))
 val Rotation2D.radians: Double get() = atan2(y = sin, x = cos)
 
-@Deprecated("", ReplaceWith("toDegrees()"))
-val Rotation2D.degrees: Double get() = Math.toDegrees(toRadians())
+@Deprecated("", ReplaceWith("degrees()"))
+val Rotation2D.degrees: Double get() = Math.toDegrees(radians())
 
 @Deprecated("", ReplaceWith("mag()"))
 val Rotation2D.mag: Double get() = hypot(sin, cos)
 
+@Deprecated("", ReplaceWith("unit()"))
 val Rotation2D.norm: Rotation2D get() = scaled(by = 1 / mag())
 
 val Rotation2D.translation: Translation2D get() = Translation2D(cos, sin)
 
 val Rotation2D.normal: Rotation2D get() = Rotation2D(-sin, cos)
 
-/**
- * Fast interpolation (omits 3 object creations)
- */
-@ExperimentalGeometry
-fun Rotation2D.interpolateFast(other: Rotation2D, x: Double): Rotation2D {
-    val angle = distanceTo(other) * x
-    val c = cos(angle)
-    val s = sin(angle)
-    return Rotation2D(cos * c - sin * s, cos * s + sin * c)
-}
 
 infix fun Rotation2D.parallelTo(other: Rotation2D) = (translation cross other.translation).epsilonEquals(0.0)
 
-val Translation2D.direction: Rotation2D get() = Rotation2D(x, y).norm
+val Translation2D.direction: Rotation2D get() = Rotation2D(x, y).unit()
 
+@Deprecated("", ReplaceWith("transposed()"))
 val Translation2D.transposed: Translation2D get() = Translation2D(y, x)
 
 val Translation2D.norm: Translation2D get() = scaled(by = 1 / mag)

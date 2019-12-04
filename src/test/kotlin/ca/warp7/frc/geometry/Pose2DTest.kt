@@ -17,7 +17,7 @@ class Pose2DTest {
 
         assertEquals(transformed.translation.x, 1 + 5.0 / sqrt(2.0), kEpsilon)
         assertEquals(transformed.translation.y, 2 + 5.0 / sqrt(2.0), kEpsilon)
-        assertEquals(transformed.rotation.toDegrees(), 50.0, kEpsilon)
+        assertEquals(transformed.rotation.degrees(), 50.0, kEpsilon)
     }
 
     @Test
@@ -31,7 +31,7 @@ class Pose2DTest {
 
         assertEquals( 5.0 * sqrt(2.0), finalRelativeToInitial.translation.x, kEpsilon)
         assertEquals(0.0, finalRelativeToInitial.translation.y, kEpsilon)
-        assertEquals(0.0, finalRelativeToInitial.rotation.toDegrees(), kEpsilon)
+        assertEquals(0.0, finalRelativeToInitial.rotation.degrees(), kEpsilon)
     }
 
     @Test

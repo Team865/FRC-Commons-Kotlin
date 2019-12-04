@@ -14,7 +14,7 @@ class Rotation2D(val cos: Double, val sin: Double) {
             Rotation2D(cos * by.cos - sin * by.sin, cos * by.sin + sin * by.cos)
 
     operator fun minus(by: Rotation2D): Rotation2D =
-            Rotation2D(cos * by.cos - sin * -by.sin, cos * -by.sin + sin * by.cos )
+            Rotation2D(cos * by.cos - sin * -by.sin, cos * -by.sin + sin * by.cos)
 
     fun scaled(by: Double): Rotation2D {
         if (by == 1.0) {
@@ -33,28 +33,31 @@ class Rotation2D(val cos: Double, val sin: Double) {
     fun interpolate(other: Rotation2D, x: Double): Rotation2D = when {
         x <= 0 -> this
         x >= 1 -> other
-        else -> this + fromRadians(radians = distanceTo(other) * x)
+        else -> {
+            val angle = distanceTo(other) * x
+            val c = cos(angle)
+            val s = sin(angle)
+            Rotation2D(cos * c - sin * s, cos * s + sin * c)
+        }
     }
 
     val inverse: Rotation2D get() = Rotation2D(cos, -sin)
 
-    fun toDegrees(): Double {
-        return Math.toDegrees(toRadians())
+    fun degrees(): Double {
+        return Math.toDegrees(radians())
     }
 
-    fun toRadians(): Double {
+    fun radians(): Double {
         return atan2(y = sin, x = cos)
     }
 
-    fun tan(): Double {
-        return if (abs(cos) < 1E-12) {
-            if (sin >= 0.0) {
-                Double.POSITIVE_INFINITY
-            } else {
-                Double.NEGATIVE_INFINITY
-            }
-        } else sin / cos
-    }
+    fun tan(): Double = if (abs(cos) < 1E-12) {
+        if (sin >= 0.0) {
+            Double.POSITIVE_INFINITY
+        } else {
+            Double.NEGATIVE_INFINITY
+        }
+    } else sin / cos
 
     /**
      * Gets the magnitude of the vector.
@@ -68,8 +71,13 @@ class Rotation2D(val cos: Double, val sin: Double) {
      */
     fun mag(): Double = hypot(cos, sin)
 
+    /**
+     * Get the unit rotation vector
+     */
+    fun unit(): Rotation2D = scaled(1 / mag())
+
     override fun toString(): String {
-        return "⟳${toDegrees().f}°"
+        return "⟳${degrees().f}°"
     }
 
     override fun equals(other: Any?): Boolean {
