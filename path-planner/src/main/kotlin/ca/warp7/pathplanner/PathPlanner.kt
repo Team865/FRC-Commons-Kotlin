@@ -40,7 +40,6 @@ class PathPlanner : PApplet() {
 
     val wheelBaseRadius = kInchesToMetres * 12.4
     val robotLength = wheelBaseRadius * 1.3
-    val robotDrawCenter = Translation2D(768.0, 100.0)
 
     val kPixelsPerMeter = 494 / 8.2296
     val yCenterPx = 17.0 + (512.0 - 17.0) / 2
@@ -549,7 +548,7 @@ class PathPlanner : PApplet() {
             's' -> showForCopy(waypoints.joinToString(",\n") {
                 "Pose2D(${(kMetresToFeet * it.translation.x).f}.feet, " +
                         "${(kMetresToFeet * it.translation.y).f}.feet, " +
-                        "${it.rotation.degrees.f}.degrees)"
+                        "${it.rotation.toDegrees().f}.degrees)"
             })
             '0' -> {
                 simulating = false

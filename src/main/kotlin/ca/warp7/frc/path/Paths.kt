@@ -2,7 +2,6 @@
 
 package ca.warp7.frc.path
 
-import ca.warp7.frc.epsilonEquals
 import ca.warp7.frc.geometry.*
 
 operator fun Path2D.get(t: Double): Path2DState {
@@ -43,8 +42,8 @@ fun parameterizedSplinesOf(vararg waypoints: Pose2D): List<ArcPose2D> =
         quinticSplinesOf(*waypoints).parameterized()
 
 fun parameterizeQuickTurn(a: Rotation2D, b: Rotation2D): List<ArcPose2D> {
-    val theta = (b - a).radians
-    val startingAngle = a.radians
+    val startingAngle = a.toRadians()
+    val theta = (b - a).toRadians()
     require(theta != 0.0) {
         "QuickTurn Generator - Two points are the same"
     }

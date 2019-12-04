@@ -90,6 +90,7 @@ fun generateTrajectory(
     // Step 5
     if (maxJerk.isFinite()) {
         rampedAccelerationPass(states, arcLengths, maxJerk)
+        accumulativePass(states)
     }
     // Step 6
     integrationPass(states)
@@ -103,6 +104,7 @@ fun generateTrajectory(
 internal fun computeArcLengths(
         path: List<ArcPose2D> // (((x, y), θ), k, dk_ds)
 ): List<Double> {
+    // zipWithNext maps consecutive states in a list
     return path.zipWithNext { current, next ->
 
         // Check that the path is actually a  path
@@ -272,26 +274,26 @@ internal fun rampedAccelerationPass(
 ) {
 
     // Find a list of points that exceeds the max jerk
-    val jerkPoints = mutableListOf<Int>()
+    val violations = mutableListOf<Int>()
 
     for (i in 1 until states.size) {
 
         // Limit jerk at each of these points
         if (abs(states[i].ddv) > maxJerk) {
-            jerkPoints.add(i)
+            violations.add(i)
         }
     }
 
-    for (i in 0 until jerkPoints.size) {
+    for (i in 0 until violations.size) {
 
-        val stateIndex = jerkPoints[i]
+        val stateIndex = violations[i]
 
         // Calculate a range of points to spread out the required acceleration
         val range = abs(states[stateIndex].ddv / (2 * maxJerk)).toInt() * 2 + 1
 
         // Calculate the bounds of the actual range with respect to other jerk points
-        val start = maxOf(jerkPoints.getOrNull(i - 1) ?: 0, stateIndex - range)
-        val end = minOf(jerkPoints.getOrNull(i + 1) ?: states.size - 1, stateIndex + range)
+        val start = maxOf(violations.getOrNull(i - 1) ?: 0, stateIndex - range)
+        val end = minOf(violations.getOrNull(i + 1) ?: states.size - 1, stateIndex + range)
 
         val accStart = states[start].dv
         val accEnd = states[end].dv

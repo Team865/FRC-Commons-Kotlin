@@ -2,9 +2,7 @@ package ca.warp7.frc.geometry
 
 import ca.warp7.frc.epsilonEquals
 import ca.warp7.frc.f
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sin
+import kotlin.math.*
 
 @Suppress("MemberVisibilityCanBePrivate")
 class Rotation2D(val cos: Double, val sin: Double) {
@@ -13,10 +11,10 @@ class Rotation2D(val cos: Double, val sin: Double) {
             cos.epsilonEquals(state.cos, epsilon) && sin.epsilonEquals(state.sin, epsilon)
 
     operator fun plus(by: Rotation2D): Rotation2D =
-            Rotation2D(cos * by.cos - sin * by.sin, cos * by.sin + sin * by.cos).norm
+            Rotation2D(cos * by.cos - sin * by.sin, cos * by.sin + sin * by.cos)
 
     operator fun minus(by: Rotation2D): Rotation2D =
-            Rotation2D(cos * by.cos - sin * -by.sin, cos * -by.sin + sin * by.cos ).norm
+            Rotation2D(cos * by.cos - sin * -by.sin, cos * -by.sin + sin * by.cos )
 
     fun scaled(by: Double): Rotation2D {
         if (by == 1.0) {
@@ -40,9 +38,51 @@ class Rotation2D(val cos: Double, val sin: Double) {
 
     val inverse: Rotation2D get() = Rotation2D(cos, -sin)
 
-    override fun toString(): String {
-        return "⟳${degrees.f}°"
+    fun toDegrees(): Double {
+        return Math.toDegrees(toRadians())
     }
+
+    fun toRadians(): Double {
+        return atan2(y = sin, x = cos)
+    }
+
+    fun tan(): Double {
+        return if (abs(cos) < 1E-12) {
+            if (sin >= 0.0) {
+                Double.POSITIVE_INFINITY
+            } else {
+                Double.NEGATIVE_INFINITY
+            }
+        } else sin / cos
+    }
+
+    /**
+     * Gets the magnitude of the vector.
+     *
+     * **Example**
+     *
+     * @sample ca.warp7.frc.geometry.Translation2DTest.magWorksProperly
+     *
+     * @return the magnitude of the vector.
+     *
+     */
+    fun mag(): Double = hypot(cos, sin)
+
+    override fun toString(): String {
+        return "⟳${toDegrees().f}°"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Rotation2D) return false
+        return epsilonEquals(other)
+    }
+
+    override fun hashCode(): Int {
+        var result = cos.hashCode()
+        result = 31 * result + sin.hashCode()
+        return result
+    }
+
 
     companion object {
 

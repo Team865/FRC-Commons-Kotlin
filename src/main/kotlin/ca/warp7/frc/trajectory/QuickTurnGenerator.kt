@@ -52,7 +52,6 @@ private fun angularForwardPass(
 ) {
 
     // Assign the initial linear and angular velocity
-    states.first().v = 0.0
     states.first().w = 0.0
 
     for (i in 0 until states.size - 1) {
@@ -79,7 +78,6 @@ private fun angularReversePass(
 ) {
 
     // Assign the final linear and angular velocity
-    states.last().v = 0.0
     states.last().w = 0.0
 
     for (i in states.size - 1 downTo 1) {

@@ -33,7 +33,7 @@ class SwerveDriveModel(
      * Inverse kinematics
      */
     fun solve(transform: Pose2D): SwerveWheels {
-        val omega = transform.rotation.radians
+        val omega = transform.rotation.toRadians()
         val forward = transform.translation.x
         val strafe = -transform.translation.y
         val a = forward - omega * width / 2

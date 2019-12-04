@@ -16,28 +16,20 @@ val Number.radians: Rotation2D get() = Rotation2D.fromRadians(this.toDouble())
 
 val Number.degrees: Rotation2D get() = Rotation2D.fromDegrees(this.toDouble())
 
+@Deprecated("", ReplaceWith("toRadians()"))
 val Rotation2D.radians: Double get() = atan2(y = sin, x = cos)
 
-val Rotation2D.degrees: Double get() = Math.toDegrees(radians)
+@Deprecated("", ReplaceWith("toDegrees()"))
+val Rotation2D.degrees: Double get() = Math.toDegrees(toRadians())
 
+@Deprecated("", ReplaceWith("mag()"))
 val Rotation2D.mag: Double get() = hypot(sin, cos)
 
-val Rotation2D.norm: Rotation2D get() = scaled(by = 1 / mag)
+val Rotation2D.norm: Rotation2D get() = scaled(by = 1 / mag())
 
 val Rotation2D.translation: Translation2D get() = Translation2D(cos, sin)
 
 val Rotation2D.normal: Rotation2D get() = Rotation2D(-sin, cos)
-
-val Rotation2D.tan: Double
-    get() {
-        return if (abs(cos) < 1E-12) {
-            if (sin >= 0.0) {
-                Double.POSITIVE_INFINITY
-            } else {
-                Double.NEGATIVE_INFINITY
-            }
-        } else sin / cos
-    }
 
 /**
  * Fast interpolation (omits 3 object creations)
@@ -93,22 +85,7 @@ fun Pose2D.intersection(other: Pose2D): Translation2D {
     }
 }
 
-/**
- * The same as [Pose2D.log] except it doesn't create intermediate objects
- * and simplifies the equations
- */
-@ExperimentalGeometry
-fun Pose2D.logFast(): Twist2D {
-    val dTheta = rotation.radians
-    val halfThetaByTanOfHalfDTheta =
-            if (1.0 - rotation.cos < 1E-9) 1.0 - 1.0 / 12.0 * dTheta * dTheta
-            else (0.5 * dTheta) * rotation.sin / (1.0 - rotation.cos)
-    return Twist2D(
-            dx = translation.x * halfThetaByTanOfHalfDTheta + translation.y * dTheta / 2.0,
-            dy = translation.y * halfThetaByTanOfHalfDTheta - translation.x * dTheta / 2.0,
-            dTheta = dTheta
-    )
-}
+fun Pose2D.mirrored(): Pose2D = Pose2D(Translation2D(translation.x, -translation.y), rotation.inverse)
 
 
 private fun intersectionInternal(a: Pose2D, b: Pose2D): Translation2D {
@@ -117,7 +94,7 @@ private fun intersectionInternal(a: Pose2D, b: Pose2D): Translation2D {
     val at = a.translation
     val bt = b.translation
 
-    val tanB = br.tan
+    val tanB = br.tan()
     val t = ((at.x - bt.x) * tanB + bt.y - at.y) / (ar.sin - ar.cos * tanB)
     return if (t.isNaN()) {
         Translation2D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)

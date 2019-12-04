@@ -67,20 +67,6 @@ class Translation2D(val x: Double, val y: Double) {
     operator fun minus(by: Translation2D): Translation2D = Translation2D(x - by.x, y - by.y)
 
     /**
-     * Gets the X and Y of the vector in a string.
-     *
-     * **Example**
-     *
-     * @sample ca.warp7.frc.geometry.Translation2DTest.toStringWorksProperly
-     *
-     * @return String containing X and Y of the vector.
-     *
-     */
-    override fun toString(): String {
-        return "↘(${x.f}, ${y.f})"
-    }
-
-    /**
      * Scales the vector by a double.
      *
      * **Example**
@@ -134,6 +120,32 @@ class Translation2D(val x: Double, val y: Double) {
      *
      */
     val mag: Double get() = hypot(x, y)
+
+
+    /**
+     * Gets the X and Y of the vector in a string.
+     *
+     * **Example**
+     *
+     * @sample ca.warp7.frc.geometry.Translation2DTest.toStringWorksProperly
+     *
+     * @return String containing X and Y of the vector.
+     *
+     */
+    override fun toString(): String {
+        return "↘(${x.f}, ${y.f})"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Translation2D) return false
+        return epsilonEquals(other)
+    }
+
+    override fun hashCode(): Int {
+        var result = x.hashCode()
+        result = 31 * result + y.hashCode()
+        return result
+    }
 
     companion object {
         @JvmStatic
