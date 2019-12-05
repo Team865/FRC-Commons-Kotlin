@@ -3,10 +3,7 @@
 package ca.warp7.frc.trajectory
 
 import ca.warp7.frc.geometry.ArcPose2D
-import ca.warp7.frc.linearInterpolate
-import ca.warp7.frc.squared
 import kotlin.math.abs
-import kotlin.math.asin
 import kotlin.math.sqrt
 
 /**
@@ -103,6 +100,7 @@ fun generateTrajectory(
 internal fun computeArcLengths(
         path: List<ArcPose2D> // (((x, y), θ), k, dk_ds)
 ): List<Double> {
+    // zipWithNext maps consecutive states in a list
     return path.zipWithNext { current, next ->
 
         // Check that the path is actually a  path
@@ -125,18 +123,7 @@ internal fun computeArcLengths(
         // Returns the linear distance in metres
 
         // Get the chord length (translational distance)
-        val distance = current.translation.distanceTo(next.translation)
-
-        when {
-            // Going straight, arcLength = distance
-            k < 1E-6 -> distance
-
-            // Moving on a radius:
-            // arcLength = theta * r = theta / k
-            // theta = asin(half_chord / r) * 2 = asin(half_chord * k) * 2
-            // arcLength = asin(half_chord * k) * 2 / k
-            else -> asin((distance / 2) * k) * 2 / k
-        }
+        current.translation.distanceTo(next.translation)
     }
 }
 
@@ -195,7 +182,7 @@ private fun forwardPass(
         val constrainedVelocity = minOf(driveKinematicConstraint, centripetalAccelerationConstraint)
 
         // Apply kinematic equation vf^2 = vi^2 + 2ax, solve for vf
-        val maxReachableVelocity = sqrt(current.v.squared + 2 * maxAcceleration * arcLength)
+        val maxReachableVelocity = sqrt(current.v * current.v + 2 * maxAcceleration * arcLength)
 
         // Limit velocity based on curvature constraint and forward acceleration
         next.v = minOf(maxVelocity, constrainedVelocity, maxReachableVelocity)
@@ -225,7 +212,7 @@ private fun reversePass(
         val next = states[i - 1]
 
         // Apply kinematic equation vf^2 = vi^2 + 2ax, solve for vf
-        val maxReachableVelocity = sqrt(current.v.squared + 2 * maxAcceleration * arcLength)
+        val maxReachableVelocity = sqrt(current.v * current.v + 2 * maxAcceleration * arcLength)
 
         // Limit velocity based on reverse acceleration
         next.v = minOf(next.v, maxReachableVelocity)
@@ -264,6 +251,8 @@ private fun accumulativePass(states: List<TrajectoryState>) {
 
 /**
  * Limits jerk in a trajectory
+ *
+ * This works only in some cases
  */
 internal fun rampedAccelerationPass(
         states: List<TrajectoryState>,
@@ -272,55 +261,49 @@ internal fun rampedAccelerationPass(
 ) {
 
     // Find a list of points that exceeds the max jerk
-    val jerkPoints = mutableListOf<Int>()
+    val violations = (1 until states.size).filter { abs(states[it].ddv) > maxJerk }
 
-    for (i in 1 until states.size) {
+    for (i in violations.indices) {
 
-        // Limit jerk at each of these points
-        if (abs(states[i].ddv) > maxJerk) {
-            jerkPoints.add(i)
-        }
-    }
+        val minIndex = if (i == 0) 0 else violations[i - 1]
+        val maxIndex = if (i == violations.size - 1) states.size - 1 else violations[i + 1]
 
-    for (i in 0 until jerkPoints.size) {
-
-        val stateIndex = jerkPoints[i]
+        val stateIndex = violations[i]
 
         // Calculate a range of points to spread out the required acceleration
-        val range = abs(states[stateIndex].ddv / (2 * maxJerk)).toInt() * 2 + 1
+        val range = abs(states[stateIndex].ddv / (2 * maxJerk)).toInt() * 3
 
         // Calculate the bounds of the actual range with respect to other jerk points
-        val start = maxOf(jerkPoints.getOrNull(i - 1) ?: 0, stateIndex - range)
-        val end = minOf(jerkPoints.getOrNull(i + 1) ?: states.size - 1, stateIndex + range)
+        val start = maxOf(minIndex, stateIndex - range - 1)
+        val end = minOf(maxIndex, stateIndex + range - 1)
 
         val accStart = states[start].dv
         val accEnd = states[end].dv
 
         // Calculate the individual step size
-        val maxTime = states.subList(start, end + 1).sumByDouble { it.t }
+        val times = states.subList(start, end + 1).map { it.t }
+        val maxTime = times.sum()
         var t = 0.0
 
         for (j in start..end) {
 
-            val next = states[j + 1]
             val current = states[j]
+            val next = states[j + 1]
 
             t += current.t
             val x = t / maxTime
 
             // Interpolate the acceleration
-            current.dv = linearInterpolate(accStart, accEnd, x)
+            val desiredAcceleration = accStart + (accEnd - accStart) * x
 
             // Apply kinematic equation vf^2 = vi^2 + 2ax, solve for vf
             val arcLength = arcLengths[j]
 
-            val jerkLimitedVelocity = sqrt(current.v.squared + 2 * current.dv * arcLength)
-            next.v = minOf(next.v, jerkLimitedVelocity)
-
-            // Set the new dt
-            next.t = maxOf(next.t, 2 * arcLength) / abs(current.v + next.v)
+            next.v = sqrt(current.v * current.v + 2 * desiredAcceleration * arcLength)
+            next.t = (2 * arcLength) / (current.v + next.v)
         }
     }
+    accumulativePass(states)
 }
 
 /**

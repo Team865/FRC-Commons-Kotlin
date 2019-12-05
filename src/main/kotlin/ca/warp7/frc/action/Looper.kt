@@ -26,11 +26,6 @@ object Looper {
         loop.interrupt()
     }
 
-    @Deprecated("", ReplaceWith("resetAll()"))
-    fun reset() {
-        resetAll()
-    }
-
     @JvmStatic
     fun resetAll() {
         for (loop in actionLoops) {
@@ -39,6 +34,7 @@ object Looper {
         actionLoops.clear()
     }
 
+    @JvmStatic
     fun printAll() {
         for ((index, loop) in actionLoops.withIndex()) {
             println("Loop $index - ${loop.name()}")

@@ -23,7 +23,4 @@ class CubicSegment2D(
     override fun ay(t: Double) = y.a(t)
     override fun jx(t: Double) = x.j()
     override fun jy(t: Double) = y.j()
-
-    override val dx: Double = x1 - x0
-    override val dy: Double = y1 - y0
 }

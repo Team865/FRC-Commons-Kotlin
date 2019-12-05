@@ -16,6 +16,31 @@ class Translation2D(val x: Double, val y: Double) {
         else -> Translation2D(x1 * (other.x - x) + x, x1 * (other.y - y) + y)
     }
 
+    fun transposed(): Translation2D {
+        return Translation2D(y, x)
+    }
+
+    fun direction(): Rotation2D {
+        return Rotation2D(x, y).unit()
+    }
+
+    fun rotate(by: Rotation2D): Translation2D {
+        return Translation2D(x * by.cos - y * by.sin, x * by.sin + y * by.cos)
+    }
+
+    infix fun dot(other: Translation2D): Double {
+        return x * other.x + y * other.y
+    }
+
+    infix fun cross(other: Translation2D): Double {
+        return x * other.y - y * other.x
+    }
+
+    fun unit(): Translation2D {
+        return scaled(1 / mag())
+    }
+
+
     /**
      * Swaps the sign of the vector.
      *
@@ -65,20 +90,6 @@ class Translation2D(val x: Double, val y: Double) {
      *
      */
     operator fun minus(by: Translation2D): Translation2D = Translation2D(x - by.x, y - by.y)
-
-    /**
-     * Gets the X and Y of the vector in a string.
-     *
-     * **Example**
-     *
-     * @sample ca.warp7.frc.geometry.Translation2DTest.toStringWorksProperly
-     *
-     * @return String containing X and Y of the vector.
-     *
-     */
-    override fun toString(): String {
-        return "↘(${x.f}, ${y.f})"
-    }
 
     /**
      * Scales the vector by a double.
@@ -133,7 +144,33 @@ class Translation2D(val x: Double, val y: Double) {
      * @return the magnitude of the vector.
      *
      */
-    val mag: Double get() = hypot(x, y)
+    fun mag(): Double = hypot(x, y)
+
+
+    /**
+     * Gets the X and Y of the vector in a string.
+     *
+     * **Example**
+     *
+     * @sample ca.warp7.frc.geometry.Translation2DTest.toStringWorksProperly
+     *
+     * @return String containing X and Y of the vector.
+     *
+     */
+    override fun toString(): String {
+        return "↘(${x.f}, ${y.f})"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Translation2D) return false
+        return epsilonEquals(other)
+    }
+
+    override fun hashCode(): Int {
+        var result = x.hashCode()
+        result = 31 * result + y.hashCode()
+        return result
+    }
 
     companion object {
         @JvmStatic

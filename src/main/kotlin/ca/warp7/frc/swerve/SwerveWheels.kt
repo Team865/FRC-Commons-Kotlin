@@ -1,7 +1,6 @@
 package ca.warp7.frc.swerve
 
 import ca.warp7.frc.geometry.Rotation2D
-import ca.warp7.frc.geometry.translation
 
 class SwerveWheels(
         val leftFront: Rotation2D,
@@ -20,9 +19,5 @@ class SwerveWheels(
 
     operator fun div(by: Double): SwerveWheels {
         return times(1.0 / by)
-    }
-
-    override fun toString(): String {
-        return "SwerveWheels(LF=${leftFront.translation}, RF=${rightFront.translation}, LR=${leftRear.translation}, RR=${rightRear.translation})"
     }
 }

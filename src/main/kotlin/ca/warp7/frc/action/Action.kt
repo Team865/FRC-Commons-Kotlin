@@ -40,15 +40,6 @@ interface Action {
     }
 
 
-    @Deprecated(
-            "start() is renamed to firstCycle()",
-            ReplaceWith(expression = "firstCycle()")
-    )
-    fun start() {
-        firstCycle()
-    }
-
-
     /**
      * Returns whether or not the code has finished execution.
      *
@@ -61,14 +52,6 @@ interface Action {
     fun shouldFinish(): Boolean {
         return false
     }
-
-
-    @Deprecated(
-            "shouldFinish is no longer a property; it is now a boolean function",
-            ReplaceWith(expression = "shouldFinish()")
-    )
-    val shouldFinish: Boolean
-        get() = shouldFinish()
 
 
     /**
@@ -107,25 +90,5 @@ interface Action {
      * [interrupt] will be used for ending timeout actions
      */
     fun interrupt() {
-    }
-
-
-    @Deprecated(
-            "stop(Boolean) has been separated into lastCycle() and interrupt()",
-            ReplaceWith(expression = "")
-    )
-    fun stop(interrupted: Boolean) {
-        if (interrupted) {
-            interrupt()
-        } else {
-            lastCycle()
-        }
-    }
-
-    @Deprecated(
-            "stop() has been renamed to lastCycle()",
-            ReplaceWith(expression = "lastCycle()")
-    )
-    fun stop() {
     }
 }

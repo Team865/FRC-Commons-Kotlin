@@ -17,11 +17,7 @@ class Twist2D(val dx: Double, val dy: Double, val dTheta: Double) {
 
     fun scaled(by: Double): Twist2D = Twist2D(dx * by, dy * by, dTheta * by)
 
-    val mag get() = hypot(dx, dy)
-
-    @Deprecated("", ReplaceWith("exp()"))
-    val exp: Pose2D
-        get() = exp()
+    fun mag() = hypot(dx, dy)
 
     /**
      * Convert this twist into a Pose2D transformation

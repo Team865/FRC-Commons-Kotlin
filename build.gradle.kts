@@ -1,6 +1,6 @@
 @file:Suppress("UnusedImport", "SpellCheckingInspection")
 
-import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -17,17 +17,13 @@ repositories {
 }
 
 group = "ca.warp7.frc"
-version = "2019.6.0"
+version = "2019.7.0"
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf(
-                "-Xnew-inference",
-                "-Xuse-experimental=kotlin.Experimental",
-                "-Xallow-kotlin-package",
                 "-Xno-call-assertions",
-                "-Xno-param-assertions",
-                "-Xinline-classes"
+                "-Xno-param-assertions"
         )
         kotlinOptions.jvmTarget = "11"
     }
@@ -76,12 +72,12 @@ publishing {
     }
 }
 
-tasks.dokka  {
-    outputFormat = "html" 
+tasks.dokka {
+    outputFormat = "html"
     outputDirectory = "$buildDir/javadoc"
     configuration {
         moduleName = "ca.warp7.frc"
         noJdkLink = true
-        samples = listOf("src/test/kotlin/test/ca/warp7/frc/geometry")
+        samples = listOf("src/test/kotlin/ca/warp7/frc/geometry")
     }
 }

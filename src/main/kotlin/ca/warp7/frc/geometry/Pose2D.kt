@@ -2,20 +2,22 @@ package ca.warp7.frc.geometry
 
 import kotlin.math.abs
 
-@Suppress("MemberVisibilityCanBePrivate")
+/**
+ * Rigid Transform (of a translation and a rotation)
+ */
 class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
 
     constructor(x: Double, y: Double, rotation: Rotation2D) : this(Translation2D(x, y), rotation)
+    constructor(x: Double, y: Double, rotation: Double) : this(Translation2D(x, y), Rotation2D.fromRadians(rotation))
 
-    fun epsilonEquals(state: Pose2D, epsilon: Double): Boolean =
+    fun epsilonEquals(state: Pose2D, epsilon: Double = 1E-12): Boolean =
             translation.epsilonEquals(state.translation, epsilon) && rotation.epsilonEquals(state.rotation, epsilon)
 
-    fun epsilonEquals(state: Pose2D): Boolean = epsilonEquals(state, 1E-12)
-
     operator fun plus(by: Pose2D): Pose2D =
-            Pose2D(translation + by.translation.rotate(by.rotation), rotation + by.rotation)
+            Pose2D(translation + by.translation.rotate(rotation), rotation + by.rotation)
 
-    operator fun minus(by: Pose2D): Pose2D = plus(by.inverse)
+    operator fun minus(by: Pose2D): Pose2D =
+            Pose2D((translation - by.translation).rotate(by.rotation.inverse), rotation - by.rotation)
 
     fun scaled(by: Double): Pose2D {
         if (by == 1.0) {
@@ -27,8 +29,6 @@ class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
     operator fun times(by: Double): Pose2D = scaled(by)
 
     operator fun div(by: Double): Pose2D = scaled(1.0 / by)
-
-    fun distanceTo(state: Pose2D): Double = (state - this).log().mag
 
     fun interpolate(other: Pose2D, x: Double): Pose2D = when {
         x <= 0 -> this
@@ -46,7 +46,7 @@ class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
      * Convert a Pose2D into a Twist2D transformation
      */
     fun log(): Twist2D {
-        val dTheta = rotation.radians
+        val dTheta = rotation.radians()
         val halfTheta = 0.5 * dTheta
         val cosMinusOne = rotation.cos - 1.0
         val halfThetaByTanOfHalfDTheta =
@@ -56,8 +56,32 @@ class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
         return Twist2D(delta.x, delta.y, dTheta)
     }
 
-    val mirrored: Pose2D
-        get() = Pose2D(Translation2D(translation.x, -translation.y), rotation.inverse)
+    /**
+     * The same as [Pose2D.log] except it doesn't create intermediate objects
+     * and simplifies the equations
+     */
+    fun logFast(): Twist2D {
+        val dTheta = rotation.radians()
+        val halfThetaByTanOfHalfDTheta =
+                if (1.0 - rotation.cos < 1E-9) 1.0 - 1.0 / 12.0 * dTheta * dTheta
+                else (0.5 * dTheta) * rotation.sin / (1.0 - rotation.cos)
+        return Twist2D(
+                dx = translation.x * halfThetaByTanOfHalfDTheta + translation.y * dTheta / 2.0,
+                dy = translation.y * halfThetaByTanOfHalfDTheta - translation.x * dTheta / 2.0,
+                dTheta = dTheta
+        )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Pose2D) return false
+        return epsilonEquals(other)
+    }
+
+    override fun hashCode(): Int {
+        var result = translation.hashCode()
+        result = 31 * result + rotation.hashCode()
+        return result
+    }
 
     companion object {
         @JvmStatic

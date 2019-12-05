@@ -8,7 +8,7 @@ import kotlin.math.sqrt
  */
 
 fun QuinticSegment2D.sumDCurvature2(): Double =
-        (0 until 100).map { get(it / 100.0) }.map { it.dCurvature2 }.sum()
+        (0 until 100).sumByDouble { get(it / 100.0).dCurvatureSquared() }
 
 fun List<QuinticSegment2D>.sumDCurvature2(): Double = this.sumByDouble { it.sumDCurvature2() }
 
@@ -26,14 +26,14 @@ fun MutableList<QuinticSegment2D>.optimize() {
     }
 }
 
-private data class ControlPoint(var ddx: Double, var ddy: Double)
+private class ControlPoint(var ddx: Double, var ddy: Double)
 
 fun QuinticSegment2D.getStartPose(): Pose2D {
-    return Pose2D(Translation2D(x0, y0), Rotation2D(dx0, dy0).norm)
+    return Pose2D(Translation2D(x0, y0), Rotation2D(dx0, dy0).unit())
 }
 
 fun QuinticSegment2D.getEndPose(): Pose2D {
-    return Pose2D(Translation2D(x1, y1), Rotation2D(dx1, dy1).norm)
+    return Pose2D(Translation2D(x1, y1), Rotation2D(dx1, dy1).unit())
 }
 
 fun QuinticSegment2D.updateD2End(ddx: Double, ddy: Double): QuinticSegment2D {

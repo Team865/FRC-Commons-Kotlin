@@ -39,7 +39,7 @@ class CSVLogManager(private val rootDir: File = File("/home/lvuser/RobotLogs/"))
         loggerNames[name] = count
         val logDir = logDir!!
         val file = File(logDir, "$name-$count.csv")
-        val writer = PrintWriter(BufferedWriter(FileWriter(file)), false)
+        val writer = PrintWriter(file.bufferedWriter(), false)
         val logger = CSVLoggerImpl(writer)
         loggers.add(logger)
         return logger

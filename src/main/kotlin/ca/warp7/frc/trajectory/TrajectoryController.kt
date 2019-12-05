@@ -6,9 +6,7 @@ import ca.warp7.frc.linearInterpolate
 import java.util.concurrent.FutureTask
 
 @Suppress("MemberVisibilityCanBePrivate")
-class TrajectoryController(
-        private val builder: TrajectoryBuilder
-) {
+class TrajectoryController(private val builder: TrajectoryBuilder) {
 
     var t = 0.0
         private set
@@ -50,7 +48,7 @@ class TrajectoryController(
             return false // Check if generator is done generating
         }
         trajectory = generator.get()
-        totalTime = trajectory.last().t // reset tracking state
+        totalTime = trajectory.last().t
         t = 0.0
         trajectoryGenerator = null
         return true
@@ -96,7 +94,7 @@ class TrajectoryController(
         val position = last.arcPose.translation.interpolate(next.arcPose.translation, x)
 
         val heading = last.arcPose.rotation.interpolate(next.arcPose.rotation, x)
-                .translation.scaled(builder.invertMultiplier).direction
+                .translation().scaled(builder.invertMultiplier).direction()
 
         val pose = ArcPose2D(Pose2D(position, heading), curvature, 0.0)
 
