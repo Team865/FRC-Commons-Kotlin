@@ -7,6 +7,12 @@ import kotlin.math.*
 @Suppress("MemberVisibilityCanBePrivate")
 class Rotation2D(val cos: Double, val sin: Double) {
 
+    fun translation(): Translation2D = Translation2D(cos, sin)
+
+    fun normal(): Rotation2D = Rotation2D(-sin, cos)
+
+    infix fun parallelTo(other: Rotation2D) = (translation() cross other.translation()).epsilonEquals(0.0)
+
     fun epsilonEquals(state: Rotation2D, epsilon: Double = 1E-12): Boolean =
             cos.epsilonEquals(state.cos, epsilon) && sin.epsilonEquals(state.sin, epsilon)
 
@@ -50,6 +56,7 @@ class Rotation2D(val cos: Double, val sin: Double) {
     fun radians(): Double {
         return atan2(y = sin, x = cos)
     }
+
 
     fun tan(): Double = if (abs(cos) < 1E-12) {
         if (sin >= 0.0) {

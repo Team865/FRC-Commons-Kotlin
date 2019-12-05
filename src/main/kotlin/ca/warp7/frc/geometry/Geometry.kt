@@ -1,4 +1,4 @@
-@file:Suppress("unused")
+@file:JvmName("Geometry")
 
 package ca.warp7.frc.geometry
 
@@ -8,42 +8,6 @@ import kotlin.math.*
 val Number.radians: Rotation2D get() = Rotation2D.fromRadians(this.toDouble())
 
 val Number.degrees: Rotation2D get() = Rotation2D.fromDegrees(this.toDouble())
-
-@Deprecated("", ReplaceWith("radians()"))
-val Rotation2D.radians: Double get() = atan2(y = sin, x = cos)
-
-@Deprecated("", ReplaceWith("degrees()"))
-val Rotation2D.degrees: Double get() = Math.toDegrees(radians())
-
-@Deprecated("", ReplaceWith("mag()"))
-val Rotation2D.mag: Double get() = hypot(sin, cos)
-
-@Deprecated("", ReplaceWith("unit()"))
-val Rotation2D.norm: Rotation2D get() = scaled(by = 1 / mag())
-
-val Rotation2D.translation: Translation2D get() = Translation2D(cos, sin)
-
-val Rotation2D.normal: Rotation2D get() = Rotation2D(-sin, cos)
-
-
-infix fun Rotation2D.parallelTo(other: Rotation2D) = (translation cross other.translation).epsilonEquals(0.0)
-
-val Translation2D.direction: Rotation2D get() = Rotation2D(x, y).unit()
-
-@Deprecated("", ReplaceWith("transposed()"))
-val Translation2D.transposed: Translation2D get() = Translation2D(y, x)
-
-val Translation2D.norm: Translation2D get() = scaled(by = 1 / mag)
-
-val Translation2D.flipX: Translation2D get() = Translation2D(-x, y)
-
-val Translation2D.flipY: Translation2D get() = Translation2D(x, -y)
-
-fun Translation2D.rotate(by: Rotation2D) = Translation2D(x * by.cos - y * by.sin, x * by.sin + y * by.cos)
-
-infix fun Translation2D.dot(other: Translation2D) = x * other.x + y * other.y
-
-infix fun Translation2D.cross(other: Translation2D) = x * other.y - y * other.x
 
 fun fitParabola(p1: Translation2D, p2: Translation2D, p3: Translation2D): Double {
     val a = p3.x * (p2.y - p1.y) + p2.x * (p1.y - p3.y) + p1.x * (p3.y - p2.y)
@@ -72,7 +36,6 @@ fun Pose2D.intersection(other: Pose2D): Translation2D {
 
 fun Pose2D.mirrored(): Pose2D = Pose2D(Translation2D(translation.x, -translation.y), rotation.inverse)
 
-
 private fun intersectionInternal(a: Pose2D, b: Pose2D): Translation2D {
     val ar = a.rotation
     val br = b.rotation
@@ -83,26 +46,26 @@ private fun intersectionInternal(a: Pose2D, b: Pose2D): Translation2D {
     val t = ((at.x - bt.x) * tanB + bt.y - at.y) / (ar.sin - ar.cos * tanB)
     return if (t.isNaN()) {
         Translation2D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)
-    } else at + ar.translation * t
+    } else at + ar.translation() * t
 }
 
 fun getDirection(pose: Pose2D, point: ArcPose2D): Double {
     val poseToPoint = point.translation - pose.translation
-    val robot = pose.rotation.translation
+    val robot = pose.rotation.translation()
     return if (robot cross poseToPoint < 0.0) -1.0 else 1.0 // if robot < pose turn left
 }
 
 fun findCenter(pose: Pose2D, point: ArcPose2D): Translation2D {
     val poseToPointHalfway = pose.translation.interpolate(point.translation, 0.5)
-    val normal = (pose.translation.inverse + poseToPointHalfway).direction.normal
+    val normal = (pose.translation.inverse + poseToPointHalfway).direction().normal()
     val perpendicularBisector = Pose2D(poseToPointHalfway, normal)
-    val normalFromPose = Pose2D(pose.translation, pose.rotation.normal)
-    return if (normalFromPose.isColinear(perpendicularBisector.run { Pose2D(translation, rotation.normal) })) {
+    val normalFromPose = Pose2D(pose.translation, pose.rotation.normal())
+    return if (normalFromPose.isColinear(perpendicularBisector.run { Pose2D(translation, rotation.normal()) })) {
         // Special case: center is poseToPointHalfway.
         poseToPointHalfway
     } else normalFromPose.intersection(perpendicularBisector)
 }
 
 fun findRadius(pose: Pose2D, point: ArcPose2D): Double {
-    return (point.translation - findCenter(pose, point)).mag * getDirection(pose, point)
+    return (point.translation - findCenter(pose, point)).mag() * getDirection(pose, point)
 }

@@ -75,14 +75,14 @@ class TrajectoryBuilder {
     fun forward(metres: Double) = apply {
         check(waypoints.isNotEmpty() && metres > 0)
         val pose = waypoints.last()
-                .run { Pose2D(translation + rotation.translation * metres, rotation) }
+                .run { Pose2D(translation + rotation.translation() * metres, rotation) }
         waypoints.add(pose)
     }
 
     fun reverse(metres: Double) = apply {
         check(waypoints.isNotEmpty() && metres > 0)
         val pose = waypoints.last()
-                .run { Pose2D(translation + rotation.translation * (-metres), rotation) }
+                .run { Pose2D(translation + rotation.translation() * (-metres), rotation) }
         waypoints.add(pose)
     }
 

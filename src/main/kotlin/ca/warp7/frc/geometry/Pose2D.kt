@@ -10,10 +10,8 @@ class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
     constructor(x: Double, y: Double, rotation: Rotation2D) : this(Translation2D(x, y), rotation)
     constructor(x: Double, y: Double, rotation: Double) : this(Translation2D(x, y), Rotation2D.fromRadians(rotation))
 
-    fun epsilonEquals(state: Pose2D, epsilon: Double): Boolean =
+    fun epsilonEquals(state: Pose2D, epsilon: Double = 1E-12): Boolean =
             translation.epsilonEquals(state.translation, epsilon) && rotation.epsilonEquals(state.rotation, epsilon)
-
-    fun epsilonEquals(state: Pose2D): Boolean = epsilonEquals(state, 1E-12)
 
     operator fun plus(by: Pose2D): Pose2D =
             Pose2D(translation + by.translation.rotate(rotation), rotation + by.rotation)

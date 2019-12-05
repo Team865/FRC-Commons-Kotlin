@@ -16,9 +16,30 @@ class Translation2D(val x: Double, val y: Double) {
         else -> Translation2D(x1 * (other.x - x) + x, x1 * (other.y - y) + y)
     }
 
-    fun transposed() : Translation2D {
+    fun transposed(): Translation2D {
         return Translation2D(y, x)
     }
+
+    fun direction(): Rotation2D {
+        return Rotation2D(x, y).unit()
+    }
+
+    fun rotate(by: Rotation2D): Translation2D {
+        return Translation2D(x * by.cos - y * by.sin, x * by.sin + y * by.cos)
+    }
+
+    infix fun dot(other: Translation2D): Double {
+        return x * other.x + y * other.y
+    }
+
+    infix fun cross(other: Translation2D): Double {
+        return x * other.y - y * other.x
+    }
+
+    fun unit(): Translation2D {
+        return scaled(1 / mag())
+    }
+
 
     /**
      * Swaps the sign of the vector.
@@ -123,7 +144,7 @@ class Translation2D(val x: Double, val y: Double) {
      * @return the magnitude of the vector.
      *
      */
-    val mag: Double get() = hypot(x, y)
+    fun mag(): Double = hypot(x, y)
 
 
     /**
