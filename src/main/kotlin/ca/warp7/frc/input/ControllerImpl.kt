@@ -2,20 +2,39 @@ package ca.warp7.frc.input
 
 class ControllerImpl : RobotController {
     override var backButton = ButtonState.None
+        private set
+
     override var aButton = ButtonState.None
+        private set
     override var bButton = ButtonState.None
+        private set
     override var xButton = ButtonState.None
+        private set
     override var yButton = ButtonState.None
+        private set
     override var leftBumper = ButtonState.None
+        private set
+
     override var rightBumper = ButtonState.None
+        private set
     override var leftStickButton = ButtonState.None
+        private set
     override var rightStickButton = ButtonState.None
+        private set
+
     override var startButton = ButtonState.None
+        private set
     override var leftTrigger = 0.0
+        private set
     override var rightTrigger = 0.0
+        private set
+
     override var leftX = 0.0
+        private set
     override var leftY = 0.0
+        private set
     override var rightX = 0.0
+        private set
     override var rightY = 0.0
 
     fun updateAxes(
@@ -33,8 +52,7 @@ class ControllerImpl : RobotController {
         this.rightX = rightX
         this.rightY = rightY
     }
-    
-    @Suppress("DuplicatedCode")
+
     fun updateButtons(
             aButton: Boolean,
             bButton: Boolean,

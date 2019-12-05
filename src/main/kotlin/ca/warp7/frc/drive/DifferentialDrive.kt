@@ -2,9 +2,7 @@
 
 package ca.warp7.frc.drive
 
-import ca.warp7.frc.epsilonEquals
 import kotlin.math.abs
-import kotlin.math.withSign
 
 /**
  * Solves the maximum forward velocity the robot can go on a curve,
@@ -41,39 +39,3 @@ fun maxVelocityAtCurvature(
         wheelbaseRadius: Double,
         curvature: Double
 ): Double = maxVelocity / (1 + abs(curvature) * wheelbaseRadius)
-
-/**
- * Solves the maximum reachable linear and angular velocity based on the curvature.
- *
- * The equations are derived from `w(r + L / 2) = far side velocity`. Assume far side goes 100%,
- * we replace it with max velocity and isolate for angular velocity.
- *
- * Then we rearrange `w = (right - left)/L` into `left = maxV - wL`, substitute it into
- * `v = (left + right) / 2`, and get the equation for max linear velocity
- *
- * L is double of wheelBaseRadius, so calculations are simplified here.
- *
- * If curvature is 0, it just returns a ChassisState with no angular velocity.
- *
- * Future: Does this also work for acceleration???
- *
- * @param curvature the curvature of the path in m^-1
- * @param maxVel the maximum velocity of the faster wheel in m/s
- * @param wheelbaseRadius the effective wheel base radius
- * @return the maximum reachable chassis velocity in (m/s, rad/s)
- */
-@Deprecated(
-        "Use better derived Equations",
-        ReplaceWith(
-                "maxVelocityAtCurvature(maxVel, wheelbaseRadius, curvature)" +
-                        ".let { ChassisState(it, it * curvature) }"
-        )
-)
-fun signedMaxVelocityAtCurvature(curvature: Double, maxVel: Double, wheelbaseRadius: Double): ChassisState {
-    if (curvature.epsilonEquals(0.0, 1E-9)) {
-        return ChassisState(maxVel, angular = 0.0)
-    }
-    val angular = maxVel / (1 / abs(curvature) + wheelbaseRadius)
-    val linear = maxVel - (angular * wheelbaseRadius)
-    return ChassisState(linear, angular.withSign(curvature))
-}

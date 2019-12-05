@@ -1,4 +1,3 @@
-@file:Suppress("unused")
 @file:JvmName("ActionLib")
 
 package ca.warp7.frc.action
@@ -9,19 +8,11 @@ package ca.warp7.frc.action
 @ActionDSL
 fun sequential(block: ActionBuilder.() -> Unit): Action = Sequential().apply(block)
 
-@Deprecated("queue() is renamed to sequential()", ReplaceWith("sequential(block)"))
-fun queue(block: ActionBuilder.() -> Unit): Action = sequential(block)
-
-
 /**
  * Returns an action that runs other actions in parallel
  */
 @ActionDSL
 fun parallel(block: ActionBuilder.() -> Unit): Action = Parallel().apply(block)
-
-@Deprecated("async() is renamed to parallel()", ReplaceWith("parallel(block)"))
-fun async(block: ActionBuilder.() -> Unit): Action = parallel(block)
-
 
 /**
  * Returns an action that does nothing until a condition is met

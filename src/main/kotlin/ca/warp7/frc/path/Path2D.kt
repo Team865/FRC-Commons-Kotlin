@@ -9,6 +9,4 @@ interface Path2D {
     fun ay(t: Double): Double
     fun jx(t: Double): Double
     fun jy(t: Double): Double
-    val dx: Double
-    val dy: Double
 }

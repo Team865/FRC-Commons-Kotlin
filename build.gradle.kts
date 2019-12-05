@@ -22,12 +22,8 @@ version = "2019.7.0"
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf(
-                "-Xnew-inference",
-                "-Xuse-experimental=kotlin.Experimental",
-                "-Xallow-kotlin-package",
                 "-Xno-call-assertions",
-                "-Xno-param-assertions",
-                "-Xinline-classes"
+                "-Xno-param-assertions"
         )
         kotlinOptions.jvmTarget = "11"
     }

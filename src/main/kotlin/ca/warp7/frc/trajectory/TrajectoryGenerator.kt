@@ -4,7 +4,6 @@ package ca.warp7.frc.trajectory
 
 import ca.warp7.frc.geometry.ArcPose2D
 import kotlin.math.abs
-import kotlin.math.asin
 import kotlin.math.sqrt
 
 /**
@@ -124,18 +123,7 @@ internal fun computeArcLengths(
         // Returns the linear distance in metres
 
         // Get the chord length (translational distance)
-        val distance = current.translation.distanceTo(next.translation)
-
-        when {
-            // Going straight, arcLength = distance
-            k < 1E-6 -> distance
-
-            // Moving on a radius:
-            // arcLength = theta * r = theta / k
-            // theta = asin(half_chord / r) * 2 = asin(half_chord * k) * 2
-            // arcLength = asin(half_chord * k) * 2 / k
-            else -> asin((distance / 2) * k) * 2 / k
-        }
+        current.translation.distanceTo(next.translation)
     }
 }
 
@@ -263,6 +251,8 @@ private fun accumulativePass(states: List<TrajectoryState>) {
 
 /**
  * Limits jerk in a trajectory
+ *
+ * This works only in some cases
  */
 internal fun rampedAccelerationPass(
         states: List<TrajectoryState>,

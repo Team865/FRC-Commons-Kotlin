@@ -6,9 +6,7 @@ import ca.warp7.frc.linearInterpolate
 import java.util.concurrent.FutureTask
 
 @Suppress("MemberVisibilityCanBePrivate")
-class TrajectoryController(
-        private val builder: TrajectoryBuilder
-) {
+class TrajectoryController(private val builder: TrajectoryBuilder) {
 
     var t = 0.0
         private set
@@ -50,7 +48,7 @@ class TrajectoryController(
             return false // Check if generator is done generating
         }
         trajectory = generator.get()
-        totalTime = trajectory.last().t // reset tracking state
+        totalTime = trajectory.last().t
         t = 0.0
         trajectoryGenerator = null
         return true

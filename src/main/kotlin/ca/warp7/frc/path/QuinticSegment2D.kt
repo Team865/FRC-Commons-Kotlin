@@ -29,11 +29,4 @@ data class QuinticSegment2D(
     override fun ay(t: Double) = y.a(t)
     override fun jx(t: Double) = x.j(t)
     override fun jy(t: Double) = y.j(t)
-
-    override val dx: Double = x1 - x0
-    override val dy: Double = y1 - y0
-
-    override fun toString(): String {
-        return "QuinticSegment2D(x0=${x0.f}, dx0=${dx0.f}, ddx0=${ddx0.f}, x1=${x1.f}, dx1=${dx1.f}, ddx1=${ddx1.f}, y0=${y0.f}, dy0=${dy0.f}, ddy0=${ddy0.f}, y1=${y1.f}, dy1=${dy1.f}, ddy1=${ddy1.f})"
-    }
 }

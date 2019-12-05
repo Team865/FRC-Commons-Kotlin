@@ -156,11 +156,7 @@ class PathPlanner : PApplet() {
         intermediate = quinticSplinesOf(*waypoints, optimizePath = optimizing)
         curvatureSum = intermediate.sumDCurvature2()
         splines = intermediate.parameterized()
-        arcLength = splines.zipWithNext { a: ArcPose2D, b: ArcPose2D ->
-            val chordLength = (a.translation - b.translation).mag()
-            if (a.curvature.epsilonEquals(0.0)) chordLength else
-                kotlin.math.abs(kotlin.math.asin(chordLength * a.curvature / 2) / a.curvature * 2)
-        }.sum()
+        arcLength = splines.zipWithNext { a: ArcPose2D, b: ArcPose2D -> a.translation.distanceTo(b.translation) }.sum()
         trajectory = generateTrajectory(splines, kEffectiveWheelBaseRadius,
                 kMaxVelocity * maxVRatio,
                 kMaxAcceleration * maxARatio,
