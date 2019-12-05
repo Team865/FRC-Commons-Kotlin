@@ -7,8 +7,7 @@ import kotlin.math.min
 class Transmission(
         val speedPerVolt: Double, // (rad/s) / V
         val torquePerVolt: Double, // (N * m) / V
-        val frictionVoltage: Double, // V
-        val maxVoltage: Double // V
+        val frictionVoltage: Double // V
 ) {
 
     companion object {

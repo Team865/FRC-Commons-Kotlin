@@ -20,8 +20,4 @@ class SwerveWheels(
     operator fun div(by: Double): SwerveWheels {
         return times(1.0 / by)
     }
-
-    override fun toString(): String {
-        return "SwerveWheels(LF=${leftFront.translation()}, RF=${rightFront.translation()}, LR=${leftRear.translation()}, RR=${rightRear.translation()})"
-    }
 }
