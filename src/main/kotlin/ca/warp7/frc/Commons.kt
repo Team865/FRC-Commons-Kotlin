@@ -48,9 +48,6 @@ fun Double.epsilonEquals(other: Double): Boolean {
  * @return the interpolation result
  */
 fun linearInterpolate(a: Double, b: Double, x: Double): Double {
-    if (b < a) {
-        return linearInterpolate(b, a, x)
-    }
     if (x < 0.0) {
         return a
     }
