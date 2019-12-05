@@ -28,16 +28,6 @@ class Translation2DTest {
 
         assertTrue(transTestB2.epsilonEquals(transGoldenB))
     }
-//
-//    @Test
-//    fun unaryMinusWorksProperly() {
-//        val transTest0 = Translation2D(-10.1, 15.9).unaryMinus()
-//        val transTest1 = -Translation2D(-10.1, 15.9)
-//        val transGolden = Translation2D(10.1, -15.9)
-//
-//        assertTrue(transTest0.epsilonEquals(transGolden))
-//        assertTrue(transTest1.epsilonEquals(transGolden))
-//    }
 
     @Test
     fun inverseWorksProperly() {
@@ -45,23 +35,6 @@ class Translation2DTest {
         val transGolden = Translation2D(-1425.0, 23.0)
         assertTrue(transTest.epsilonEquals(transGolden))
     }
-
-//    @Test
-//    fun unaryPlusWorksProperly() {
-//        val transTest0 = Translation2D(25.0, 3.34501).unaryPlus()
-//        val transTest1 = +Translation2D(25.0, 3.34501)
-//        val transGolden = Translation2D(25.0, 3.34501)
-//
-//        assert(transTest0.epsilonEquals(transGolden))
-//        assert(transTest1.epsilonEquals(transGolden))
-//    }
-//
-//    @Test
-//    fun copyWorksProperly() {
-//        val transTest = Translation2D(20.01, 13.49).copy
-//        val transGolden = Translation2D(20.01, 13.49)
-//        assert(transTest.epsilonEquals(transGolden))
-//    }
 
     @Test
     fun epsilonEqualsWorksProperly() {
@@ -74,14 +47,6 @@ class Translation2DTest {
         assertTrue(transEqual)
         assertEquals(transNotEqual, false)
     }
-
-//    @Test
-//    fun transformWorksProperly() {
-//        val transForm = Translation2D(-5.0, 5.0)
-//        val transTest = Translation2D(10.0, 10.0).transform(transForm)
-//        val transGolden = Translation2D(5.0, 15.0)
-//        assert(transTest.epsilonEquals(transGolden))
-//    }
 
     @Test
     fun plusWorksProperly() {

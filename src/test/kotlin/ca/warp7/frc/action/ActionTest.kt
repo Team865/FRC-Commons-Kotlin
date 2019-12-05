@@ -7,6 +7,15 @@ import kotlin.test.assertEquals
 
 class ActionTest {
 
+    private fun executeUnrestricted(action: Action) {
+        action.firstCycle()
+        while (!action.shouldFinish()) {
+            action.update()
+            Thread.sleep(20)
+        }
+        action.lastCycle()
+    }
+
     private val maskedOut = ByteArrayOutputStream()
     private val systemOut = System.out
 
