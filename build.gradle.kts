@@ -82,6 +82,6 @@ tasks.dokka {
     configuration {
         moduleName = "ca.warp7.frc"
         noJdkLink = true
-        samples = listOf("src/test/kotlin/test/ca/warp7/frc/geometry")
+        samples = listOf("src/test/kotlin/ca/warp7/frc/geometry")
     }
 }
