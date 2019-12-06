@@ -8,8 +8,8 @@ import ca.warp7.frc.toDoubleSign
 class TrajectoryBuilder {
 
     private var wheelbaseRadius = 0.0
-    private var trajectoryVelocity = 0.0
-    private var trajectoryAcceleration = 0.0
+    private var maxVelocity = 0.0
+    private var maxAcceleration = 0.0
     private var maxCentripetalAcceleration = 0.0
     private var maxJerk = Double.POSITIVE_INFINITY
     private var bendFactor = 1.2
@@ -39,12 +39,12 @@ class TrajectoryBuilder {
         wheelbaseRadius = metres
     }
 
-    fun setTrajectoryVelocity(metresPerSecond: Double) = apply {
-        trajectoryVelocity = metresPerSecond
+    fun setMaxVelocity(metresPerSecond: Double) = apply {
+        maxVelocity = metresPerSecond
     }
 
-    fun setTrajectoryAcceleration(metresPerSecondSquared: Double) = apply {
-        trajectoryAcceleration = metresPerSecondSquared
+    fun setMaxAcceleration(metresPerSecondSquared: Double) = apply {
+        maxAcceleration = metresPerSecondSquared
     }
 
     fun setJerkLimit(metresPerSecondCubed: Double) = apply {
@@ -115,7 +115,13 @@ class TrajectoryBuilder {
         val optimizedPath = if (optimizeDkSquared) path.optimized() else path
         val parameterizedPath = optimizedPath.parameterized()
         return generateTrajectory(parameterizedPath, wheelbaseRadius,
-                trajectoryVelocity, trajectoryAcceleration, maxCentripetalAcceleration, maxJerk)
+                maxVelocity, maxAcceleration, maxCentripetalAcceleration, maxJerk)
+    }
+
+    private fun generateQuickTurn(a: Pose2D, b: Pose2D): List<TrajectoryState> {
+        return generateQuickTurn(parameterizeQuickTurn(a.rotation, b.rotation),
+                maxVelocity / wheelbaseRadius,
+                maxAcceleration / wheelbaseRadius)
     }
 
     internal fun generatePathAndTrajectory(): List<TrajectoryState> {
@@ -132,17 +138,13 @@ class TrajectoryBuilder {
                     trajectory.addAll(generateTrajectory(path))
                     path.clear()
                 }
-                val quickTurnSegment = generateQuickTurn(parameterizeQuickTurn(a.rotation, b.rotation),
-                        trajectoryVelocity / wheelbaseRadius,
-                        trajectoryAcceleration / wheelbaseRadius)
-                trajectory.addAll(quickTurnSegment)
+                trajectory.addAll(generateQuickTurn(a, b))
             }
         }
         if (path.isNotEmpty()) {
             trajectory.addAll(generateTrajectory(path))
             path.clear()
         }
-
         return trajectory
     }
 }

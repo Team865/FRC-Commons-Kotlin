@@ -3,7 +3,7 @@ package ca.warp7.frc.control
 /**
  * PID Controller Values
  */
-data class PID(
+class PID(
         var kP: Double = 0.0,
         var kI: Double = 0.0,
         var kD: Double = 0.0,
