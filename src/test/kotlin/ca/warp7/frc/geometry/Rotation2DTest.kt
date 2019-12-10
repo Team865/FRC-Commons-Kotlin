@@ -1,9 +1,9 @@
 package ca.warp7.frc.geometry
 
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import kotlin.test.assertTrue
 
-//This is testing the Rotation2D class using unittesting
+//This is testing the Rotation2D class using unit testing
 
 class Rotation2DTest {
 

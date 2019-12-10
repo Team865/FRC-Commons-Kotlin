@@ -8,8 +8,6 @@ class DriveOdometry(
         gyroAngle: Rotation2D,
         private var pose: Pose2D = Pose2D.identity
 ) {
-    private var prevLeftDist = 0.0
-    private var prevRightDist = 0.0
     private var prevAngle = Rotation2D.identity
     private var gyroOffset = pose.rotation - gyroAngle
 
@@ -18,7 +16,7 @@ class DriveOdometry(
      *
      * @return The pose of the robot (x and y are in meters).
      */
-    fun pose(): Pose2D {
+    fun getRobotState(): Pose2D {
         return pose
     }
 
@@ -39,8 +37,6 @@ class DriveOdometry(
         this.pose = pose
         prevAngle = pose.rotation
         gyroOffset = pose.rotation - gyroAngle
-        prevLeftDist = 0.0
-        prevRightDist = 0.0
     }
 
     /**
@@ -49,18 +45,13 @@ class DriveOdometry(
      * is also advantageous for teams that are using lower CPR encoders.
      *
      * @param gyroAngle           The angle reported by the gyroscope.
-     * @param leftDistance  The distance traveled by the left encoder.
-     * @param rightDistance The distance traveled by the right encoder.
+     * @param deltaLeft  The distance traveled by the left encoder.
+     * @param deltaRight The distance traveled by the right encoder.
      * @return The new pose of the robot.
      */
-    fun update(gyroAngle: Rotation2D, leftDistance: Double, rightDistance: Double): Pose2D {
-        val deltaLeftDistance = leftDistance - prevLeftDist
-        val deltaRightDistance = rightDistance - prevRightDist
+    fun update(gyroAngle: Rotation2D, deltaLeft: Double, deltaRight: Double): Pose2D {
 
-        prevLeftDist = leftDistance
-        prevRightDist = rightDistance
-
-        val averageDeltaDistance = (deltaLeftDistance + deltaRightDistance) / 2.0
+        val averageDeltaDistance = (deltaLeft + deltaRight) / 2.0
         val angle = gyroAngle.plus(gyroOffset)
 
         val newPose = pose + Twist2D(averageDeltaDistance, 0.0, (angle - prevAngle).radians()).exp()

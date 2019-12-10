@@ -47,15 +47,12 @@ class Transmission(
      * then convert to volts and add the signed friction voltage
      * Units: (N * m) / ((N * m) / V) + (rad/s) / ((rad/s) / V) + V = V
      *
-     * @param chassisSpeed the speed of the chassis to determine friction voltage
      * @param wheelSpeed the desired speed in rad/s
      * @param wheelTorque the desired torque in N * m
      * @return voltage in V
      */
-    fun voltageForTorque(chassisSpeed: Double, wheelSpeed: Double, wheelTorque: Double): Double {
+    fun voltageForTorque(wheelSpeed: Double, wheelTorque: Double): Double {
         val frictionVoltage = when {
-            chassisSpeed > kEpsilon -> frictionVoltage
-            chassisSpeed < -kEpsilon -> -frictionVoltage
             wheelSpeed > kEpsilon -> frictionVoltage
             wheelSpeed < -kEpsilon -> -frictionVoltage
             wheelTorque > kEpsilon -> frictionVoltage

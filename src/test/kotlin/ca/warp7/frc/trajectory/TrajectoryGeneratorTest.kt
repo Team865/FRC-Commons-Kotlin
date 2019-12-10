@@ -4,11 +4,11 @@ import ca.warp7.frc.epsilonEquals
 import ca.warp7.frc.geometry.ArcPose2D
 import ca.warp7.frc.geometry.Pose2D
 import ca.warp7.frc.geometry.Rotation2D
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.math.abs
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class TrajectoryGeneratorTest {
 

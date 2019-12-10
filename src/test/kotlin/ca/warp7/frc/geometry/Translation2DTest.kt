@@ -1,8 +1,8 @@
 package ca.warp7.frc.geometry
 
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 //This is testing the Translation2D class using unittesting
 

@@ -19,10 +19,6 @@ class Twist2D(val dx: Double, val dy: Double, val dTheta: Double) {
 
     fun mag() = hypot(dx, dy)
 
-    /**
-     * Convert this twist into a Pose2D transformation
-     * By: Team 254
-     */
     fun exp(): Pose2D {
         val sinTheta = sin(dTheta)
         val cosTheta = cos(dTheta)
@@ -36,5 +32,17 @@ class Twist2D(val dx: Double, val dy: Double, val dTheta: Double) {
             c = (1.0 - cosTheta) / dTheta
         }
         return Pose2D(Translation2D(dx * s - dy * c, dx * c + dy * s), Rotation2D(cosTheta, sinTheta))
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Twist2D) return false;
+        return dx == other.dx && dy == other.dy && dTheta == other.dTheta
+    }
+
+    override fun hashCode(): Int {
+        var result = dx.hashCode()
+        result = 31 * result + dy.hashCode()
+        result = 31 * result + dTheta.hashCode()
+        return result
     }
 }
