@@ -25,7 +25,7 @@ fun QuinticSegment2D.parameterize(
     val p1 = get(t1)
     val pose1 = p1.pose()
     // get the twist transformation between start and and points
-    val twist = (pose1 - p0.pose()).logFast()
+    val twist = (pose1 - p0.pose()).log()
     // check if the twist is within threshold
     if (twist.dx > 0.1 || twist.dy > 0.01 || twist.dTheta > 0.1) {
         // partition and re-parameterize

@@ -6,7 +6,7 @@ import ca.warp7.frc.geometry.Rotation2D.Companion.fromDegrees
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class DriveOdometryTest {
+class DriveOdometryTest {
     private val odometry = DriveOdometry(Rotation2D.identity, Pose2D.identity)
     @Test
     fun testOdometryWithEncoderDistances() {

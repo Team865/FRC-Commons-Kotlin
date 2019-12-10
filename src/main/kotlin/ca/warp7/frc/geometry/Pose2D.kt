@@ -1,7 +1,5 @@
 package ca.warp7.frc.geometry
 
-import kotlin.math.abs
-
 /**
  * Rigid Transform (of a translation and a rotation)
  */
@@ -47,28 +45,13 @@ class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
      */
     fun log(): Twist2D {
         val dTheta = rotation.radians()
-        val halfTheta = 0.5 * dTheta
-        val cosMinusOne = rotation.cos - 1.0
-        val halfThetaByTanOfHalfDTheta =
-                if (abs(cosMinusOne) < 1E-9) 1.0 - 1.0 / 12.0 * dTheta * dTheta
-                else -(halfTheta * rotation.sin) / cosMinusOne
-        val delta = translation.rotate(Rotation2D(halfThetaByTanOfHalfDTheta, -halfTheta))
-        return Twist2D(delta.x, delta.y, dTheta)
-    }
-
-    /**
-     * The same as [Pose2D.log] except it doesn't create intermediate objects
-     * and simplifies the equations
-     */
-    fun logFast(): Twist2D {
-        val dTheta = rotation.radians()
         val halfThetaByTanOfHalfDTheta =
                 if (1.0 - rotation.cos < 1E-9) 1.0 - 1.0 / 12.0 * dTheta * dTheta
                 else (0.5 * dTheta) * rotation.sin / (1.0 - rotation.cos)
         return Twist2D(
-                dx = translation.x * halfThetaByTanOfHalfDTheta + translation.y * dTheta / 2.0,
-                dy = translation.y * halfThetaByTanOfHalfDTheta - translation.x * dTheta / 2.0,
-                dTheta = dTheta
+                translation.x * halfThetaByTanOfHalfDTheta + translation.y * dTheta / 2.0,
+                translation.y * halfThetaByTanOfHalfDTheta - translation.x * dTheta / 2.0,
+                dTheta
         )
     }
 
