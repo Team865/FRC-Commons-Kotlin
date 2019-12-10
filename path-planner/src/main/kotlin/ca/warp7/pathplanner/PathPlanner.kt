@@ -153,7 +153,7 @@ class PathPlanner : PApplet() {
             val dir = it.rotation.unit().translation()
             controlPoints.add(ControlPoint(pos, heading, dir))
         }
-        intermediate = quinticSplinesOf(*waypoints, optimizePath = optimizing)
+        intermediate = quinticSplinesOf(waypoints.toList(), optimizePath = optimizing)
         curvatureSum = intermediate.sumDCurvature2()
         splines = intermediate.parameterized()
         arcLength = splines.zipWithNext { a: ArcPose2D, b: ArcPose2D -> a.translation.distanceTo(b.translation) }.sum()

@@ -27,7 +27,7 @@ fun quinticSplineFromPose(p0: Pose2D, p1: Pose2D, bendFactor: Double = 1.2): Qui
 }
 
 fun quinticSplinesOf(
-        vararg waypoints: Pose2D,
+        waypoints: List<Pose2D>,
         optimizePath: Boolean = false,
         bendFactor: Double = 1.2
 ): List<QuinticSegment2D> {
@@ -38,8 +38,8 @@ fun quinticSplinesOf(
     return if (optimizePath) path.optimized() else path
 }
 
-fun parameterizedSplinesOf(vararg waypoints: Pose2D): List<ArcPose2D> =
-        quinticSplinesOf(*waypoints).parameterized()
+fun parameterizedSplinesOf(waypoints: List<Pose2D>): List<ArcPose2D> =
+        quinticSplinesOf(waypoints).parameterized()
 
 fun parameterizeQuickTurn(a: Rotation2D, b: Rotation2D): List<ArcPose2D> {
     val startingAngle = a.radians()
