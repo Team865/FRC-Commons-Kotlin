@@ -18,16 +18,16 @@ class TrajectoryBuilder {
 
     internal var follower: TrajectoryFollower? = null
 
-    internal var invertMultiplier = 1.0
-    internal var mirroredMultiplier = 1.0
+    internal var invertMultiplier = 1
+    internal var mirroredMultiplier = 1
 
 
     fun setInverted(inverted: Boolean) = apply {
-        invertMultiplier = if (inverted) -1.0 else 1.0
+        invertMultiplier = if (inverted) -1 else 1
     }
 
     fun setMirrored(mirrored: Boolean) = apply {
-        mirroredMultiplier = if (mirrored) -1.0 else 1.0
+        mirroredMultiplier = if (mirrored) -1 else 1
     }
 
     fun setFollower(f: TrajectoryFollower) = apply {
@@ -83,12 +83,12 @@ class TrajectoryBuilder {
 
     fun turnRight(degrees: Double) = apply {
         check(waypoints.isNotEmpty() && degrees > 0)
-        waypoints.add(waypoints.last() + Pose2D(0.0, 0.0, Rotation2D.fromRadians(-degrees)))
+        waypoints.add(waypoints.last() + Pose2D(0.0, 0.0, Rotation2D.fromDegrees(-degrees)))
     }
 
     fun turnLeft(degrees: Double) = apply {
         check(waypoints.isNotEmpty() && degrees > 0)
-        waypoints.add(waypoints.last() + Pose2D(0.0, 0.0, Rotation2D.fromRadians(degrees)))
+        waypoints.add(waypoints.last() + Pose2D(0.0, 0.0, Rotation2D.fromDegrees(degrees)))
     }
 
     fun moveTo(pose: Pose2D) = apply {

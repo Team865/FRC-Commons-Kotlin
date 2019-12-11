@@ -1,9 +1,9 @@
 package ca.warp7.frc.action
 
 import org.junit.jupiter.api.*
+import org.junit.jupiter.api.Assertions.assertEquals
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
-import kotlin.test.assertEquals
 
 class ActionTest {
 
@@ -30,7 +30,7 @@ class ActionTest {
     }
 
     @Test
-    fun p12() {
+    fun testParallel() {
         executeUnrestricted(parallel {
             +runOnce { print("A") }
             +runOnce { print("B") }
@@ -39,7 +39,7 @@ class ActionTest {
     }
 
     @Test
-    fun p12wait() {
+    fun testWait() {
         executeUnrestricted(parallel {
             +sequential {
                 +wait(0.1)
@@ -57,7 +57,7 @@ class ActionTest {
 
 
     @Test
-    fun p2s() {
+    fun testDoubleSequential() {
         executeUnrestricted(parallel {
             +sequential {
                 +wait(0.1)
@@ -76,7 +76,7 @@ class ActionTest {
     }
 
     @Test
-    fun pInS() {
+    fun testParallelInSequential() {
         executeUnrestricted(sequential {
             +parallel {
                 +sequential {

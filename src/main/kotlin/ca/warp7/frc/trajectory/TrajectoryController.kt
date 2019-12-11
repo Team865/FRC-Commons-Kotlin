@@ -94,7 +94,7 @@ class TrajectoryController(private val builder: TrajectoryBuilder) {
         val position = last.arcPose.translation.interpolate(next.arcPose.translation, x)
 
         val heading = last.arcPose.rotation.interpolate(next.arcPose.rotation, x)
-                .translation().scaled(builder.invertMultiplier).direction()
+                .translation().scaled(builder.invertMultiplier.toDouble()).direction()
 
         val pose = ArcPose2D(Pose2D(position, heading), curvature, 0.0)
 

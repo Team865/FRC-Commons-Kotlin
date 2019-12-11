@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-//This is testing the Translation2D class using unittesting
+//This is testing the Translation2D class using unit testing
 
 class Translation2DTest {
 
