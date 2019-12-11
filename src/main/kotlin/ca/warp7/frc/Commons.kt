@@ -6,6 +6,7 @@
 
 package ca.warp7.frc
 
+import ca.warp7.frc.geometry.Rotation2D
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.sign
@@ -152,6 +153,16 @@ val Number.feet: Double get() = this.toDouble() * kFeetToMetres
  * Convert a number in inches into metres
  */
 val Number.inches: Double get() = this.toDouble() * kInchesToMetres
+
+/**
+ * Converts a number in radians to a Rotation
+ */
+val Number.radians: Rotation2D get() = Rotation2D.fromRadians(this.toDouble())
+
+/**
+ * Converts a number in degrees to a Rotation
+ */
+val Number.degrees: Rotation2D get() = Rotation2D.fromDegrees(this.toDouble())
 
 /**
  * Square a number

@@ -2,6 +2,9 @@ package ca.warp7.frc.geometry
 
 /**
  * Rigid Transform (of a translation and a rotation)
+ *
+ * Can be used to describe a direction and heading (pose) relative
+ * to another point
  */
 class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
 

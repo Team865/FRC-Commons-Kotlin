@@ -2,7 +2,6 @@ package ca.warp7.frc.trajectory
 
 import ca.warp7.frc.geometry.*
 import ca.warp7.frc.path.*
-import ca.warp7.frc.toDoubleSign
 
 @Suppress("MemberVisibilityCanBePrivate")
 class TrajectoryBuilder {
@@ -15,20 +14,20 @@ class TrajectoryBuilder {
     private var bendFactor = 1.2
     private var optimizeDkSquared = false
 
-    private val waypoints: MutableList<Pose2D> = mutableListOf()
+    internal val waypoints: MutableList<Pose2D> = mutableListOf()
 
     internal var follower: TrajectoryFollower? = null
 
-    internal var invertMultiplier = 0.0
-    internal var mirroredMultiplier = 0.0
+    internal var invertMultiplier = 1.0
+    internal var mirroredMultiplier = 1.0
 
 
     fun setInverted(inverted: Boolean) = apply {
-        invertMultiplier = inverted.toDoubleSign()
+        invertMultiplier = if (inverted) -1.0 else 1.0
     }
 
     fun setMirrored(mirrored: Boolean) = apply {
-        mirroredMultiplier = mirrored.toDoubleSign()
+        mirroredMultiplier = if (mirrored) -1.0 else 1.0
     }
 
     fun setFollower(f: TrajectoryFollower) = apply {
@@ -74,41 +73,27 @@ class TrajectoryBuilder {
 
     fun forward(metres: Double) = apply {
         check(waypoints.isNotEmpty() && metres > 0)
-        val pose = waypoints.last()
-                .run { Pose2D(translation + rotation.translation() * metres, rotation) }
-        waypoints.add(pose)
+        waypoints.add(waypoints.last() + Pose2D(metres, 0.0, 0.0))
     }
 
     fun reverse(metres: Double) = apply {
         check(waypoints.isNotEmpty() && metres > 0)
-        val pose = waypoints.last()
-                .run { Pose2D(translation + rotation.translation() * (-metres), rotation) }
-        waypoints.add(pose)
+        waypoints.add(waypoints.last() + Pose2D(-metres, 0.0, 0.0))
     }
 
     fun turnRight(degrees: Double) = apply {
         check(waypoints.isNotEmpty() && degrees > 0)
-        val pose = waypoints.last()
-                .run { Pose2D(translation, rotation + Rotation2D.fromDegrees(-degrees)) }
-        waypoints.add(pose)
+        waypoints.add(waypoints.last() + Pose2D(0.0, 0.0, Rotation2D.fromRadians(-degrees)))
     }
 
     fun turnLeft(degrees: Double) = apply {
         check(waypoints.isNotEmpty() && degrees > 0)
-        val pose = waypoints.last()
-                .run { Pose2D(translation, rotation + Rotation2D.fromDegrees(degrees)) }
-        waypoints.add(pose)
+        waypoints.add(waypoints.last() + Pose2D(0.0, 0.0, Rotation2D.fromRadians(degrees)))
     }
 
     fun moveTo(pose: Pose2D) = apply {
         check(waypoints.isNotEmpty() && !pose.epsilonEquals(waypoints.last()))
         waypoints.add(pose)
-    }
-
-    fun moveToAll(vararg poses: Pose2D) = apply {
-        for (pose in poses) {
-            moveTo(pose)
-        }
     }
 
     private fun generateTrajectory(path: List<QuinticSegment2D>): List<TrajectoryState> {

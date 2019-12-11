@@ -5,16 +5,6 @@ package ca.warp7.frc.geometry
 import ca.warp7.frc.epsilonEquals
 import kotlin.math.*
 
-val Number.radians: Rotation2D get() = Rotation2D.fromRadians(this.toDouble())
-
-val Number.degrees: Rotation2D get() = Rotation2D.fromDegrees(this.toDouble())
-
-fun fitParabola(p1: Translation2D, p2: Translation2D, p3: Translation2D): Double {
-    val a = p3.x * (p2.y - p1.y) + p2.x * (p1.y - p3.y) + p1.x * (p3.y - p2.y)
-    val b = p3.x * p3.x * (p1.y - p2.y) + p2.x * p2.x * (p3.y - p1.y) + p1.x * p1.x * (p2.y - p3.y)
-    return -b / (2 * a)
-}
-
 fun Pose2D.isColinear(other: Pose2D): Boolean {
     if (!rotation.parallelTo(other.rotation)) return false
     val twist = (other - this).log()
@@ -33,8 +23,6 @@ fun Pose2D.intersection(other: Pose2D): Translation2D {
         intersectionInternal(other, this)
     }
 }
-
-fun Pose2D.mirrored(): Pose2D = Pose2D(Translation2D(translation.x, -translation.y), rotation.inverse)
 
 private fun intersectionInternal(a: Pose2D, b: Pose2D): Translation2D {
     val ar = a.rotation
