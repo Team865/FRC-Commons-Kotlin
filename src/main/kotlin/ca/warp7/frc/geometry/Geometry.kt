@@ -37,13 +37,13 @@ private fun intersectionInternal(a: Pose2D, b: Pose2D): Translation2D {
     } else at + ar.translation() * t
 }
 
-fun getDirection(pose: Pose2D, point: ArcPose2D): Double {
+fun getDirection(pose: Pose2D, point: Pose2D): Double {
     val poseToPoint = point.translation - pose.translation
     val robot = pose.rotation.translation()
     return if (robot cross poseToPoint < 0.0) -1.0 else 1.0 // if robot < pose turn left
 }
 
-fun findCenter(pose: Pose2D, point: ArcPose2D): Translation2D {
+fun findCenter(pose: Pose2D, point: Pose2D): Translation2D {
     val poseToPointHalfway = pose.translation.interpolate(point.translation, 0.5)
     val normal = (pose.translation.inverse + poseToPointHalfway).direction().normal()
     val perpendicularBisector = Pose2D(poseToPointHalfway, normal)
@@ -54,6 +54,6 @@ fun findCenter(pose: Pose2D, point: ArcPose2D): Translation2D {
     } else normalFromPose.intersection(perpendicularBisector)
 }
 
-fun findRadius(pose: Pose2D, point: ArcPose2D): Double {
+fun findRadius(pose: Pose2D, point: Pose2D): Double {
     return (point.translation - findCenter(pose, point)).mag() * getDirection(pose, point)
 }

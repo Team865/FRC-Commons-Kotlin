@@ -18,7 +18,10 @@ data class Path2DState(
         val jx: Double,
         val jy: Double
 ) {
-    fun curvature() = (vx * ay - ax * vy) / (vx * vx + vy * vy).pow(1.5)
+    fun curvature(): Double {
+        val d = vx * vx + vy * vy
+        return (vx * ay - ax * vy) / (d * sqrt(d))
+    }
 
     fun point() = Translation2D(px, py)
 
