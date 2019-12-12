@@ -16,8 +16,6 @@ class TrajectoryBuilder {
 
     internal val waypoints: MutableList<Pose2D> = mutableListOf()
 
-    internal var follower: TrajectoryFollower? = null
-
     internal var invertMultiplier = 1
     internal var mirroredMultiplier = 1
 
@@ -28,10 +26,6 @@ class TrajectoryBuilder {
 
     fun setMirrored(mirrored: Boolean) = apply {
         mirroredMultiplier = if (mirrored) -1 else 1
-    }
-
-    fun setFollower(f: TrajectoryFollower) = apply {
-        follower = f
     }
 
     fun setWheelbaseRadius(metres: Double) = apply {

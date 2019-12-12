@@ -24,10 +24,6 @@ class TrajectoryController(private val builder: TrajectoryBuilder) {
 
     var generationTimeMs = 0
 
-    fun getFollower(): TrajectoryFollower? {
-        return builder.follower
-    }
-
     fun initTrajectory() {
         val generator = FutureTask {
             val startTime = System.nanoTime()
