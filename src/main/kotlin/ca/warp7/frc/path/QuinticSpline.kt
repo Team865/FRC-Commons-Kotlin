@@ -1,7 +1,5 @@
 package ca.warp7.frc.path
 
-import kotlin.math.pow
-
 class QuinticSpline(
         p0: Double,
         m0: Double,
@@ -18,8 +16,8 @@ class QuinticSpline(
     private val e: Double = m0
     private val f: Double = p0
 
-    fun p(t: Double) = a * t.pow(5) + b * t.pow(4) + c * t.pow(3) + d * t.pow(2) + e * t + f
-    fun v(t: Double) = 5 * a * t.pow(4) + 4 * b * t.pow(3) + 3 * c * t.pow(2) + 2 * d * t + e
-    fun a(t: Double) = 20 * a * t.pow(3) + 12 * b * t.pow(2) + 6 * c * t + 2 * d
-    fun j(t: Double) = 60 * a * t.pow(2) + 24 * b * t + 6 * c
+    fun p(t: Double) = a * t * t * t * t * t + b * t * t * t * t + c * t * t * t + d * t * t + e * t + f
+    fun v(t: Double) = 5 * a * t * t * t * t + 4 * b * t * t * t + 3 * c * t * t + 2 * d * t + e
+    fun a(t: Double) = 20 * a * t * t * t + 12 * b * t * t + 6 * c * t + 2 * d
+    fun j(t: Double) = 60 * a * t * t + 24 * b * t + 6 * c
 }

@@ -1,26 +1,25 @@
 package ca.warp7.frc.trajectory
 
 import ca.warp7.frc.epsilonEquals
-import ca.warp7.frc.geometry.ArcPose2D
 import ca.warp7.frc.geometry.Pose2D
 import ca.warp7.frc.geometry.Rotation2D
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.math.abs
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class TrajectoryGeneratorTest {
 
-    private fun createStraightLinePath(): List<ArcPose2D> {
+    private fun createStraightLinePath(): List<TrajectoryState> {
         return (0..10).map {
-            ArcPose2D(Pose2D(it / 10.0, 0.0, Rotation2D.identity), 0.0, 0.0)
+            TrajectoryState(Pose2D(it / 10.0, 0.0, Rotation2D.identity), 0.0)
         }
     }
 
-    private fun createStraightLinePathLong(): List<ArcPose2D> {
+    private fun createStraightLinePathLong(): List<TrajectoryState> {
         return (0..100).map {
-            ArcPose2D(Pose2D(it / 10.0, 0.0, Rotation2D.identity), 0.0, 0.0)
+            TrajectoryState(Pose2D(it / 10.0, 0.0, Rotation2D.identity), 0.0)
         }
     }
 
@@ -45,18 +44,14 @@ class TrajectoryGeneratorTest {
         assertTrue((2 until trajectory.size - 2).all { i -> abs(trajectory[i].dv).epsilonEquals(initial) })
     }
 
-    private fun checkInputPathMatchesOutput(path: List<ArcPose2D>, trajectory: List<TrajectoryState>) {
-        // test that all the poses are identical
-        assertTrue(trajectory.indices.all { i -> trajectory[i].arcPose === path[i] })
-    }
 
     private fun printTrajectory(trajectory: List<TrajectoryState>) {
         println(trajectory.joinToString("\n"))
     }
 
-    private fun generateNoJerkLimit(path: List<ArcPose2D>): List<TrajectoryState> {
-        return generateTrajectory(
-                path = path,
+    private fun generateNoJerkLimit(path: List<TrajectoryState>) {
+        parameterizeTrajectory(
+                states = path,
                 wheelbaseRadius = 1.0,
                 maxVelocity = 5.0,
                 maxAcceleration = 3.0,
@@ -65,9 +60,9 @@ class TrajectoryGeneratorTest {
         )
     }
 
-    private fun generateWithJerkLimit(path: List<ArcPose2D>): List<TrajectoryState> {
-        return generateTrajectory(
-                path = path,
+    private fun generateWithJerkLimit(path: List<TrajectoryState>) {
+        parameterizeTrajectory(
+                states = path,
                 wheelbaseRadius = 1.0,
                 maxVelocity = 5.0,
                 maxAcceleration = 3.0,
@@ -77,16 +72,15 @@ class TrajectoryGeneratorTest {
     }
 
     @Test
-    fun straightLineTest() {
-        val path = createStraightLinePath()
-        val trajectory = generateNoJerkLimit(path)
-        checkInputPathMatchesOutput(path, trajectory)
+    fun testStraightLine() {
+        val trajectory = createStraightLinePath()
+        generateNoJerkLimit(trajectory)
         checkEndpointInvariants(trajectory)
         checkConstantAcceleration(trajectory)
     }
 
     @Test
-    fun straightLineJerkLimitTest() {
+    fun testStraightLineJerkLimit() {
         val path = createStraightLinePathLong()
         generateWithJerkLimit(path)
         assertTrue(true)
@@ -94,41 +88,40 @@ class TrajectoryGeneratorTest {
     }
 
     @Test
-    fun emptyPathInputTest() {
-        val path = listOf<ArcPose2D>()
-        val trajectory = generateNoJerkLimit(path)
-        assertTrue(trajectory.isEmpty())
+    fun testEmptyPathInput() {
+        val path = listOf<TrajectoryState>()
+        generateNoJerkLimit(path)
+        assertTrue(path.isEmpty())
     }
 
     @Test
-    fun singlePathInputTest() {
-        val path = listOf(ArcPose2D(Pose2D.identity, 0.0, 0.0))
-        val trajectory = generateNoJerkLimit(path)
-        assertEquals(0.0, trajectory.first().t)
-        checkInputPathMatchesOutput(path, trajectory)
+    fun testSinglePathInput() {
+        val path = listOf(TrajectoryState(Pose2D.identity, 0.0))
+        generateNoJerkLimit(path)
+        assertEquals(0.0, path.first().t)
     }
 
     @Test
-    fun singleInfCurvatureInputTest() {
-        val path = listOf(ArcPose2D(Pose2D.identity, Double.POSITIVE_INFINITY, 0.0))
+    fun testSingleInfCurvatureInput() {
+        val path = listOf(TrajectoryState(Pose2D.identity, Double.POSITIVE_INFINITY))
         assertThrows<IllegalArgumentException> {
             generateNoJerkLimit(path)
         }
     }
 
     @Test
-    fun multiInfCurvatureInputTest() {
+    fun testMultiInfCurvatureInput() {
         val path = listOf(
-                ArcPose2D(Pose2D.identity, 0.0, 0.0),
-                ArcPose2D(Pose2D(1.0, 0.0, Rotation2D.identity), Double.POSITIVE_INFINITY, 0.0))
+                TrajectoryState(Pose2D.identity, 0.0),
+                TrajectoryState(Pose2D(1.0, 0.0, Rotation2D.identity), Double.POSITIVE_INFINITY))
         assertThrows<IllegalArgumentException> { generateNoJerkLimit(path) }
     }
 
     @Test
-    fun multiSamePositionInputTest() {
+    fun testMultiSamePositionInput() {
         val path = listOf(
-                ArcPose2D(Pose2D.identity, 0.0, 0.0),
-                ArcPose2D(Pose2D.identity, 0.0, 0.0))
+                TrajectoryState(Pose2D.identity, 0.0),
+                TrajectoryState(Pose2D.identity, 0.0))
         assertThrows<IllegalArgumentException> { generateNoJerkLimit(path) }
     }
 }

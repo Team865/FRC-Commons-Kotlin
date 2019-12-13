@@ -5,16 +5,6 @@ package ca.warp7.frc.geometry
 import ca.warp7.frc.epsilonEquals
 import kotlin.math.*
 
-val Number.radians: Rotation2D get() = Rotation2D.fromRadians(this.toDouble())
-
-val Number.degrees: Rotation2D get() = Rotation2D.fromDegrees(this.toDouble())
-
-fun fitParabola(p1: Translation2D, p2: Translation2D, p3: Translation2D): Double {
-    val a = p3.x * (p2.y - p1.y) + p2.x * (p1.y - p3.y) + p1.x * (p3.y - p2.y)
-    val b = p3.x * p3.x * (p1.y - p2.y) + p2.x * p2.x * (p3.y - p1.y) + p1.x * p1.x * (p2.y - p3.y)
-    return -b / (2 * a)
-}
-
 fun Pose2D.isColinear(other: Pose2D): Boolean {
     if (!rotation.parallelTo(other.rotation)) return false
     val twist = (other - this).log()
@@ -34,8 +24,6 @@ fun Pose2D.intersection(other: Pose2D): Translation2D {
     }
 }
 
-fun Pose2D.mirrored(): Pose2D = Pose2D(Translation2D(translation.x, -translation.y), rotation.inverse)
-
 private fun intersectionInternal(a: Pose2D, b: Pose2D): Translation2D {
     val ar = a.rotation
     val br = b.rotation
@@ -49,13 +37,13 @@ private fun intersectionInternal(a: Pose2D, b: Pose2D): Translation2D {
     } else at + ar.translation() * t
 }
 
-fun getDirection(pose: Pose2D, point: ArcPose2D): Double {
+fun getDirection(pose: Pose2D, point: Pose2D): Double {
     val poseToPoint = point.translation - pose.translation
     val robot = pose.rotation.translation()
     return if (robot cross poseToPoint < 0.0) -1.0 else 1.0 // if robot < pose turn left
 }
 
-fun findCenter(pose: Pose2D, point: ArcPose2D): Translation2D {
+fun findCenter(pose: Pose2D, point: Pose2D): Translation2D {
     val poseToPointHalfway = pose.translation.interpolate(point.translation, 0.5)
     val normal = (pose.translation.inverse + poseToPointHalfway).direction().normal()
     val perpendicularBisector = Pose2D(poseToPointHalfway, normal)
@@ -66,6 +54,6 @@ fun findCenter(pose: Pose2D, point: ArcPose2D): Translation2D {
     } else normalFromPose.intersection(perpendicularBisector)
 }
 
-fun findRadius(pose: Pose2D, point: ArcPose2D): Double {
+fun findRadius(pose: Pose2D, point: Pose2D): Double {
     return (point.translation - findCenter(pose, point)).mag() * getDirection(pose, point)
 }

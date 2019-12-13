@@ -1,23 +1,34 @@
 package ca.warp7.frc.trajectory
 
-import ca.warp7.frc.drive.ChassisState
 import ca.warp7.frc.f
-import ca.warp7.frc.geometry.ArcPose2D
+import ca.warp7.frc.geometry.Pose2D
+import ca.warp7.frc.geometry.Rotation2D
 
-class TrajectoryState(
-        val arcPose: ArcPose2D,
-        var v: Double = 0.0,
-        var w: Double = 0.0,
-        var dv: Double = 0.0,
-        var dw: Double = 0.0,
-        var ddv: Double = 0.0,
-        var ddw: Double = 0.0,
-        var t: Double = 0.0
-) {
+/**
+ * Defines a trajectory state, which is a point on a curved
+ * path with velocity information
+ */
+class TrajectoryState(val pose: Pose2D, val curvature: Double) {
+
+    @JvmField var v = 0.0
+    @JvmField var w = 0.0
+    @JvmField var dv = 0.0
+    @JvmField var dw = 0.0
+    @JvmField var ddv = 0.0
+    @JvmField var ddw = 0.0
+    @JvmField var t = 0.0
+
     override fun toString(): String {
-        return "T(t=${t.f}, $arcPose, v=${v.f}, ω=${w.f}, a=${dv.f}, dω=${dw.f}, j=${ddv.f}, ddω=${ddw.f})"
+        return "(t=${t.f}, $pose, k=${curvature.f}, v=${v.f}, ω=${w.f}, " +
+                "a=${dv.f}, dω=${dw.f}, j=${ddv.f}, ddω=${ddw.f})"
     }
 
-    val velocity get() = ChassisState(v, w)
-    val acceleration get() = ChassisState(dv, dw)
+    fun inverted(): TrajectoryState {
+        val h = pose.rotation
+        val s = TrajectoryState(Pose2D(pose.translation, Rotation2D(-h.cos, -h.sin)), -curvature)
+        s.v = -v
+        s.dv = -dv
+        s.t = t
+        return s
+    }
 }

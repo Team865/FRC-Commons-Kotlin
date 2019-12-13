@@ -1,7 +1,5 @@
 package ca.warp7.frc.path
 
-import ca.warp7.frc.f
-
 @Suppress("unused", "MemberVisibilityCanBePrivate", "CanBeParameter")
 data class QuinticSegment2D(
         val x0: Double,

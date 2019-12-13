@@ -1,14 +1,17 @@
 package ca.warp7.pathplanner
 
 import ca.warp7.frc.*
+import ca.warp7.frc.drive.ChassisState
 import ca.warp7.frc.drive.WheelState
-import ca.warp7.frc.geometry.*
+import ca.warp7.frc.geometry.Pose2D
+import ca.warp7.frc.geometry.Rotation2D
+import ca.warp7.frc.geometry.Translation2D
 import ca.warp7.frc.path.QuinticSegment2D
-import ca.warp7.frc.path.parameterized
+import ca.warp7.frc.trajectory.parameterized
 import ca.warp7.frc.path.quinticSplinesOf
 import ca.warp7.frc.path.sumDCurvature2
 import ca.warp7.frc.trajectory.TrajectoryState
-import ca.warp7.frc.trajectory.generateTrajectory
+import ca.warp7.frc.trajectory.parameterizeTrajectory
 import processing.core.PApplet
 import processing.core.PConstants
 import processing.core.PImage
@@ -54,7 +57,6 @@ class PathPlanner : PApplet() {
 
     var waypoints: Array<Pose2D> = emptyArray()
     var intermediate: List<QuinticSegment2D> = emptyList()
-    var splines: List<ArcPose2D> = emptyList()
     var trajectory: List<TrajectoryState> = emptyList()
     var controlPoints: MutableList<ControlPoint> = mutableListOf()
     var dynamics: List<Triple<WheelState, WheelState, Double>> = emptyList()
@@ -153,25 +155,27 @@ class PathPlanner : PApplet() {
             val dir = it.rotation.unit().translation()
             controlPoints.add(ControlPoint(pos, heading, dir))
         }
-        intermediate = quinticSplinesOf(*waypoints, optimizePath = optimizing)
+        intermediate = quinticSplinesOf(waypoints.toList(), optimizePath = optimizing)
         curvatureSum = intermediate.sumDCurvature2()
-        splines = intermediate.parameterized()
-        arcLength = splines.zipWithNext { a: ArcPose2D, b: ArcPose2D -> a.translation.distanceTo(b.translation) }.sum()
-        trajectory = generateTrajectory(splines, kEffectiveWheelBaseRadius,
+        trajectory = intermediate.parameterized()
+        arcLength = trajectory.zipWithNext { a: TrajectoryState, b: TrajectoryState ->
+            a.pose.translation.distanceTo(b.pose.translation)
+        }.sum()
+        parameterizeTrajectory(trajectory, kEffectiveWheelBaseRadius,
                 kMaxVelocity * maxVRatio,
                 kMaxAcceleration * maxARatio,
                 kMaxAcceleration * maxAcRatio,
                 if (jerkLimiting) 45.0 else Double.POSITIVE_INFINITY)
         trajectoryTime = trajectory.last().t
         dynamics = trajectory.map {
-            val velocity = it.velocity
-            val acceleration = it.acceleration
+            val velocity = ChassisState(it.v, it.w)
+            val acceleration = ChassisState(it.dv, it.dw)
             val wv = velocity.solve(kEffectiveWheelBaseRadius) * (217.5025513493939 / 1023 * 12)
             val wa = acceleration.solve(kEffectiveWheelBaseRadius) * (6.0 / 1023 * 12)
             Triple(WheelState(wv.left + wa.left, wv.right + wa.right),
                     WheelState(wv.left + wa.left, wv.right + wa.right), it.t)
         }
-        maxK = splines.maxBy { it.curvature.absoluteValue }?.curvature?.absoluteValue ?: 1.0
+        maxK = trajectory.maxBy { it.curvature.absoluteValue }?.curvature?.absoluteValue ?: 1.0
         maxAngular = trajectory.map { kotlin.math.abs(it.w) }.max() ?: 1.0
         maxAngularAcc = trajectory.map { kotlin.math.abs(it.dw) }.max() ?: 1.0
         redrawScreen()
@@ -264,25 +268,25 @@ class PathPlanner : PApplet() {
         redrawBackground()
 
         // draw the start of the curve
-        val s0 = splines.first()
-        val t0 = s0.translation
-        var normal = (s0.rotation.normal() * wheelBaseRadius).translation()
+        val s0 = trajectory.first()
+        val t0 = s0.pose.translation
+        var normal = (s0.pose.rotation.normal() * wheelBaseRadius).translation()
         var left = (t0 - normal).newXY
         var right = (t0 + normal).newXY
 
         strokeWeight(2f)
         stroke(0f, 255f, 0f)
-        val a0 = t0.newXY - Translation2D(robotLength, wheelBaseRadius).rotate(s0.rotation).newXYNoOffset
-        val b0 = t0.newXY + Translation2D(-robotLength, wheelBaseRadius).rotate(s0.rotation).newXYNoOffset
+        val a0 = t0.newXY - Translation2D(robotLength, wheelBaseRadius).rotate(s0.pose.rotation).newXYNoOffset
+        val b0 = t0.newXY + Translation2D(-robotLength, wheelBaseRadius).rotate(s0.pose.rotation).newXYNoOffset
         lineTo(a0, b0)
         lineTo(left, a0)
         lineTo(right, b0)
 
         // draw the curve
-        for (i in 1 until splines.size) {
-            val s = splines[i]
-            val t = s.translation
-            normal = (s.rotation.normal() * wheelBaseRadius).translation()
+        for (i in 1 until trajectory.size) {
+            val s = trajectory[i]
+            val t = s.pose.translation
+            normal = (s.pose.rotation.normal() * wheelBaseRadius).translation()
             val newLeft = (t - normal).newXY
             val newRight = (t + normal).newXY
             val kx = s.curvature.absoluteValue / maxK
@@ -297,11 +301,11 @@ class PathPlanner : PApplet() {
 
         // draw the end of the curve
 
-        val sf = splines.last()
+        val sf = trajectory.last()
         stroke(0f, 255f, 0f)
-        val tf = sf.translation.newXY
-        val af = tf - Translation2D(-robotLength, wheelBaseRadius).rotate(sf.rotation).newXYNoOffset
-        val bf = tf + Translation2D(robotLength, wheelBaseRadius).rotate(sf.rotation).newXYNoOffset
+        val tf = sf.pose.translation.newXY
+        val af = tf - Translation2D(-robotLength, wheelBaseRadius).rotate(sf.pose.rotation).newXYNoOffset
+        val bf = tf + Translation2D(robotLength, wheelBaseRadius).rotate(sf.pose.rotation).newXYNoOffset
         lineTo(af, bf)
         lineTo(left, af)
         lineTo(right, bf)
@@ -579,9 +583,9 @@ class PathPlanner : PApplet() {
             val thisMoment = trajectory[simIndex]
             val nextMoment = trajectory[simIndex + 1]
             val tx = (t - thisMoment.t) / (nextMoment.t - thisMoment.t)
-            val pos = thisMoment.arcPose.translation.interpolate(nextMoment.arcPose.translation, tx).newXY
-            val heading = thisMoment.arcPose.rotation.interpolate(nextMoment.arcPose.rotation, tx)
-            val curvature = linearInterpolate(thisMoment.arcPose.curvature, nextMoment.arcPose.curvature, tx)
+            val pos = thisMoment.pose.translation.interpolate(nextMoment.pose.translation, tx).newXY
+            val heading = thisMoment.pose.rotation.interpolate(nextMoment.pose.rotation, tx)
+            val curvature = linearInterpolate(thisMoment.curvature, nextMoment.curvature, tx)
             redrawScreen()
             if (curvature.isFinite() && curvature != 0.0) {
                 val radius = 1 / curvature

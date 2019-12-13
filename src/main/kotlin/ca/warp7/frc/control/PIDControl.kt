@@ -11,10 +11,11 @@ class PIDControl(
         val dtNormalizer: Double = 50.0,
         val maxOutput: Double = 1.0
 ) {
-    var lastError = 0.0
-    var dError = 0.0
-    var sumError = 0.0
-    var timeInEpsilon = 0.0
+    private var lastError = 0.0
+    private var dError = 0.0
+    private var sumError = 0.0
+    private var timeInEpsilon = 0.0
+
     var setpoint = 0.0
     var dt = 0.0
 

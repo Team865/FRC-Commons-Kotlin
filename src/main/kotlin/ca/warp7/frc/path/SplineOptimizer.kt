@@ -3,14 +3,16 @@ package ca.warp7.frc.path
 import ca.warp7.frc.geometry.*
 import kotlin.math.sqrt
 
-/**
- * @author Team 254
- */
 
-fun QuinticSegment2D.sumDCurvature2(): Double =
-        (0 until 100).sumByDouble { get(it / 100.0).dCurvatureSquared() }
+fun List<QuinticSegment2D>.sumDCurvature2(): Double = sumByDouble { segment ->
+    (0 until 100).sumByDouble { segment[it / 100.0].dCurvatureSquared() }
+}
 
-fun List<QuinticSegment2D>.sumDCurvature2(): Double = this.sumByDouble { it.sumDCurvature2() }
+fun fitParabola(p1: Translation2D, p2: Translation2D, p3: Translation2D): Double {
+    val a = p3.x * (p2.y - p1.y) + p2.x * (p1.y - p3.y) + p1.x * (p3.y - p2.y)
+    val b = p3.x * p3.x * (p1.y - p2.y) + p2.x * p2.x * (p3.y - p1.y) + p1.x * p1.x * (p2.y - p3.y)
+    return -b / (2 * a)
+}
 
 fun List<QuinticSegment2D>.optimized(): List<QuinticSegment2D> = toMutableList().apply { optimize() }
 
