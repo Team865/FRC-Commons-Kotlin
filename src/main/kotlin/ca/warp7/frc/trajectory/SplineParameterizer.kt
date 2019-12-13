@@ -1,9 +1,14 @@
-package ca.warp7.frc.path
+@file:JvmName("SplineParameterizer")
+
+package ca.warp7.frc.trajectory
 
 import ca.warp7.frc.geometry.Pose2D
 import ca.warp7.frc.geometry.Rotation2D
 import ca.warp7.frc.geometry.Translation2D
-import ca.warp7.frc.trajectory.TrajectoryState
+import ca.warp7.frc.path.Path2DState
+import ca.warp7.frc.path.QuinticSegment2D
+import ca.warp7.frc.path.get
+import ca.warp7.frc.path.quinticSplinesOf
 import kotlin.math.hypot
 
 fun parameterizedSplinesOf(waypoints: List<Pose2D>): List<TrajectoryState> =

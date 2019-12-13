@@ -1,7 +1,6 @@
 package ca.warp7.frc.trajectory
 
 import ca.warp7.frc.geometry.Pose2D
-import ca.warp7.frc.path.parameterizedSplinesOf
 import kotlin.system.measureNanoTime
 
 fun main() {
@@ -17,7 +16,7 @@ fun bench() {
                     listOf(Pose2D.identity, Pose2D(2.0 * i, i.toDouble(), 0.0))
             )
 //            t1 += (System.nanoTime() - b) / 1E9
-            timeParameterize(path, 1.0, 3.0, 2.5,
+            parameterizeTrajectory(path, 1.0, 3.0, 2.5,
                     20.0, Double.POSITIVE_INFINITY)
         }
     }

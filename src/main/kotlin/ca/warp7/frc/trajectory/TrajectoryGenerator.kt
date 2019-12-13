@@ -7,12 +7,8 @@ import kotlin.math.sqrt
 
 /**
  * Time parameterize a list of [TrajectoryState] with some drive train parameters.
- *
- * Formally, it generates a piecewise function T(t) that returns a [TrajectoryState],
- * with the maximum possible velocity, angular velocity, acceleration, and angular
- * acceleration for the elapsed time of the trajectory that does not violate the
- * limits of the differential drive math model, given a list of desired points.
- * The complexity based on path size is O(n).
+ * The complexity based on path size is O(n). It's usually quite fast compared to
+ * splitting paths
  *
  * The input path of this function can be generated from points with
  * [ca.warp7.frc.path.parameterizedSplinesOf]. For the best results, the points should be
@@ -51,7 +47,7 @@ import kotlin.math.sqrt
  *
  * @see TrajectoryState
  */
-fun timeParameterize(
+fun parameterizeTrajectory(
         states: List<TrajectoryState>, // (((x, y), θ), k, dk_ds)
         wheelbaseRadius: Double, // m
         maxVelocity: Double, // m/s

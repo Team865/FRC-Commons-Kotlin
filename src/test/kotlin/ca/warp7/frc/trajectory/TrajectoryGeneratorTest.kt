@@ -50,7 +50,7 @@ class TrajectoryGeneratorTest {
     }
 
     private fun generateNoJerkLimit(path: List<TrajectoryState>) {
-        timeParameterize(
+        parameterizeTrajectory(
                 states = path,
                 wheelbaseRadius = 1.0,
                 maxVelocity = 5.0,
@@ -61,7 +61,7 @@ class TrajectoryGeneratorTest {
     }
 
     private fun generateWithJerkLimit(path: List<TrajectoryState>) {
-        timeParameterize(
+        parameterizeTrajectory(
                 states = path,
                 wheelbaseRadius = 1.0,
                 maxVelocity = 5.0,

@@ -1,13 +1,15 @@
+@file:JvmName("QuickTurnGenerator")
+
 package ca.warp7.frc.trajectory
 
 import ca.warp7.frc.squared
 import kotlin.math.sqrt
 
 /**
- * This is a simple version of [timeParameterize]. Read more docs there.
+ * This is a simple version of [parameterizeTrajectory]. Read more docs there.
  * This only works for quick turning
  */
-fun generateQuickTurn(
+fun parameterizeQuickTurn(
         states: List<TrajectoryState>,
         maxAngularVelocity: Double, // m/s
         maxAngularAcceleration: Double // m/s^2

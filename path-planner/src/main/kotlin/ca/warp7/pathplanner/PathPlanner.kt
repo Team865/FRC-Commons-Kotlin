@@ -7,11 +7,11 @@ import ca.warp7.frc.geometry.Pose2D
 import ca.warp7.frc.geometry.Rotation2D
 import ca.warp7.frc.geometry.Translation2D
 import ca.warp7.frc.path.QuinticSegment2D
-import ca.warp7.frc.path.parameterized
+import ca.warp7.frc.trajectory.parameterized
 import ca.warp7.frc.path.quinticSplinesOf
 import ca.warp7.frc.path.sumDCurvature2
 import ca.warp7.frc.trajectory.TrajectoryState
-import ca.warp7.frc.trajectory.timeParameterize
+import ca.warp7.frc.trajectory.parameterizeTrajectory
 import processing.core.PApplet
 import processing.core.PConstants
 import processing.core.PImage
@@ -161,7 +161,7 @@ class PathPlanner : PApplet() {
         arcLength = trajectory.zipWithNext { a: TrajectoryState, b: TrajectoryState ->
             a.pose.translation.distanceTo(b.pose.translation)
         }.sum()
-        timeParameterize(trajectory, kEffectiveWheelBaseRadius,
+        parameterizeTrajectory(trajectory, kEffectiveWheelBaseRadius,
                 kMaxVelocity * maxVRatio,
                 kMaxAcceleration * maxARatio,
                 kMaxAcceleration * maxAcRatio,

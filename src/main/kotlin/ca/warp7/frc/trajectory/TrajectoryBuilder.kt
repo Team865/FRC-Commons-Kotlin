@@ -93,13 +93,13 @@ class TrajectoryBuilder {
     private fun generateTrajectory(path: List<QuinticSegment2D>): List<TrajectoryState> {
         val optimizedPath = if (optimizeDkSquared) path.optimized() else path
         val trajectory = optimizedPath.parameterized()
-        timeParameterize(trajectory, wheelbaseRadius,
+        parameterizeTrajectory(trajectory, wheelbaseRadius,
                 maxVelocity, maxAcceleration, maxCentripetalAcceleration, maxJerk)
         return trajectory
     }
 
     private fun generateQuickTurn(a: Pose2D, b: Pose2D): List<TrajectoryState> {
-        return generateQuickTurn(parameterizeQuickTurn(a.rotation, b.rotation),
+        return parameterizeQuickTurn(parameterizeQuickTurn(a.rotation, b.rotation),
                 maxVelocity / wheelbaseRadius,
                 maxAcceleration / wheelbaseRadius)
     }
