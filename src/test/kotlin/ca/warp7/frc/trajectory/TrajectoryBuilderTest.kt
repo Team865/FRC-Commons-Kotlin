@@ -10,12 +10,6 @@ class TrajectoryBuilderTest {
     @Test
     fun testBasicSteps() {
         val builder = TrajectoryBuilder()
-        assertEquals(1, builder.invertMultiplier)
-        assertEquals(1, builder.mirroredMultiplier)
-        builder.setInverted(true)
-        builder.setMirrored(true)
-        assertEquals(-1, builder.invertMultiplier)
-        assertEquals(-1, builder.mirroredMultiplier)
         builder.startAt(Pose2D.identity)
         builder.moveTo(Pose2D(1.0, 0.0, 0.0))
         assertEquals(2, builder.waypoints.size)

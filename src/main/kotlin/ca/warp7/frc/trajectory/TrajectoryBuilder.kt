@@ -1,7 +1,10 @@
 package ca.warp7.frc.trajectory
 
-import ca.warp7.frc.geometry.*
-import ca.warp7.frc.path.*
+import ca.warp7.frc.geometry.Pose2D
+import ca.warp7.frc.geometry.Rotation2D
+import ca.warp7.frc.path.QuinticSegment2D
+import ca.warp7.frc.path.optimized
+import ca.warp7.frc.path.quinticSplineFromPose
 
 @Suppress("MemberVisibilityCanBePrivate")
 class TrajectoryBuilder {
@@ -15,17 +18,10 @@ class TrajectoryBuilder {
     private var optimizeDkSquared = false
 
     internal val waypoints: MutableList<Pose2D> = mutableListOf()
-
-    internal var invertMultiplier = 1
-    internal var mirroredMultiplier = 1
-
+    internal var inverted = false
 
     fun setInverted(inverted: Boolean) = apply {
-        invertMultiplier = if (inverted) -1 else 1
-    }
-
-    fun setMirrored(mirrored: Boolean) = apply {
-        mirroredMultiplier = if (mirrored) -1 else 1
+        this.inverted = inverted
     }
 
     fun setWheelbaseRadius(metres: Double) = apply {

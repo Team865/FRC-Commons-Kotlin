@@ -58,21 +58,18 @@ class TrajectoryController(private val builder: TrajectoryBuilder) {
         val next = trajectory[index + 1]
         val x = if (last.t == next.t) 1.0 else (t - last.t) / (next.t - last.t)
 
-        val curvature = linearInterpolate(last.curvature, next.curvature, x) *
-                builder.mirroredMultiplier
-
+        val curvature = linearInterpolate(last.curvature, next.curvature, x)
         val position = last.pose.translation.interpolate(next.pose.translation, x)
-        val heading = last.pose.rotation.interpolate(next.pose.rotation, x) // TODO
-
+        val heading = last.pose.rotation.interpolate(next.pose.rotation, x)
         val state = TrajectoryState(Pose2D(position, heading), curvature)
 
-        state.v = builder.invertMultiplier * linearInterpolate(last.v, next.v, x)
-        state.dv = builder.invertMultiplier * linearInterpolate(last.dv, next.dv, x)
-        state.w = builder.mirroredMultiplier * linearInterpolate(last.w, next.w, x)
-        state.dw = builder.mirroredMultiplier * linearInterpolate(last.dw, next.dw, x)
+        state.v = linearInterpolate(last.v, next.v, x)
+        state.dv = linearInterpolate(last.dv, next.dv, x)
+        state.w = linearInterpolate(last.w, next.w, x)
+        state.dw = linearInterpolate(last.dw, next.dw, x)
         state.t = t
 
-        return state
+        return if (builder.inverted) state.inverted() else state
     }
 
     fun advanceTrajectory(dt: Double): TrajectoryState {
