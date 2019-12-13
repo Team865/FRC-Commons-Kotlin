@@ -17,7 +17,7 @@ fun bench() {
                     listOf(Pose2D.identity, Pose2D(2.0 * i, i.toDouble(), 0.0))
             )
 //            t1 += (System.nanoTime() - b) / 1E9
-            generateTrajectory(path, 1.0, 3.0, 2.5,
+            timeParameterize(path, 1.0, 3.0, 2.5,
                     20.0, Double.POSITIVE_INFINITY)
         }
     }

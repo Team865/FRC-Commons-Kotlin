@@ -1,7 +1,6 @@
 package ca.warp7.frc.trajectory
 
-import ca.warp7.frc.epsilonEquals
-import ca.warp7.frc.geometry.*
+import ca.warp7.frc.geometry.Pose2D
 import ca.warp7.frc.linearInterpolate
 import java.util.concurrent.FutureTask
 
@@ -59,21 +58,18 @@ class TrajectoryController(private val builder: TrajectoryBuilder) {
         val next = trajectory[index + 1]
         val x = if (last.t == next.t) 1.0 else (t - last.t) / (next.t - last.t)
 
-        val curvature = linearInterpolate(last.arcPose.curvature, next.arcPose.curvature, x) *
+        val curvature = linearInterpolate(last.curvature, next.curvature, x) *
                 builder.mirroredMultiplier
 
-        val position = last.arcPose.translation.interpolate(next.arcPose.translation, x)
+        val position = last.pose.translation.interpolate(next.pose.translation, x)
+        val heading = last.pose.rotation.interpolate(next.pose.rotation, x) // TODO
 
-        val heading = last.arcPose.rotation.interpolate(next.arcPose.rotation, x)
-                .translation().scaled(builder.invertMultiplier.toDouble()).direction()
-
-        val pose = ArcPose2D(Pose2D(position, heading), curvature)
-        val state = TrajectoryState(pose)
+        val state = TrajectoryState(Pose2D(position, heading), curvature)
 
         state.v = builder.invertMultiplier * linearInterpolate(last.v, next.v, x)
         state.dv = builder.invertMultiplier * linearInterpolate(last.dv, next.dv, x)
         state.w = builder.mirroredMultiplier * linearInterpolate(last.w, next.w, x)
-        state.dw =  builder.mirroredMultiplier * linearInterpolate(last.dw, next.dw, x)
+        state.dw = builder.mirroredMultiplier * linearInterpolate(last.dw, next.dw, x)
         state.t = t
 
         return state

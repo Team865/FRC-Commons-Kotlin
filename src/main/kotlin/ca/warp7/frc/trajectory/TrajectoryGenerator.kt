@@ -2,13 +2,11 @@
 
 package ca.warp7.frc.trajectory
 
-import ca.warp7.frc.geometry.ArcPose2D
 import kotlin.math.abs
 import kotlin.math.sqrt
 
 /**
- * Generates a list of timed [TrajectoryState] for a differential drive robot,
- * based on a list of [ArcPose2D] and drive train parameters.
+ * Time parameterize a list of [TrajectoryState] with some drive train parameters.
  *
  * Formally, it generates a piecewise function T(t) that returns a [TrajectoryState],
  * with the maximum possible velocity, angular velocity, acceleration, and angular
@@ -32,7 +30,7 @@ import kotlin.math.sqrt
  * 5. Apply a ramped acceleration pass to limit jerk
  * 6. Integrate dt of each state into total trajectory time
  *
- * @param path the target path of the trajectory.
+ * @param states the target path of the trajectory.
  *
  * @param wheelbaseRadius the effect wheel base radius in metres
  *
@@ -52,32 +50,27 @@ import kotlin.math.sqrt
  * be passed instead to disable jerk limiting
  *
  * @see TrajectoryState
- * @see ArcPose2D
- *
- * @return a list of timed trajectory points
  */
-fun generateTrajectory(
-        path: List<ArcPose2D>, // (((x, y), θ), k, dk_ds)
+fun timeParameterize(
+        states: List<TrajectoryState>, // (((x, y), θ), k, dk_ds)
         wheelbaseRadius: Double, // m
         maxVelocity: Double, // m/s
         maxAcceleration: Double, // m/s^2
         maxCentripetalAcceleration: Double, // s^-1
         maxJerk: Double // m/s^3
-): List<TrajectoryState> {
-    // If path is empty, returns an empty trajectory
-    if (path.isEmpty()) {
-        return emptyList()
+) {
+    // If path is empty, return directly
+    if (states.isEmpty()) {
+        return
     }
 
     // Make sure the first state doesn't have infinite curvature
-    require(path.first().curvature.isFinite()) {
+    require(states.first().curvature.isFinite()) {
         "Infinite curvature is not allowed in the trajectory generator"
     }
 
-    // Create result states
-    val states = path.map { point -> TrajectoryState(point) }
     // Step 1
-    val arcLengths = computeArcLengths(path)
+    val arcLengths = computeArcLengths(states)
     // Step 2
     forwardPass(states, arcLengths, wheelbaseRadius, maxVelocity, maxAcceleration, maxCentripetalAcceleration)
     // Step 3
@@ -90,7 +83,6 @@ fun generateTrajectory(
     }
     // Step 6
     integrationPass(states)
-    return states
 }
 
 
@@ -98,13 +90,13 @@ fun generateTrajectory(
  * Compute arc length between each pair of poses in the path
  */
 internal fun computeArcLengths(
-        path: List<ArcPose2D> // (((x, y), θ), k, dk_ds)
+        states: List<TrajectoryState> // (((x, y), θ), k, dk_ds)
 ): List<Double> {
     // zipWithNext maps consecutive states in a list
-    return path.zipWithNext { current, next ->
+    return states.zipWithNext { current, next ->
 
         // Check that the path is actually a  path
-        require(!current.translation.epsilonEquals(next.translation)) {
+        require(!current.pose.translation.epsilonEquals(next.pose.translation)) {
             "Two points cannot contain the same translation in the trajectory generator"
         }
 
@@ -123,7 +115,7 @@ internal fun computeArcLengths(
         // Returns the linear distance in metres
 
         // Get the chord length (translational distance)
-        current.translation.distanceTo(next.translation)
+        current.pose.translation.distanceTo(next.pose.translation)
     }
 }
 
@@ -149,7 +141,7 @@ private fun forwardPass(
         val current = states[i]
         val next = states[i + 1]
 
-        val k = abs(next.arcPose.curvature)
+        val k = abs(next.curvature)
 
         // Velocity constrained by these equations:
         // eqn 1. w = (right - left) / (2 * L)
@@ -237,7 +229,7 @@ private fun accumulativePass(states: List<TrajectoryState>) {
         current.dv = (current.v - last.v) / current.t
 
         // Calculate angular velocity
-        current.w = current.v * current.arcPose.curvature
+        current.w = current.v * current.curvature
 
         // Calculate angular acceleration
         current.dw = (current.w - last.w) / current.t

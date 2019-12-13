@@ -1,21 +1,24 @@
 package ca.warp7.frc.path
 
-import ca.warp7.frc.geometry.ArcPose2D
 import ca.warp7.frc.geometry.Pose2D
 import ca.warp7.frc.geometry.Rotation2D
 import ca.warp7.frc.geometry.Translation2D
+import ca.warp7.frc.trajectory.TrajectoryState
 import kotlin.math.hypot
 
-fun List<QuinticSegment2D>.parameterized(): List<ArcPose2D> {
-    val points = mutableListOf<ArcPose2D>()
+fun parameterizedSplinesOf(waypoints: List<Pose2D>): List<TrajectoryState> =
+        quinticSplinesOf(waypoints).parameterized()
+
+fun List<QuinticSegment2D>.parameterized(): List<TrajectoryState> {
+    val points = mutableListOf<TrajectoryState>()
     val p0 = first()[0.0]
-    points.add(ArcPose2D(p0.pose(), p0.curvature()))
+    points.add(TrajectoryState(p0.pose(), p0.curvature()))
     forEach { points.addAll(it.parameterized()) }
     return points
 }
 
-fun QuinticSegment2D.parameterized(): List<ArcPose2D> {
-    val points = mutableListOf<ArcPose2D>()
+fun QuinticSegment2D.parameterized(): List<TrajectoryState> {
+    val points = mutableListOf<TrajectoryState>()
     parameterize(points, 0.0, 1.0)
     return points
 }
@@ -32,7 +35,7 @@ fun QuinticSegment2D.getPose(t: Double): Pose2D {
 }
 
 fun QuinticSegment2D.parameterize(
-        points: MutableList<ArcPose2D>,
+        points: MutableList<TrajectoryState>,
         t0: Double,
         t1: Double
 ) {
@@ -43,6 +46,29 @@ fun QuinticSegment2D.parameterize(
         parameterize(points, t0, (t0 + t1) / 2.0)
         parameterize(points, (t0 + t1) / 2.0, t1)
     } else {
-        points.add(ArcPose2D(statePose, state.curvature()))
+        points.add(TrajectoryState(statePose, state.curvature()))
+    }
+}
+
+fun parameterizeQuickTurn(a: Rotation2D, b: Rotation2D): List<TrajectoryState> {
+    val startingAngle = a.radians()
+    val theta = (b - a).radians()
+    require(theta != 0.0) {
+        "QuickTurn Generator - Two points are the same"
+    }
+    val quickTurnAngles = mutableListOf<Rotation2D>()
+    var x = 0.0
+    return if (theta > 0) {
+        while (x < theta) {
+            x += 0.1
+            quickTurnAngles.add(Rotation2D.fromRadians(startingAngle + x))
+        }
+        quickTurnAngles.map { TrajectoryState(Pose2D(a.translation(), it), Double.POSITIVE_INFINITY) }
+    } else {
+        while (x > theta) {
+            x -= 0.1
+            quickTurnAngles.add(Rotation2D.fromRadians(startingAngle + x))
+        }
+        quickTurnAngles.map { TrajectoryState(Pose2D(a.translation(), it), Double.NEGATIVE_INFINITY) }
     }
 }

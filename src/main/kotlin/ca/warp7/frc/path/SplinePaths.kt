@@ -38,29 +38,3 @@ fun quinticSplinesOf(
     }
     return if (optimizePath) path.optimized() else path
 }
-
-fun parameterizedSplinesOf(waypoints: List<Pose2D>): List<ArcPose2D> =
-        quinticSplinesOf(waypoints).parameterized()
-
-fun parameterizeQuickTurn(a: Rotation2D, b: Rotation2D): List<ArcPose2D> {
-    val startingAngle = a.radians()
-    val theta = (b - a).radians()
-    require(theta != 0.0) {
-        "QuickTurn Generator - Two points are the same"
-    }
-    val quickTurnAngles = mutableListOf<Rotation2D>()
-    var x = 0.0
-    return if (theta > 0) {
-        while (x < theta) {
-            x += 0.1
-            quickTurnAngles.add(Rotation2D.fromRadians(startingAngle + x))
-        }
-        quickTurnAngles.map { ArcPose2D(Pose2D(a.translation(), it), Double.POSITIVE_INFINITY) }
-    } else {
-        while (x > theta) {
-            x -= 0.1
-            quickTurnAngles.add(Rotation2D.fromRadians(startingAngle + x))
-        }
-        quickTurnAngles.map { ArcPose2D(Pose2D(a.translation(), it), Double.NEGATIVE_INFINITY) }
-    }
-}

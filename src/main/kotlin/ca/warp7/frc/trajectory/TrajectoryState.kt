@@ -1,11 +1,15 @@
 package ca.warp7.frc.trajectory
 
-import ca.warp7.frc.drive.ChassisState
 import ca.warp7.frc.f
-import ca.warp7.frc.geometry.ArcPose2D
+import ca.warp7.frc.geometry.Pose2D
 
+/**
+ * Defines a trajectory state, which is a point on a curved
+ * path with velocity information
+ */
 class TrajectoryState(
-        val arcPose: ArcPose2D
+        val pose: Pose2D,
+        val curvature: Double
 ) {
 
     var v: Double = 0.0
@@ -17,9 +21,6 @@ class TrajectoryState(
     var t: Double = 0.0
 
     override fun toString(): String {
-        return "T(t=${t.f}, $arcPose, v=${v.f}, ω=${w.f}, a=${dv.f}, dω=${dw.f}, j=${ddv.f}, ddω=${ddw.f})"
+        return "(t=${t.f}, $pose, k=${curvature.f}, v=${v.f}, ω=${w.f}, a=${dv.f}, dω=${dw.f}, j=${ddv.f}, ddω=${ddw.f})"
     }
-
-    val velocity get() = ChassisState(v, w)
-    val acceleration get() = ChassisState(dv, dw)
 }

@@ -1,30 +1,28 @@
 package ca.warp7.frc.trajectory
 
-import ca.warp7.frc.geometry.ArcPose2D
 import ca.warp7.frc.squared
 import kotlin.math.sqrt
 
 /**
- * This is a simple version of [generateTrajectory]. Read more docs there.
+ * This is a simple version of [timeParameterize]. Read more docs there.
  * This only works for quick turning
  */
 fun generateQuickTurn(
-        path: List<ArcPose2D>,
+        states: List<TrajectoryState>,
         maxAngularVelocity: Double, // m/s
         maxAngularAcceleration: Double // m/s^2
 ): List<TrajectoryState> {
     // If path is empty, returns an empty trajectory
-    if (path.isEmpty()) {
+    if (states.isEmpty()) {
         return emptyList()
     }
 
     // Make sure the first state doesn't have infinite curvature
-    require(path.first().curvature.isInfinite()) {
+    require(states.first().curvature.isInfinite()) {
         "Normal curvature is not allowed in the quick turn generator"
     }
 
-    val states = path.map { point -> TrajectoryState(point) }
-    val angles = computeAngles(path)
+    val angles = computeAngles(states)
     angularForwardPass(states, angles, maxAngularVelocity, maxAngularAcceleration)
     angularReversePass(states, angles, maxAngularAcceleration)
     accumulativePass(states)
@@ -32,15 +30,15 @@ fun generateQuickTurn(
     return states
 }
 
-private fun computeAngles(path: List<ArcPose2D>): List<Double> {
-    return path.zipWithNext { current, next ->
+private fun computeAngles(states: List<TrajectoryState>): List<Double> {
+    return states.zipWithNext { current, next ->
 
         // Check that the path is actually a  path
-        require(current.translation.epsilonEquals(next.translation)) {
+        require(current.pose.translation.epsilonEquals(next.pose.translation)) {
             "Multiple translations not allowed in the quick turn generator"
         }
 
-        current.rotation.distanceTo(next.rotation)
+        current.pose.rotation.distanceTo(next.pose.rotation)
     }
 }
 
