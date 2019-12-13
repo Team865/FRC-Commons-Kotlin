@@ -1,4 +1,5 @@
 @file:Suppress("unused")
+@file:JvmName("SplinePaths")
 
 package ca.warp7.frc.path
 

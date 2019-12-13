@@ -25,9 +25,7 @@ class Pose2DTest {
         val initial = Pose2D(0.0, 0.0, Rotation2D.fromDegrees(45.0))
         val last = Pose2D(5.0, 5.0, Rotation2D.fromDegrees(45.0))
 
-//        val finalRelativeToInitial = last.relativeTo(initial)
         val finalRelativeToInitial = last - initial
-
 
         assertEquals( 5.0 * sqrt(2.0), finalRelativeToInitial.translation.x, kEpsilon)
         assertEquals(0.0, finalRelativeToInitial.translation.y, kEpsilon)

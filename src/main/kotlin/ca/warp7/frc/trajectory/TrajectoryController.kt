@@ -17,9 +17,6 @@ class TrajectoryController(private val builder: TrajectoryBuilder) {
     var totalTime = 0.0
         private set
 
-    var initialState: Pose2D = Pose2D.identity
-        private set
-
     private var trajectoryGenerator: FutureTask<List<TrajectoryState>>? = null
 
     var generationTimeMs = 0
@@ -50,23 +47,6 @@ class TrajectoryController(private val builder: TrajectoryBuilder) {
         return true
     }
 
-    fun updateInitialState(robotState: Pose2D) {
-        val firstState = trajectory.first().arcPose
-        initialState = Pose2D((robotState.translation - firstState.translation).rotate(firstState.rotation.inverse),
-                robotState.rotation - firstState.rotation)
-    }
-
-    fun getInitialToRobot(robotState: Pose2D): Pose2D {
-        return Pose2D((robotState.translation - initialState.translation)
-                .rotate(initialState.rotation.inverse), robotState.rotation - initialState.rotation)
-    }
-
-    fun getError(robotState: Pose2D, setpoint: ArcPose2D): Pose2D {
-        val initialToRobot = getInitialToRobot(robotState)
-        return Pose2D((setpoint.translation - initialToRobot.translation)
-                .rotate(initialToRobot.rotation.inverse), setpoint.rotation - initialToRobot.rotation)
-    }
-
     /**
      * Get an interpolated view
      *
@@ -77,12 +57,7 @@ class TrajectoryController(private val builder: TrajectoryBuilder) {
         while (index < trajectory.size - 2 && trajectory[index + 1].t < t) index++
         val last = trajectory[index]
         val next = trajectory[index + 1]
-        val x = if (last.t.epsilonEquals(next.t)) 1.0 else (t - last.t) / (next.t - last.t)
-
-        val v = builder.invertMultiplier * linearInterpolate(last.v, next.v, x)
-        val dv = builder.invertMultiplier * linearInterpolate(last.dv, next.dv, x)
-        val w = builder.mirroredMultiplier * linearInterpolate(last.w, next.w, x)
-        val dw = builder.mirroredMultiplier * linearInterpolate(last.dw, next.dw, x)
+        val x = if (last.t == next.t) 1.0 else (t - last.t) / (next.t - last.t)
 
         val curvature = linearInterpolate(last.arcPose.curvature, next.arcPose.curvature, x) *
                 builder.mirroredMultiplier
@@ -93,8 +68,15 @@ class TrajectoryController(private val builder: TrajectoryBuilder) {
                 .translation().scaled(builder.invertMultiplier.toDouble()).direction()
 
         val pose = ArcPose2D(Pose2D(position, heading), curvature)
+        val state = TrajectoryState(pose)
 
-        return TrajectoryState(pose, v, w, dv, dw, 0.0, 0.0, t)
+        state.v = builder.invertMultiplier * linearInterpolate(last.v, next.v, x)
+        state.dv = builder.invertMultiplier * linearInterpolate(last.dv, next.dv, x)
+        state.w = builder.mirroredMultiplier * linearInterpolate(last.w, next.w, x)
+        state.dw =  builder.mirroredMultiplier * linearInterpolate(last.dw, next.dw, x)
+        state.t = t
+
+        return state
     }
 
     fun advanceTrajectory(dt: Double): TrajectoryState {
