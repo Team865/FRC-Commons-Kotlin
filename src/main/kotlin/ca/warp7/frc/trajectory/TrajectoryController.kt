@@ -9,15 +9,11 @@ class TrajectoryController(private val builder: TrajectoryBuilder) {
 
     var t = 0.0
         private set
-
     var trajectory: List<TrajectoryState> = listOf()
         private set
-
     var totalTime = 0.0
         private set
-
     private var trajectoryGenerator: FutureTask<List<TrajectoryState>>? = null
-
     var generationTimeMs = 0
 
     fun initTrajectory() {
