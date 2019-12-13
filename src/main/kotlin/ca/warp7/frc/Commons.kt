@@ -1,7 +1,3 @@
-/**
- * Commons.kt --- common values and functions
- */
-
 @file:JvmName("Util")
 
 package ca.warp7.frc

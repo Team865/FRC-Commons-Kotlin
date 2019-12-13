@@ -35,7 +35,7 @@ class Twist2D(val dx: Double, val dy: Double, val dTheta: Double) {
     }
 
     override fun equals(other: Any?): Boolean {
-        if (other !is Twist2D) return false;
+        if (other !is Twist2D) return false
         return dx == other.dx && dy == other.dy && dTheta == other.dTheta
     }
 

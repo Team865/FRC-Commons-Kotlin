@@ -1,8 +1,6 @@
 package ca.warp7.frc.log
 
-import java.io.BufferedWriter
 import java.io.File
-import java.io.FileWriter
 import java.io.PrintWriter
 import java.text.SimpleDateFormat
 import java.util.*

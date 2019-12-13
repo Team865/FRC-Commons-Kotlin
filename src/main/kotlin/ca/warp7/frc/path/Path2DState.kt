@@ -38,7 +38,7 @@ data class Path2DState(
         return num / (dx2dy2 * dx2dy2 * sqrt(dx2dy2))
     }
 
-    @Suppress("PropertyName")
+    @Suppress("FunctionName")
     fun dCurvature_dS(): Double = dCurvature() / hypot(vx, vy)
 
     fun dCurvatureSquared(): Double {

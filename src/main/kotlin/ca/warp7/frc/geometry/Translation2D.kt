@@ -4,7 +4,7 @@ import ca.warp7.frc.epsilonEquals
 import ca.warp7.frc.f
 import kotlin.math.hypot
 
-//Translation2D can often be used as mathimatical vector.
+//Translation2D can often be used as mathematical vector.
 
 @Suppress("MemberVisibilityCanBePrivate")
 class Translation2D(val x: Double, val y: Double) {
