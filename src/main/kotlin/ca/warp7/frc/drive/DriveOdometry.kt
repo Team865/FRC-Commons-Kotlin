@@ -41,10 +41,9 @@ class DriveOdometry(
 
     /**
      * Updates the robot position on the field using distance measurements from encoders. This
-     * method is more numerically accurate than using velocities to integrate the pose and
-     * is also advantageous for teams that are using lower CPR encoders.
+     * method is more numerically accurate than using velocities to integrate the pose
      *
-     * @param gyroAngle           The angle reported by the gyroscope.
+     * @param gyroAngle  The angle reported by the gyroscope.
      * @param deltaLeft  The distance traveled by the left encoder.
      * @param deltaRight The distance traveled by the right encoder.
      * @return The new pose of the robot.
@@ -52,12 +51,13 @@ class DriveOdometry(
     fun update(gyroAngle: Rotation2D, deltaLeft: Double, deltaRight: Double): Pose2D {
 
         val averageDeltaDistance = (deltaLeft + deltaRight) / 2.0
-        val angle = gyroAngle.plus(gyroOffset)
+        val angle = gyroAngle + gyroOffset
 
-        val newPose = pose + Twist2D(averageDeltaDistance, 0.0, (angle - prevAngle).radians()).exp()
+        val newPose = pose + Twist2D(averageDeltaDistance,
+                0.0, (angle - prevAngle).radians()).exp()
         prevAngle = angle
 
         pose = Pose2D(newPose.translation, angle)
-        return pose;
+        return pose
     }
 }

@@ -95,7 +95,7 @@ class TrajectoryBuilder {
     }
 
     private fun generateQuickTurn(a: Pose2D, b: Pose2D): List<TrajectoryState> {
-        return parameterizeQuickTurn(parameterizeQuickTurn(a.rotation, b.rotation),
+        return parameterizeQuickTurn(parameterizeRotation(a.rotation, b.rotation),
                 maxVelocity / wheelbaseRadius,
                 maxAcceleration / wheelbaseRadius)
     }
