@@ -12,15 +12,16 @@ class TrajectoryState(
         val curvature: Double
 ) {
 
-    var v: Double = 0.0
-    var w: Double = 0.0
-    var dv: Double = 0.0
-    var dw: Double = 0.0
-    var ddv: Double = 0.0
-    var ddw: Double = 0.0
-    var t: Double = 0.0
+    @JvmField var v = 0.0
+    @JvmField var w = 0.0
+    @JvmField var dv = 0.0
+    @JvmField var dw = 0.0
+    @JvmField var ddv = 0.0
+    @JvmField var ddw = 0.0
+    @JvmField var t = 0.0
 
     override fun toString(): String {
-        return "(t=${t.f}, $pose, k=${curvature.f}, v=${v.f}, ω=${w.f}, a=${dv.f}, dω=${dw.f}, j=${ddv.f}, ddω=${ddw.f})"
+        return "(t=${t.f}, $pose, k=${curvature.f}, v=${v.f}, ω=${w.f}, " +
+                "a=${dv.f}, dω=${dw.f}, j=${ddv.f}, ddω=${ddw.f})"
     }
 }

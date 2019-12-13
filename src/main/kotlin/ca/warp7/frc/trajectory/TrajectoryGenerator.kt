@@ -11,8 +11,8 @@ import kotlin.math.sqrt
  * splitting paths
  *
  * The input path of this function can be generated from points with
- * [ca.warp7.frc.path.parameterizedSplinesOf]. For the best results, the points should be
- * relatively close to one another.
+ * [ca.warp7.frc.trajectory.parameterizedSplinesOf]. For the best results, the points
+ * should be relatively close to one another.
  *
  * The path should not contain consecutive points on the same location because this algorithm
  * does not support turning in place (if that's included it would make the code more difficult
