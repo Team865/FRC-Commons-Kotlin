@@ -54,12 +54,12 @@ fun parameterizeQuickTurn(a: Rotation2D, b: Rotation2D): List<ArcPose2D> {
             x += 0.1
             quickTurnAngles.add(Rotation2D.fromRadians(startingAngle + x))
         }
-        quickTurnAngles.map { ArcPose2D(Pose2D(a.translation(), it), Double.POSITIVE_INFINITY, 0.0) }
+        quickTurnAngles.map { ArcPose2D(Pose2D(a.translation(), it), Double.POSITIVE_INFINITY) }
     } else {
         while (x > theta) {
             x -= 0.1
             quickTurnAngles.add(Rotation2D.fromRadians(startingAngle + x))
         }
-        quickTurnAngles.map { ArcPose2D(Pose2D(a.translation(), it), Double.NEGATIVE_INFINITY, 0.0) }
+        quickTurnAngles.map { ArcPose2D(Pose2D(a.translation(), it), Double.NEGATIVE_INFINITY) }
     }
 }

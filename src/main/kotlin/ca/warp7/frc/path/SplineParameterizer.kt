@@ -9,7 +9,7 @@ import kotlin.math.hypot
 fun List<QuinticSegment2D>.parameterized(): List<ArcPose2D> {
     val points = mutableListOf<ArcPose2D>()
     val p0 = first()[0.0]
-    points.add(ArcPose2D(p0.pose(), p0.curvature(), 0.0))
+    points.add(ArcPose2D(p0.pose(), p0.curvature()))
     forEach { points.addAll(it.parameterized()) }
     return points
 }
@@ -43,6 +43,6 @@ fun QuinticSegment2D.parameterize(
         parameterize(points, t0, (t0 + t1) / 2.0)
         parameterize(points, (t0 + t1) / 2.0, t1)
     } else {
-        points.add(ArcPose2D(statePose, state.curvature(), 0.0))
+        points.add(ArcPose2D(statePose, state.curvature()))
     }
 }

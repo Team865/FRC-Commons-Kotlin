@@ -14,13 +14,13 @@ class TrajectoryGeneratorTest {
 
     private fun createStraightLinePath(): List<ArcPose2D> {
         return (0..10).map {
-            ArcPose2D(Pose2D(it / 10.0, 0.0, Rotation2D.identity), 0.0, 0.0)
+            ArcPose2D(Pose2D(it / 10.0, 0.0, Rotation2D.identity), 0.0)
         }
     }
 
     private fun createStraightLinePathLong(): List<ArcPose2D> {
         return (0..100).map {
-            ArcPose2D(Pose2D(it / 10.0, 0.0, Rotation2D.identity), 0.0, 0.0)
+            ArcPose2D(Pose2D(it / 10.0, 0.0, Rotation2D.identity), 0.0)
         }
     }
 
@@ -102,7 +102,7 @@ class TrajectoryGeneratorTest {
 
     @Test
     fun testSinglePathInput() {
-        val path = listOf(ArcPose2D(Pose2D.identity, 0.0, 0.0))
+        val path = listOf(ArcPose2D(Pose2D.identity, 0.0))
         val trajectory = generateNoJerkLimit(path)
         assertEquals(0.0, trajectory.first().t)
         checkInputPathMatchesOutput(path, trajectory)
@@ -110,7 +110,7 @@ class TrajectoryGeneratorTest {
 
     @Test
     fun testSingleInfCurvatureInput() {
-        val path = listOf(ArcPose2D(Pose2D.identity, Double.POSITIVE_INFINITY, 0.0))
+        val path = listOf(ArcPose2D(Pose2D.identity, Double.POSITIVE_INFINITY))
         assertThrows<IllegalArgumentException> {
             generateNoJerkLimit(path)
         }
@@ -119,16 +119,16 @@ class TrajectoryGeneratorTest {
     @Test
     fun testMultiInfCurvatureInput() {
         val path = listOf(
-                ArcPose2D(Pose2D.identity, 0.0, 0.0),
-                ArcPose2D(Pose2D(1.0, 0.0, Rotation2D.identity), Double.POSITIVE_INFINITY, 0.0))
+                ArcPose2D(Pose2D.identity, 0.0),
+                ArcPose2D(Pose2D(1.0, 0.0, Rotation2D.identity), Double.POSITIVE_INFINITY))
         assertThrows<IllegalArgumentException> { generateNoJerkLimit(path) }
     }
 
     @Test
     fun testMultiSamePositionInput() {
         val path = listOf(
-                ArcPose2D(Pose2D.identity, 0.0, 0.0),
-                ArcPose2D(Pose2D.identity, 0.0, 0.0))
+                ArcPose2D(Pose2D.identity, 0.0),
+                ArcPose2D(Pose2D.identity, 0.0))
         assertThrows<IllegalArgumentException> { generateNoJerkLimit(path) }
     }
 }
