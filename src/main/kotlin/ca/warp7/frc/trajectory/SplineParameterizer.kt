@@ -60,9 +60,9 @@ fun QuinticSegment2D.parameterize(
  *
  * Uses degrees because this makes printing much easier to read
  */
-fun parameterizeRotation(a: Rotation2D, b: Rotation2D): List<TrajectoryState> {
-    val startingAngle = a.degrees()
-    val theta = (b - a).degrees()
+fun parameterizeRotation(a: Pose2D, b: Pose2D): List<TrajectoryState> {
+    val startingAngle = a.rotation.degrees()
+    val theta = (b - a).rotation.degrees()
     require(theta != 0.0) {
         "QuickTurn Generator - Two points are the same"
     }
@@ -73,14 +73,14 @@ fun parameterizeRotation(a: Rotation2D, b: Rotation2D): List<TrajectoryState> {
             quickTurnAngles.add(Rotation2D.fromDegrees(startingAngle + x))
             x += 5
         }
-        quickTurnAngles.add(b)
-        quickTurnAngles.map { TrajectoryState(Pose2D(a.translation(), it), Double.POSITIVE_INFINITY) }
+        quickTurnAngles.add(b.rotation)
+        quickTurnAngles.map { TrajectoryState(Pose2D(a.translation, it), Double.POSITIVE_INFINITY) }
     } else {
         while (x > theta) {
             quickTurnAngles.add(Rotation2D.fromDegrees(startingAngle + x))
             x -= 5
         }
-        quickTurnAngles.add(b)
-        quickTurnAngles.map { TrajectoryState(Pose2D(a.translation(), it), Double.NEGATIVE_INFINITY) }
+        quickTurnAngles.add(b.rotation)
+        quickTurnAngles.map { TrajectoryState(Pose2D(a.translation, it), Double.NEGATIVE_INFINITY) }
     }
 }

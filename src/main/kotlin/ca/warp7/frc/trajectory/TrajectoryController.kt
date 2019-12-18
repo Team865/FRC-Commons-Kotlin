@@ -19,7 +19,7 @@ class TrajectoryController(private val builder: TrajectoryBuilder) {
     fun initTrajectory() {
         val generator = FutureTask {
             val startTime = System.nanoTime()
-            val t = builder.generatePathAndTrajectory()
+            val t = builder.generateTrajectory()
             generationTimeMs = ((System.nanoTime() - startTime) / 1E6).toInt()
             t
         }

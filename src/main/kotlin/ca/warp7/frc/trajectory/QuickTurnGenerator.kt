@@ -3,6 +3,7 @@
 package ca.warp7.frc.trajectory
 
 import ca.warp7.frc.squared
+import kotlin.math.abs
 import kotlin.math.sqrt
 
 /**
@@ -35,12 +36,14 @@ fun parameterizeQuickTurn(
 private fun computeAngles(states: List<TrajectoryState>): List<Double> {
     return states.zipWithNext { current, next ->
 
-        // Check that the path is actually a  path
+        // Check that the path is not actually a  path
         require(current.pose.translation.epsilonEquals(next.pose.translation)) {
             "Multiple translations not allowed in the quick turn generator"
         }
 
-        current.pose.rotation.distanceTo(next.pose.rotation)
+        // Absolute value because distanceTo could return negative when
+        // turning towards the right (negative angle)
+        abs(current.pose.rotation.distanceTo(next.pose.rotation))
     }
 }
 
