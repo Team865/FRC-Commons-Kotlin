@@ -1,5 +1,6 @@
 @file:Suppress("UnusedImport", "SpellCheckingInspection")
 
+import org.javamodularity.moduleplugin.extensions.TestModuleOptions
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -8,6 +9,9 @@ plugins {
     kotlin("jvm") version "1.3.60"
     `maven-publish`
     id("org.jetbrains.dokka") version "0.10.0"
+    id("org.javamodularity.moduleplugin") version "1.6.0"
+    id("org.openjfx.javafxplugin") version "0.0.9-SNAPSHOT" apply false
+    id ("org.beryx.jlink") version "2.16.4" apply false
 }
 
 repositories {
@@ -30,6 +34,9 @@ tasks.withType<KotlinCompile> {
 }
 
 tasks.withType<Test> {
+    extensions.configure(TestModuleOptions::class.java) {
+        runOnClasspath = true
+    }
     useJUnitPlatform {
     }
 }
@@ -42,14 +49,6 @@ dependencies {
     testRuntimeOnly(group = "org.junit.jupiter", name = "junit-jupiter-engine", version = "5.5.1")
     testRuntimeOnly(group = "org.junit.platform", name = "junit-platform-launcher", version = "1.5.1")
 }
-
-
-tasks.jar {
-    manifest {
-        attributes("Automatic-Module-Name" to "ca.warp_seven.frc")
-    }
-}
-
 
 val sourcesJar by tasks.registering(Jar::class) {
     archiveClassifier.set("sources")

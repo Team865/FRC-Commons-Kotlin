@@ -4,6 +4,9 @@ plugins {
     java
     kotlin("jvm")
     id("application")
+    id("org.javamodularity.moduleplugin")
+    id("org.openjfx.javafxplugin")
+    id ("org.beryx.jlink")
 }
 
 repositories {
@@ -13,7 +16,16 @@ repositories {
 buildDir = File(rootProject.projectDir, "build/" + project.name)
 
 application {
-    mainClassName = "ca.warp7.pathplanner.MainKt"
+    mainClassName = "path.planner/ca.warp7.planner2.MainKt"
+}
+
+javafx {
+    modules("javafx.controls")
+}
+
+jlink {
+    options.addAll("--strip-debug", "--no-header-files",
+            "--no-man-pages", "--strip-native-commands")
 }
 
 tasks.withType<KotlinCompile> {
@@ -23,7 +35,6 @@ tasks.withType<KotlinCompile> {
 }
 
 dependencies {
-    implementation(rootProject)
+    implementation(project(":"))
     implementation(kotlin("stdlib"))
-    implementation("org.processing:core:3.3.7")
 }
