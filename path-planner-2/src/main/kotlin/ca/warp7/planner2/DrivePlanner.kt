@@ -5,13 +5,13 @@ import javafx.collections.MapChangeListener
 import javafx.collections.ObservableMap
 import javafx.geometry.Insets
 import javafx.scene.Scene
+import javafx.scene.canvas.Canvas
 import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.layout.BorderPane
-import javafx.scene.layout.GridPane
 import javafx.scene.layout.HBox
+import javafx.scene.layout.VBox
 import javafx.stage.Stage
-import java.util.*
 
 @Suppress("MemberVisibilityCanBePrivate")
 class DrivePlanner {
@@ -48,53 +48,78 @@ class DrivePlanner {
         )
     }
 
-    val statusMap: ObservableMap<String, String> = FXCollections.observableMap(TreeMap<String, String>())
+    val canvas = Canvas()
 
-    val statusLabel = Label().apply {
+    val pathStatus: ObservableMap<String, String> = FXCollections
+            .observableMap<String, String>(LinkedHashMap())
+
+    val pathStatusLabel = Label().apply {
         style = "-fx-text-fill: white"
     }
 
-    val statusBar = HBox().apply {
-        style = "-fx-background-color: #1e2e4a"
-        padding = Insets(4.0)
-        children.add(statusLabel)
+    val pointStatus: ObservableMap<String, String> = FXCollections
+            .observableMap<String, String>(LinkedHashMap())
+
+    val pointStatusLabel = Label().apply {
+        style = "-fx-text-fill: white"
     }
 
     val view = BorderPane().apply {
         top = toolBar
-        bottom = statusBar
+        center = canvas
+        bottom = VBox().apply {
+            children.addAll(
+                    HBox().apply {
+                        style = "-fx-background-color: #3c5c94"
+                        padding = Insets(4.0, 16.0, 4.0, 16.0)
+                        children.add(pointStatusLabel)
+                    },
+                    HBox().apply {
+                        style = "-fx-background-color: #1e2e4a"
+                        padding = Insets(4.0, 16.0, 4.0, 16.0)
+                        children.add(pathStatusLabel)
+                    }
+            )
+        }
     }
 
-    fun showRobotSettings() {
-        val dialog = Dialog<ButtonType>()
-        dialog.title = "Robot Settings"
-        dialog.dialogPane.buttonTypes.addAll(ButtonType.CANCEL, ButtonType.OK)
-        dialog.dialogPane.content = GridPane().apply {
-            hgap = 8.0
-            vgap = 8.0
-            add(Label("Effective Wheelbase Radius"), 0, 0)
-            add(TextField(), 1, 0)
-            add(Label("Max Velocity"), 0, 1)
-            add(TextField(), 1, 1)
-            add(Label("Max Acceleration"), 0, 2)
-            add(TextField(), 1, 2)
-            add(Label("Max Centripetal Acceleration"), 0, 3)
-            add(TextField(), 1, 3)
-            add(Label("Max Jerk"), 0, 4)
-            add(TextField(), 1, 4)
-            add(Label("Robot Width (for graphics)"), 0, 5)
-            add(TextField(), 1, 5)
-            add(Label("Robot Length (for graphics)"), 0, 6)
-            add(TextField(), 1, 6)
-        }
-        dialog.show()
+
+    fun updateMainCanvas() {
+        canvas.height = stage.height
+        canvas.width = stage.height / 2.0 * 3.0
     }
 
     fun show() {
-        statusMap.addListener(MapChangeListener {
-            statusLabel.text = statusMap.entries
-                    .joinToString { it.key + ": " + it.value + "  " }
+        pathStatus.addListener(MapChangeListener {
+            pathStatusLabel.text = pathStatus.entries
+                    .joinToString("   ") { it.key + ": " + it.value }
         })
+        pointStatus.addListener(MapChangeListener {
+            pointStatusLabel.text = pointStatus.entries
+                    .joinToString("   ") { it.key + ": " + it.value }
+        })
+        pathStatus.putAll(mapOf(
+                "JerkLimit" to "off",
+                "Optimize" to "off",
+                "B" to "1.2",
+                "MaxVel" to "3.0m/s×1.0",
+                "MaxAcc" to "3.0m/s^2×1.0",
+                "MaxCAcc" to "3.0rad/s×1.0",
+                "∫(dξ)" to "0.0m",
+                "∫(dt)" to "0.0s",
+                "Σ(dCurvature)²" to "0.0"
+        ))
+        pointStatus.putAll(mapOf(
+                "x" to "0.0m",
+                "y" to "0.0m",
+                "heading" to "0.0deg",
+                "curvature" to "0.0rad/m",
+                "t" to "0.0",
+                "v" to "0.0m/s",
+                "ω" to "0.0rad/s",
+                "dv/dt" to "0.0m/s^2",
+                "dω/dt" to "0.0rad/s^2"
+        ))
         stage.scene = Scene(view)
         stage.title = "WARP7 PathPlanner"
         stage.icons.add(Image(DrivePlanner::class.java.getResourceAsStream("/icon.png")))

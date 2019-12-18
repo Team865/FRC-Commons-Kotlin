@@ -52,7 +52,7 @@ fun parameterizeTrajectory(
         wheelbaseRadius: Double, // m
         maxVelocity: Double, // m/s
         maxAcceleration: Double, // m/s^2
-        maxCentripetalAcceleration: Double, // s^-1
+        maxCentripetalAcceleration: Double, // rad/s
         maxJerk: Double // m/s^3
 ) {
     // If path is empty, return directly
