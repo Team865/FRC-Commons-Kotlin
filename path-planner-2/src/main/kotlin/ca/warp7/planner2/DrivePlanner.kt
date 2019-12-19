@@ -112,11 +112,17 @@ class DrivePlanner {
                 "dv/dt" to "0.0m/s^2",
                 "dω/dt" to "0.0rad/s^2"
         ))
+        var j = 0
         for (i in state.segments.indices) {
-            drawSplines(state.segments[i], i % 2 == 1)
+            val t = state.segments[i]
+            drawSplines(t, j % 2 == 1)
+            if (t.trajectory.first().curvature.isFinite()) j++
         }
+        j = 0
         for (i in state.segments.indices) {
-            drawControlPoints(state.segments[i], i % 2 == 1)
+            val t = state.segments[i]
+            drawControlPoints(t, j % 2 == 1)
+            if (t.trajectory.first().curvature.isFinite()) j++
         }
 
         val pl = ui.poseList
@@ -177,18 +183,20 @@ class DrivePlanner {
         var left = ref.transform(t0 - normal)
         var right = ref.transform(t0 + normal)
 
-        if (odd) {
-            gc.stroke = Color.rgb(0, 128, 255)
-        } else {
-            gc.stroke = Color.rgb(0, 255, 0)
+        if (s0.curvature.isFinite()) {
+            if (odd) {
+                gc.stroke = Color.rgb(0, 128, 255)
+            } else {
+                gc.stroke = Color.rgb(0, 255, 0)
+            }
+            val a0 = ref.transform(t0) - ref.scale(Translation2D(config.robotLength,
+                    config.robotWidth).rotate(s0.pose.rotation))
+            val b0 = ref.transform(t0) + ref.scale(Translation2D(-config.robotLength,
+                    config.robotWidth).rotate(s0.pose.rotation))
+            gc.lineTo(a0, b0)
+            gc.lineTo(left, a0)
+            gc.lineTo(right, b0)
         }
-        val a0 = ref.transform(t0) - ref.scale(Translation2D(config.robotLength,
-                config.robotWidth).rotate(s0.pose.rotation))
-        val b0 = ref.transform(t0) + ref.scale(Translation2D(-config.robotLength,
-                config.robotWidth).rotate(s0.pose.rotation))
-        gc.lineTo(a0, b0)
-        gc.lineTo(left, a0)
-        gc.lineTo(right, b0)
 
         for (i in 1 until segment.trajectory.size) {
             val s = segment.trajectory[i]
@@ -196,16 +204,22 @@ class DrivePlanner {
             normal = (s.pose.rotation.normal() * config.robotWidth).translation()
             val newLeft = ref.transform(t - normal)
             val newRight = ref.transform(t + normal)
-            val kx = abs(s.curvature) / segment.maxK
-            if (odd) {
-                val r = linearInterpolate(0.0, 192.0, kx) + 63
-                val b = 255 - linearInterpolate(0.0, 192.0, kx)
-                gc.stroke = Color.rgb(r.toInt(), 128, b.toInt())
+
+            if (s.curvature.isFinite()) {
+                val kx = abs(s.curvature) / segment.maxK
+                if (odd) {
+                    val r = linearInterpolate(0.0, 192.0, kx) + 63
+                    val b = 255 - linearInterpolate(0.0, 192.0, kx)
+                    gc.stroke = Color.rgb(r.toInt(), 128, b.toInt())
+                } else {
+                    val r = linearInterpolate(0.0, 192.0, kx) + 63
+                    val g = 255 - linearInterpolate(0.0, 192.0, kx)
+                    gc.stroke = Color.rgb(r.toInt(), g.toInt(), 0)
+                }
             } else {
-                val r = linearInterpolate(0.0, 192.0, kx) + 63
-                val g = 255 - linearInterpolate(0.0, 192.0, kx)
-                gc.stroke = Color.rgb(r.toInt(), g.toInt(), 0)
+                gc.stroke = Color.MAGENTA
             }
+
             gc.lineTo(left, newLeft)
             gc.lineTo(right, newRight)
             left = newLeft
@@ -213,19 +227,22 @@ class DrivePlanner {
         }
 
         val s1 = segment.trajectory.last()
-        val t1 = s1.pose.translation
 
-        if (odd) {
-            gc.stroke = Color.rgb(0, 128, 255)
-        } else {
-            gc.stroke = Color.rgb(0, 255, 0)
+        if (s1.curvature.isFinite()) {
+            val t1 = s1.pose.translation
+            if (odd) {
+                gc.stroke = Color.rgb(0, 128, 255)
+            } else {
+                gc.stroke = Color.rgb(0, 255, 0)
+            }
+            val a1 = ref.transform(t1) - ref.scale(Translation2D(-config.robotLength,
+                    config.robotWidth).rotate(s1.pose.rotation))
+            val b1 = ref.transform(t1) + ref.scale(Translation2D(config.robotLength,
+                    config.robotWidth).rotate(s1.pose.rotation))
+            gc.lineTo(a1, b1)
+            gc.lineTo(left, a1)
+            gc.lineTo(right, b1)
         }
-        val a1 = ref.transform(t1) - ref.scale(Translation2D(-config.robotLength,
-                config.robotWidth).rotate(s1.pose.rotation))
-        val b1 = ref.transform(t1) + ref.scale(Translation2D(config.robotLength,
-                config.robotWidth).rotate(s1.pose.rotation))
-        gc.lineTo(a1, b1)
-        gc.lineTo(left, a1)
-        gc.lineTo(right, b1)
+
     }
 }
