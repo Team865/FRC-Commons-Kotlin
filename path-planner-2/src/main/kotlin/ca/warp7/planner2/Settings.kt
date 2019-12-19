@@ -27,6 +27,12 @@ fun showSettings() {
 
         add(Label("Half Field Background"), 2, 0)
         add(Button("Choose"), 3, 0)
+
+        add(Label("Show Tangent Circle"), 2, 1)
+        add(CheckBox(), 3, 1)
+
+        add(Label("Show Angular Velocity Graph"), 2, 2)
+        add(CheckBox(), 3, 2)
     }
     dialog.show()
 }
