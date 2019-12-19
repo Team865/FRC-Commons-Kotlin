@@ -5,6 +5,7 @@ import ca.warp7.frc.geometry.Translation2D
 import ca.warp7.frc.path.QuinticSegment2D
 import ca.warp7.frc.path.optimized
 import ca.warp7.frc.path.quinticSplineFromPose
+import ca.warp7.frc.path.sumDCurvature2
 import ca.warp7.frc.trajectory.*
 import javafx.scene.image.Image
 
@@ -88,7 +89,6 @@ class Configuration {
 
 abstract class Segment {
     var waypoints: List<Pose2D> = emptyList()
-    var intermediate: List<QuinticSegment2D> = emptyList()
     var trajectory: List<TrajectoryState> = emptyList()
 
     var curvatureSum = 0.0
@@ -126,9 +126,9 @@ class State {
     var maxAngular = 0.0
     var maxAngularAcc = 0.0
 
-    var trajectoryTime = 0.0
-    var curvatureSum = 0.0
-    var arcLength = 0.0
+    var totalTime = 0.0
+    var totalSumOfCurvature = 0.0
+    var totalDist = 0.0
 
     private fun generateSplineTrajectory(path: List<QuinticSegment2D>): List<TrajectoryState> {
         val optimizedPath = if (optimizing) path.optimized() else path
@@ -174,8 +174,23 @@ class State {
         }
     }
 
-    private fun generateSegment(segment: Segment): List<TrajectoryState> {
+    private fun addSplineTrajectory(
+            segment: Segment,
+            path: MutableList<QuinticSegment2D>,
+            trajectory: MutableList<TrajectoryState>
+    ) {
+        val newTrajectory = generateSplineTrajectory(path)
+        addToTrajectory(trajectory, newTrajectory)
+        segment.curvatureSum += path.sumDCurvature2()
+        segment.arcLength += newTrajectory
+                .zipWithNext { p, q -> p.pose.translation.distanceTo(q.pose.translation) }.sum()
+        path.clear()
+    }
 
+    private fun generateSegment(segment: Segment) {
+
+        segment.curvatureSum = 0.0
+        segment.arcLength = 0.0
 
         val trajectory = mutableListOf<TrajectoryState>()
         val path = mutableListOf<QuinticSegment2D>()
@@ -187,17 +202,17 @@ class State {
                 path.add(quinticSplineFromPose(segment.waypoints[i], segment.waypoints[i + 1], bendFactor))
             } else {
                 if (path.isNotEmpty()) {
-                    addToTrajectory(trajectory, generateSplineTrajectory(path))
-                    path.clear()
+                    addSplineTrajectory(segment, path, trajectory)
                 }
                 addToTrajectory(trajectory, generateQuickTurn(a, b))
             }
         }
         if (path.isNotEmpty()) {
-            addToTrajectory(trajectory, generateSplineTrajectory(path))
-            path.clear()
+            addSplineTrajectory(segment, path, trajectory)
         }
-        return trajectory
+
+        segment.trajectory = trajectory
+        segment.trajectoryTime = trajectory.last().t
     }
 
     fun generateAll() {
@@ -210,5 +225,9 @@ class State {
         for (segment in segments) {
             generateSegment(segment)
         }
+
+        totalSumOfCurvature = segments.sumByDouble { it.curvatureSum }
+        totalDist = segments.sumByDouble { it.arcLength }
+        totalTime = segments.sumByDouble { it.trajectoryTime }
     }
 }
