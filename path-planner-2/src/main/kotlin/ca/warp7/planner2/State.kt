@@ -1,5 +1,10 @@
+@file:Suppress("MemberVisibilityCanBePrivate")
+
 package ca.warp7.planner2
 
+import ca.warp7.frc.degrees
+import ca.warp7.frc.f1
+import ca.warp7.frc.feet
 import ca.warp7.frc.geometry.Pose2D
 import ca.warp7.frc.geometry.Translation2D
 import ca.warp7.frc.path.QuinticSegment2D
@@ -8,6 +13,8 @@ import ca.warp7.frc.path.quinticSplineFromPose
 import ca.warp7.frc.path.sumDCurvature2
 import ca.warp7.frc.trajectory.*
 import javafx.scene.image.Image
+import java.io.FileInputStream
+import kotlin.math.abs
 
 
 object Constants {
@@ -82,12 +89,12 @@ class Configuration {
     var maxJerk = Double.POSITIVE_INFINITY
     var robotWidth = 0.0
     var robotLength = 0.0
-    var bg: Image? = null
+    var background: Image? = null
     var tangentCircle = false
     var angularGraph = false
 }
 
-abstract class Segment {
+class Segment {
     var waypoints: List<Pose2D> = emptyList()
     var trajectory: List<TrajectoryState> = emptyList()
 
@@ -115,14 +122,6 @@ class State {
     var optimizing = false
     var bendFactor = 1.2
 
-    var selectedSegment = -1
-    var selectedPoint = -1
-    var selectionChanged = false
-
-    var draggingPoint = false
-    var draggingAngle = false
-    var draggedControlPoint: Pose2D? = null
-
     var maxAngular = 0.0
     var maxAngularAcc = 0.0
 
@@ -136,10 +135,10 @@ class State {
         parameterizeTrajectory(
                 trajectory,
                 config.wheelbaseRadius,
-                config.maxVelocity,
-                config.maxAcceleration,
-                config.maxCentripetalAcceleration,
-                config.maxJerk
+                config.maxVelocity * maxVRatio,
+                config.maxAcceleration * maxARatio,
+                config.maxCentripetalAcceleration * maxAcRatio,
+                if (jerkLimiting) config.maxJerk else Double.POSITIVE_INFINITY
         )
         return trajectory
     }
@@ -147,8 +146,8 @@ class State {
     private fun generateQuickTurn(a: Pose2D, b: Pose2D): List<TrajectoryState> {
         return parameterizeQuickTurn(
                 parameterizeRotation(a, b),
-                config.maxVelocity / config.wheelbaseRadius,
-                config.maxAcceleration / config.wheelbaseRadius
+                config.maxVelocity * maxVRatio / config.wheelbaseRadius,
+                config.maxAcceleration * maxARatio / config.wheelbaseRadius
         )
     }
 
@@ -189,6 +188,7 @@ class State {
 
     private fun generateSegment(segment: Segment) {
 
+        println("Hi")
         segment.curvatureSum = 0.0
         segment.arcLength = 0.0
 
@@ -213,6 +213,9 @@ class State {
 
         segment.trajectory = trajectory
         segment.trajectoryTime = trajectory.last().t
+        segment.maxAngular = trajectory.map { it.w }.max()!!
+        segment.maxAngularAcc = trajectory.map { it.dw }.max()!!
+        segment.maxK = trajectory.map { abs(it.curvature) }.max()!!
     }
 
     fun generateAll() {
@@ -221,6 +224,9 @@ class State {
         assertPositive(config.maxAcceleration, "maxAcceleration")
         assertPositive(config.maxCentripetalAcceleration, "maxCentripetalAcceleration")
         assertPositive(config.wheelbaseRadius, "wheelbaseRadius")
+        check(segments.isNotEmpty()) {
+            "Cannot generate with no segments"
+        }
 
         for (segment in segments) {
             generateSegment(segment)
@@ -229,5 +235,44 @@ class State {
         totalSumOfCurvature = segments.sumByDouble { it.curvatureSum }
         totalDist = segments.sumByDouble { it.arcLength }
         totalTime = segments.sumByDouble { it.trajectoryTime }
+        maxAngular = segments.map { it.maxAngular }.max()!!
+        maxAngularAcc = segments.map { it.maxAngularAcc }.max()!!
     }
+
+    fun maxVelString(): String {
+        return "${config.maxVelocity.f1}m/s×${maxVRatio.f1}"
+    }
+
+    fun maxAccString(): String {
+        return "${config.maxAcceleration.f1}m/s×${maxARatio.f1}"
+    }
+
+    fun maxAcSring(): String {
+        return "${config.maxCentripetalAcceleration.f1}m/s×${maxAcRatio.f1}"
+    }
+}
+
+
+fun getDefaultState(): State {
+    val state = State()
+
+    val bg = Image(FileInputStream("C:\\Users\\Yu\\IdeaProjects\\FRC-Commons-Kotlin\\path-planner\\src\\main\\resources\\field.PNG"))
+    state.config.apply {
+        background = bg
+        maxVelocity = 3.0
+        maxAcceleration = 3.0
+        maxCentripetalAcceleration = 3.0
+        robotLength = 0.42
+        robotWidth = 0.33
+        wheelbaseRadius = 0.5
+    }
+    state.reference.set(bg.width, bg.height, 16.0, 16.0)
+    state.segments.add(Segment().apply {
+        waypoints = listOf(
+                Pose2D(6.feet, 4.feet, 0.degrees),
+                Pose2D(16.8.feet, 11.2.feet, 32.degrees)
+        )
+    })
+
+    return state
 }

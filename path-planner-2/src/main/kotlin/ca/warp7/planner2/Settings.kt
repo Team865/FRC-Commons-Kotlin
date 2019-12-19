@@ -1,7 +1,9 @@
 package ca.warp7.planner2
 
 import javafx.scene.control.*
+import javafx.scene.image.Image
 import javafx.scene.layout.GridPane
+import javafx.stage.FileChooser
 import java.lang.NumberFormatException
 
 fun validate(str: String, old: Double): Double {
@@ -35,6 +37,22 @@ fun showSettings() {
     val choose = Button("Choose")
     val tangent = CheckBox()
     val angVel = CheckBox()
+
+    choose.setOnAction {
+        val chooser = FileChooser()
+        chooser.title = "Choose Half Field Background"
+        chooser.extensionFilters.add(FileChooser.ExtensionFilter("PNG", "*.png"))
+        val f = chooser.showOpenDialog(null)
+
+        if (f != null && f.name.endsWith("png")) {
+            try {
+                val image = Image(f.inputStream())
+                config.background = image
+                choose.text = f.name
+            } catch (e: Exception) {
+            }
+        }
+    }
 
     dialog.dialogPane.content = GridPane().apply {
         hgap = 8.0
@@ -79,4 +97,7 @@ fun showSettings() {
     config.maxJerk = validate(maxJ.text, config.maxJerk)
     config.robotWidth = validate(botWidth.text, config.robotWidth)
     config.robotLength = validate(botLength.text, config.robotLength)
+
+    config.tangentCircle = tangent.isSelected
+    config.angularGraph = angVel.isSelected
 }

@@ -1,25 +1,23 @@
 package ca.warp7.planner2
 
+import ca.warp7.frc.f2
 import ca.warp7.frc.geometry.Pose2D
-import javafx.beans.property.SimpleStringProperty
-import javafx.collections.FXCollections
-import javafx.collections.MapChangeListener
-import javafx.collections.ObservableMap
-import javafx.geometry.Insets
-import javafx.scene.Scene
-import javafx.scene.canvas.Canvas
-import javafx.scene.control.*
-import javafx.scene.image.Image
-import javafx.scene.layout.BorderPane
-import javafx.scene.layout.HBox
-import javafx.scene.layout.VBox
+import ca.warp7.frc.geometry.Translation2D
+import ca.warp7.frc.linearInterpolate
+import javafx.application.Platform
+import javafx.scene.canvas.GraphicsContext
+import javafx.scene.control.Button
+import javafx.scene.control.MenuButton
+import javafx.scene.control.MenuItem
+import javafx.scene.control.Separator
 import javafx.scene.paint.Color
-import javafx.stage.Stage
-import java.io.FileInputStream
+import kotlin.math.abs
 
 @Suppress("MemberVisibilityCanBePrivate")
 class DrivePlanner {
-    val stage = Stage()
+
+    val ui = PlannerUI()
+    val gc: GraphicsContext = ui.canvas.graphicsContext2D
 
     val pathActions = MenuButton(
             "Path Actions",
@@ -34,8 +32,8 @@ class DrivePlanner {
             MenuItem("Add Change to Point(s)")
     )
 
-    val toolBar = ToolBar().apply {
-        items.addAll(
+    init {
+        ui.toolBar.items.addAll(
                 Button("Refit Canvas"),
                 Separator(),
                 pathActions,
@@ -54,107 +52,59 @@ class DrivePlanner {
                     }
                 },
                 Separator(),
-                Button("Shortcuts").apply {
-                    setOnAction {
-                        val dialog = Dialog<ButtonType>()
-                        dialog.title = "Shortcuts"
-                        dialog.contentText = DrivePlanner::class.java.getResourceAsStream("/docs.txt")
-                                .bufferedReader().readText()
-                        dialog.dialogPane.buttonTypes.add(ButtonType.OK)
-                        dialog.show()
-                    }
-                }
+                ui.shortcutButton
         )
     }
 
-    val poseList = TreeTableView<Pose2D>().apply {
-        columns.addAll(
-                TreeTableColumn<Pose2D, String>("x").apply {
-                    setCellValueFactory { SimpleStringProperty(it.value.value.translation.x.f) }
-                },
-                TreeTableColumn<Pose2D, String>("y").apply {
-                    setCellValueFactory { SimpleStringProperty(it.value.value.translation.y.f) }
-                },
-                TreeTableColumn<Pose2D, String>("heading").apply {
-                    setCellValueFactory { SimpleStringProperty(it.value.value.rotation.degrees().f) }
-                }
-        )
-    }
+    var selectedSegment = -1
+    var selectedPoint = -1
+    var selectionChanged = false
 
-    val canvas = Canvas()
-    val gc = canvas.graphicsContext2D!!
+    var draggingPoint = false
+    var draggingAngle = false
+    var draggedControlPoint: Pose2D? = null
 
-    val pathStatus: ObservableMap<String, String> = FXCollections
-            .observableMap<String, String>(LinkedHashMap())
+    val state = getDefaultState()
+    val ref = state.reference
+    val config = state.config
 
-    val pathStatusLabel = Label().apply {
-        style = "-fx-text-fill: white"
-    }
-
-    val pointStatus: ObservableMap<String, String> = FXCollections
-            .observableMap<String, String>(LinkedHashMap())
-
-    val pointStatusLabel = Label().apply {
-        style = "-fx-text-fill: white"
-    }
-
-    val sideBar = poseList
-
-    val view = BorderPane().apply {
-        top = toolBar
-        left = canvas
-        right = sideBar
-        bottom = VBox().apply {
-            children.addAll(
-                    HBox().apply {
-                        style = "-fx-background-color: #3c5c94"
-                        padding = Insets(4.0, 16.0, 4.0, 16.0)
-                        children.add(pointStatusLabel)
-                    },
-                    HBox().apply {
-                        style = "-fx-background-color: #1e2e4a"
-                        padding = Insets(4.0, 16.0, 4.0, 16.0)
-                        children.add(pathStatusLabel)
-                    }
-            )
+    fun show() {
+        Platform.runLater {
+            regenerate()
+            ui.stage.show()
         }
     }
 
 
-    fun show() {
-        pathStatus.addListener(MapChangeListener {
-            pathStatusLabel.text = pathStatus.entries
-                    .joinToString("   ") { it.key + ": " + it.value }
-        })
-        pointStatus.addListener(MapChangeListener {
-            pointStatusLabel.text = pointStatus.entries
-                    .joinToString("   ") { it.key + ": " + it.value }
-        })
-        val bg = Image(FileInputStream("C:\\Users\\Yu\\IdeaProjects\\FRC-Commons-Kotlin\\path-planner\\src\\main\\resources\\field.PNG"))
-        canvas.width = bg.width + 32 + 400
-        canvas.height = bg.height + 32
-        canvas.isFocusTraversable = true
+    fun regenerate() {
+
+        val bg = state.config.background ?: return
+
+        ui.canvas.width = bg.width + 32 + 300
+        ui.canvas.height = bg.height + 32
         gc.fill = Color.WHITE
-        gc.fillRect(0.0, 0.0, canvas.width, canvas.height)
+        gc.fillRect(0.0, 0.0, ui.canvas.width, ui.canvas.height)
         gc.stroke = Color.valueOf("#5a8ade")
         gc.lineWidth = 4.0
         gc.strokeRect(10.0, 10.0, bg.width + 12, bg.height + 12)
         gc.drawImage(bg, 16.0, 16.0)
 
-        val ref = Image(DrivePlanner::class.java.getResourceAsStream("/reference.png"))
-        gc.drawImage(ref, bg.width + 32, 16.0, 96.0, 96.0)
-        pathStatus.putAll(mapOf(
-                "JerkLimit" to "off",
-                "Optimize" to "off",
-                "B" to "1.2",
-                "MaxVel" to "3.0m/s×1.0",
-                "MaxAcc" to "3.0m/s^2×1.0",
-                "MaxCAcc" to "3.0rad/s×1.0",
-                "∫(dξ)" to "0.0m",
-                "∫(dt)" to "0.0s",
-                "Σ(dCurvature)²" to "0.0"
+        state.generateAll()
+        println("hi")
+
+        gc.drawImage(ui.referenceImage, bg.width + 32, 16.0, 96.0, 96.0)
+        ui.pathStatus.putAll(mapOf(
+                "JerkLimit" to state.jerkLimiting.toString(),
+                "Optimize" to state.optimizing.toString(),
+                "B" to state.bendFactor.toString(),
+                "MaxVel" to state.maxVelString(),
+                "MaxAcc" to state.maxAccString(),
+                "MaxCAcc" to state.maxAcSring(),
+                "∫(dξ)" to "${state.totalDist.f2}m",
+                "∫(dt)" to "${state.totalTime.f2}s",
+                "Σ(dCurvature)²" to state.totalSumOfCurvature.f2
         ))
-        pointStatus.putAll(mapOf(
+        ui.pointStatus.putAll(mapOf(
                 "x" to "0.0m",
                 "y" to "0.0m",
                 "heading" to "0.0deg",
@@ -165,9 +115,57 @@ class DrivePlanner {
                 "dv/dt" to "0.0m/s^2",
                 "dω/dt" to "0.0rad/s^2"
         ))
-        stage.scene = Scene(view)
-        stage.title = "WARP7 PathPlanner"
-        stage.icons.add(Image(DrivePlanner::class.java.getResourceAsStream("/icon.png")))
-        stage.show()
+        for (segment in state.segments) {
+            drawSplines(segment)
+        }
+    }
+
+    fun drawSplines(segment: Segment) {
+
+        gc.lineWidth = 1.5
+
+        val s0 = segment.trajectory.first()
+        val t0 = s0.pose.translation
+        var normal = (s0.pose.rotation.normal() *
+                config.robotWidth).translation()
+        var left = ref.transform(t0 - normal)
+        var right = ref.transform(t0 + normal)
+
+        gc.stroke = Color.rgb(0, 255, 0)
+        val a0 = ref.transform(t0) - ref.scale(Translation2D(config.robotLength,
+                config.robotWidth).rotate(s0.pose.rotation))
+        val b0 = ref.transform(t0) + ref.scale(Translation2D(-config.robotLength,
+                config.robotWidth).rotate(s0.pose.rotation))
+        gc.lineTo(a0, b0)
+        gc.lineTo(left, a0)
+        gc.lineTo(right, b0)
+
+        for (i in 1 until segment.trajectory.size) {
+            val s = segment.trajectory[i]
+            val t = s.pose.translation
+            normal = (s.pose.rotation.normal() * config.robotWidth).translation()
+            val newLeft = ref.transform(t - normal)
+            val newRight = ref.transform(t + normal)
+            val kx = abs(s.curvature) / segment.maxK
+            val r = linearInterpolate(0.0, 192.0, kx).toFloat() + 63
+            val g = 255 - linearInterpolate(0.0, 192.0, kx).toFloat()
+            gc.stroke = Color.rgb(r.toInt(), g.toInt(), 0)
+            gc.lineTo(left, newLeft)
+            gc.lineTo(right, newRight)
+            left = newLeft
+            right = newRight
+        }
+
+        val s1 = segment.trajectory.last()
+        val t1 = s1.pose.translation
+
+        gc.stroke = Color.rgb(0, 255, 0)
+        val a1 = ref.transform(t1) - ref.scale(Translation2D(-config.robotLength,
+                config.robotWidth).rotate(s1.pose.rotation))
+        val b1 = ref.transform(t1) + ref.scale(Translation2D(config.robotLength,
+                config.robotWidth).rotate(s1.pose.rotation))
+        gc.lineTo(a1, b1)
+        gc.lineTo(left, a1)
+        gc.lineTo(right, b1)
     }
 }
