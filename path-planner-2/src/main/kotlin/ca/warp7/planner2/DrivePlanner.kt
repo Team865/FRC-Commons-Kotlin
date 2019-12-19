@@ -2,14 +2,12 @@ package ca.warp7.planner2
 
 import ca.warp7.frc.f2
 import ca.warp7.frc.geometry.Pose2D
+import ca.warp7.frc.geometry.Rotation2D
 import ca.warp7.frc.geometry.Translation2D
 import ca.warp7.frc.linearInterpolate
 import javafx.application.Platform
 import javafx.scene.canvas.GraphicsContext
-import javafx.scene.control.Button
-import javafx.scene.control.MenuButton
-import javafx.scene.control.MenuItem
-import javafx.scene.control.Separator
+import javafx.scene.control.*
 import javafx.scene.paint.Color
 import kotlin.math.abs
 
@@ -90,7 +88,6 @@ class DrivePlanner {
         gc.drawImage(bg, 16.0, 16.0)
 
         state.generateAll()
-        println("hi")
 
         gc.drawImage(ui.referenceImage, bg.width + 32, 16.0, 96.0, 96.0)
         ui.pathStatus.putAll(mapOf(
@@ -115,12 +112,61 @@ class DrivePlanner {
                 "dv/dt" to "0.0m/s^2",
                 "dω/dt" to "0.0rad/s^2"
         ))
-        for (segment in state.segments) {
-            drawSplines(segment)
+        for (i in state.segments.indices) {
+            drawSplines(state.segments[i], i % 2 == 1)
+        }
+        for (i in state.segments.indices) {
+            drawControlPoints(state.segments[i], i % 2 == 1)
+        }
+
+        val pl = ui.poseList
+        pl.isShowRoot = false
+        pl.root = TreeItem<Pose2D>().apply {
+            children.addAll(state.segments.map {
+                TreeItem<Pose2D>().apply {
+                    children.addAll(it.waypoints.map { p -> TreeItem(p) })
+                    isExpanded = true
+                }
+            })
         }
     }
 
-    fun drawSplines(segment: Segment) {
+    fun drawArrow(point: Pose2D) {
+        val pos = ref.transform(point.translation)
+        val heading = ref.transform(point.translation + point.rotation.translation().scaled(0.5))
+        val dir = point.rotation.unit().translation()
+
+        val r1 = dir.scaled(0.1524 * Constants.kTriangleRatio * 2)
+        val r2 = r1.rotate(Rotation2D(0.0, 1.0)).scaled(Constants.kTriangleRatio)
+        val r3 = r1.rotate(Rotation2D(0.0, -1.0)).scaled(Constants.kTriangleRatio)
+        gc.strokeOval(pos.x - 6.0, pos.y - 6.0, 12.0, 12.0)
+        val start = pos - dir.scaled(6.0).transposed()
+        gc.lineTo(start, heading)
+        val a1 = heading + ref.scale(r1)
+        val a2 = heading + ref.scale(r2)
+        val a3 = heading + ref.scale(r3)
+
+        gc.beginPath()
+        gc.vertex(a1)
+        gc.vertex(a2)
+        gc.vertex(a3)
+        gc.vertex(a1)
+        gc.closePath()
+        gc.stroke()
+    }
+
+    fun drawControlPoints(segment: Segment, odd: Boolean) {
+        if (odd) {
+            gc.stroke = Color.rgb(128, 255, 0)
+        } else {
+            gc.stroke = Color.rgb(255, 255, 0)
+        }
+        for (point in segment.waypoints) {
+            drawArrow(point)
+        }
+    }
+
+    fun drawSplines(segment: Segment, odd: Boolean) {
 
         gc.lineWidth = 1.5
 
@@ -131,7 +177,11 @@ class DrivePlanner {
         var left = ref.transform(t0 - normal)
         var right = ref.transform(t0 + normal)
 
-        gc.stroke = Color.rgb(0, 255, 0)
+        if (odd) {
+            gc.stroke = Color.rgb(0, 128, 255)
+        } else {
+            gc.stroke = Color.rgb(0, 255, 0)
+        }
         val a0 = ref.transform(t0) - ref.scale(Translation2D(config.robotLength,
                 config.robotWidth).rotate(s0.pose.rotation))
         val b0 = ref.transform(t0) + ref.scale(Translation2D(-config.robotLength,
@@ -147,9 +197,15 @@ class DrivePlanner {
             val newLeft = ref.transform(t - normal)
             val newRight = ref.transform(t + normal)
             val kx = abs(s.curvature) / segment.maxK
-            val r = linearInterpolate(0.0, 192.0, kx).toFloat() + 63
-            val g = 255 - linearInterpolate(0.0, 192.0, kx).toFloat()
-            gc.stroke = Color.rgb(r.toInt(), g.toInt(), 0)
+            if (odd) {
+                val r = linearInterpolate(0.0, 192.0, kx) + 63
+                val b = 255 - linearInterpolate(0.0, 192.0, kx)
+                gc.stroke = Color.rgb(r.toInt(), 128, b.toInt())
+            } else {
+                val r = linearInterpolate(0.0, 192.0, kx) + 63
+                val g = 255 - linearInterpolate(0.0, 192.0, kx)
+                gc.stroke = Color.rgb(r.toInt(), g.toInt(), 0)
+            }
             gc.lineTo(left, newLeft)
             gc.lineTo(right, newRight)
             left = newLeft
@@ -159,7 +215,11 @@ class DrivePlanner {
         val s1 = segment.trajectory.last()
         val t1 = s1.pose.translation
 
-        gc.stroke = Color.rgb(0, 255, 0)
+        if (odd) {
+            gc.stroke = Color.rgb(0, 128, 255)
+        } else {
+            gc.stroke = Color.rgb(0, 255, 0)
+        }
         val a1 = ref.transform(t1) - ref.scale(Translation2D(-config.robotLength,
                 config.robotWidth).rotate(s1.pose.rotation))
         val b1 = ref.transform(t1) + ref.scale(Translation2D(config.robotLength,

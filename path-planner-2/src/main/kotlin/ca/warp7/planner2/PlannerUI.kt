@@ -5,11 +5,13 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.MapChangeListener
 import javafx.collections.ObservableMap
+import javafx.event.Event
 import javafx.geometry.Insets
 import javafx.scene.Scene
 import javafx.scene.canvas.Canvas
 import javafx.scene.control.*
 import javafx.scene.image.Image
+import javafx.scene.input.MouseEvent
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
@@ -23,13 +25,25 @@ class PlannerUI {
     val poseList = TreeTableView<Pose2D>().apply {
         columns.addAll(
                 TreeTableColumn<Pose2D, String>("x").apply {
-                    setCellValueFactory { SimpleStringProperty(it.value.value.translation.x.f) }
+                    isSortable = false
+                    isResizable = false
+                    setCellValueFactory {
+                        SimpleStringProperty(it.value.value?.translation?.x?.f?.plus("m") ?: "---")
+                    }
                 },
                 TreeTableColumn<Pose2D, String>("y").apply {
-                    setCellValueFactory { SimpleStringProperty(it.value.value.translation.y.f) }
+                    isSortable = false
+                    isResizable = false
+                    setCellValueFactory {
+                        SimpleStringProperty(it.value.value?.translation?.y?.f?.plus("m") ?: "---")
+                    }
                 },
                 TreeTableColumn<Pose2D, String>("heading").apply {
-                    setCellValueFactory { SimpleStringProperty(it.value.value.rotation.degrees().f) }
+                    isSortable = false
+                    isResizable = false
+                    setCellValueFactory {
+                        SimpleStringProperty(it.value.value?.rotation?.degrees()?.f?.plus("deg") ?: "---")
+                    }
                 }
         )
     }
@@ -95,6 +109,7 @@ class PlannerUI {
                     .joinToString("   ") { it.key + ": " + it.value }
         })
         canvas.isFocusTraversable = true
+        canvas.addEventFilter(MouseEvent.MOUSE_CLICKED) { canvas.requestFocus() }
         stage.scene = Scene(view)
         stage.title = "WARP7 PathPlanner"
         stage.icons.add(Image(DrivePlanner::class.java.getResourceAsStream("/icon.png")))

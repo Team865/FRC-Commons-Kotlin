@@ -22,6 +22,8 @@ object Constants {
 
     const val kTranslationStep = 0.1 // m
     const val kRotationStep = 1.0 // deg
+
+    const val kTriangleRatio = 0.5773502691896258 // 1/sqrt(3)
 }
 
 /**
@@ -188,7 +190,6 @@ class State {
 
     private fun generateSegment(segment: Segment) {
 
-        println("Hi")
         segment.curvatureSum = 0.0
         segment.arcLength = 0.0
 
@@ -271,6 +272,12 @@ fun getDefaultState(): State {
         waypoints = listOf(
                 Pose2D(6.feet, 4.feet, 0.degrees),
                 Pose2D(16.8.feet, 11.2.feet, 32.degrees)
+        )
+    })
+    state.segments.add(Segment().apply {
+        waypoints = listOf(
+                Pose2D(16.8.feet, 11.2.feet, (180 + 32).degrees),
+                Pose2D(3.feet, 11.5.feet, (-180).degrees)
         )
     })
 
