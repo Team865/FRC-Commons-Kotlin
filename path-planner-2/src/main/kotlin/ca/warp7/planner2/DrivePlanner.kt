@@ -1,5 +1,7 @@
 package ca.warp7.planner2
 
+import ca.warp7.frc.geometry.Pose2D
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.MapChangeListener
 import javafx.collections.ObservableMap
@@ -11,29 +13,46 @@ import javafx.scene.image.Image
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
+import javafx.scene.paint.Color
 import javafx.stage.Stage
+import java.io.FileInputStream
 
 @Suppress("MemberVisibilityCanBePrivate")
 class DrivePlanner {
     val stage = Stage()
 
+    val pathActions = MenuButton(
+            "Path Actions",
+            null,
+            MenuItem("Insert Spline Control Point"),
+            MenuItem("Insert Reverse Direction"),
+            MenuItem("Insert Quick Turn"),
+            MenuItem("Delete Point(s)"),
+            MenuItem("Reverse Point(s)"),
+            MenuItem("Snap Point(s) to 0.01m"),
+            MenuItem("Edit Point"),
+            MenuItem("Add Change to Point(s)")
+    )
+
     val toolBar = ToolBar().apply {
         items.addAll(
-                Button("Insert Point"),
-                Button("Delete Point"),
-                Button("Insert Quick Turn"),
-                Button("Insert Direction Change"),
+                Button("Refit Canvas"),
                 Separator(),
-                Button("Robot Settings").apply {
+                pathActions,
+                Separator(),
+                Button("Simulate"),
+                Separator(),
+                MenuButton("Generate", null,
+                        MenuItem("Java Trajectory Command"),
+                        MenuItem("WPILib function"),
+                        MenuItem("CSV File")
+                ),
+                Separator(),
+                Button("Settings").apply {
                     setOnAction {
-                        showRobotSettings()
+                        showSettings()
                     }
                 },
-                Button("Field Settings"),
-                Separator(),
-                Button("Simulate Trajectory"),
-                Button("Show Graphs"),
-                Button("Generate Java Code"),
                 Separator(),
                 Button("Shortcuts").apply {
                     setOnAction {
@@ -48,7 +67,22 @@ class DrivePlanner {
         )
     }
 
+    val poseList = TreeTableView<Pose2D>().apply {
+        columns.addAll(
+                TreeTableColumn<Pose2D, String>("x").apply {
+                    setCellValueFactory { SimpleStringProperty(it.value.value.translation.x.f) }
+                },
+                TreeTableColumn<Pose2D, String>("y").apply {
+                    setCellValueFactory { SimpleStringProperty(it.value.value.translation.y.f) }
+                },
+                TreeTableColumn<Pose2D, String>("heading").apply {
+                    setCellValueFactory { SimpleStringProperty(it.value.value.rotation.degrees().f) }
+                }
+        )
+    }
+
     val canvas = Canvas()
+    val gc = canvas.graphicsContext2D!!
 
     val pathStatus: ObservableMap<String, String> = FXCollections
             .observableMap<String, String>(LinkedHashMap())
@@ -64,9 +98,12 @@ class DrivePlanner {
         style = "-fx-text-fill: white"
     }
 
+    val sideBar = poseList
+
     val view = BorderPane().apply {
         top = toolBar
-        center = canvas
+        left = canvas
+        right = sideBar
         bottom = VBox().apply {
             children.addAll(
                     HBox().apply {
@@ -84,11 +121,6 @@ class DrivePlanner {
     }
 
 
-    fun updateMainCanvas() {
-        canvas.height = stage.height
-        canvas.width = stage.height / 2.0 * 3.0
-    }
-
     fun show() {
         pathStatus.addListener(MapChangeListener {
             pathStatusLabel.text = pathStatus.entries
@@ -98,6 +130,19 @@ class DrivePlanner {
             pointStatusLabel.text = pointStatus.entries
                     .joinToString("   ") { it.key + ": " + it.value }
         })
+        val bg = Image(FileInputStream("C:\\Users\\Yu\\IdeaProjects\\FRC-Commons-Kotlin\\path-planner\\src\\main\\resources\\field.PNG"))
+        canvas.width = bg.width + 32 + 400
+        canvas.height = bg.height + 32
+        canvas.isFocusTraversable = true
+        gc.fill = Color.WHITE
+        gc.fillRect(0.0, 0.0, canvas.width, canvas.height)
+        gc.stroke = Color.valueOf("#5a8ade")
+        gc.lineWidth = 4.0
+        gc.strokeRect(10.0, 10.0, bg.width + 12, bg.height + 12)
+        gc.drawImage(bg, 16.0, 16.0)
+
+        val ref = Image(DrivePlanner::class.java.getResourceAsStream("/reference.png"))
+        gc.drawImage(ref, bg.width + 32, 16.0, 96.0, 96.0)
         pathStatus.putAll(mapOf(
                 "JerkLimit" to "off",
                 "Optimize" to "off",

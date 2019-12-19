@@ -1,12 +1,9 @@
 package ca.warp7.planner2
 
-import javafx.scene.control.ButtonType
-import javafx.scene.control.Dialog
-import javafx.scene.control.Label
-import javafx.scene.control.TextField
+import javafx.scene.control.*
 import javafx.scene.layout.GridPane
 
-fun showRobotSettings() {
+fun showSettings() {
     val dialog = Dialog<ButtonType>()
     dialog.title = "Robot Settings"
     dialog.dialogPane.buttonTypes.addAll(ButtonType.CANCEL, ButtonType.OK)
@@ -27,6 +24,9 @@ fun showRobotSettings() {
         add(TextField(), 1, 5)
         add(Label("Robot Length (for graphics)"), 0, 6)
         add(TextField(), 1, 6)
+
+        add(Label("Half Field Background"), 2, 0)
+        add(Button("Choose"), 3, 0)
     }
     dialog.show()
 }
