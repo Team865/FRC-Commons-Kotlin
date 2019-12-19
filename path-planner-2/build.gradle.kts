@@ -35,6 +35,6 @@ tasks.withType<KotlinCompile> {
 }
 
 dependencies {
-    implementation(project(":"))
+    implementation(rootProject)
     implementation(kotlin("stdlib"))
 }

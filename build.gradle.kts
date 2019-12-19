@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
-    kotlin("jvm") version "1.3.60"
+    kotlin("jvm") version "1.3.50"
     `maven-publish`
     id("org.jetbrains.dokka") version "0.10.0"
     id("org.javamodularity.moduleplugin") version "1.6.0"

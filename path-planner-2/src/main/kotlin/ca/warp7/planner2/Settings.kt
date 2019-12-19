@@ -2,17 +2,17 @@ package ca.warp7.planner2
 
 import javafx.scene.control.*
 import javafx.scene.layout.GridPane
-import javafx.util.converter.NumberStringConverter
 import java.lang.NumberFormatException
 
-fun checkValidDouble(str: String, old: Double): Double {
+fun validate(str: String, old: Double): Double {
     return try {
         str.trim().toDouble()
     } catch (e: NumberFormatException) {
         val dialog = Dialog<ButtonType>()
         dialog.title = "Settings Error"
         dialog.dialogPane.buttonTypes.add(ButtonType.OK)
-        dialog.dialogPane.contentText = "Cannot parse $str, reverting to $old"
+        dialog.dialogPane.contentText = "Cannot parse $str as a number, reverting to $old"
+        dialog.showAndWait()
         old
     }
 }
@@ -24,16 +24,15 @@ fun showSettings() {
     dialog.dialogPane.buttonTypes.addAll(ButtonType.CANCEL, ButtonType.OK)
 
 
-    val wheelbase = TextField()
-    wheelbase.textFormatter = TextFormatter(NumberStringConverter())
-    val maxVel = TextField()
-    val maxAcc = TextField()
-    val maxCA = TextField()
-    val maxJ = TextField()
-    val botWidth = TextField()
-    val botLength = TextField()
+    val wheelbase = TextField(config.wheelbaseRadius.toString())
+    val maxVel = TextField(config.maxVelocity.toString())
+    val maxAcc = TextField(config.maxAcceleration.toString())
+    val maxCA = TextField(config.maxCentripetalAcceleration.toString())
+    val maxJ = TextField(config.maxJerk.toString())
+    val botWidth = TextField(config.robotWidth.toString())
+    val botLength = TextField(config.robotLength.toString())
 
-    val choose = Button()
+    val choose = Button("Choose")
     val tangent = CheckBox()
     val angVel = CheckBox()
 
@@ -73,5 +72,11 @@ fun showSettings() {
 
     dialog.showAndWait()
 
-    config.wheelbaseRadius = checkValidDouble(wheelbase.text, config.wheelbaseRadius)
+    config.wheelbaseRadius = validate(wheelbase.text, config.wheelbaseRadius)
+    config.maxVelocity = validate(maxVel.text, config.maxVelocity)
+    config.maxAcceleration = validate(maxAcc.text, config.maxAcceleration)
+    config.maxCentripetalAcceleration = validate(maxCA.text, config.maxCentripetalAcceleration)
+    config.maxJerk = validate(maxJ.text, config.maxJerk)
+    config.robotWidth = validate(botWidth.text, config.robotWidth)
+    config.robotLength = validate(botLength.text, config.robotLength)
 }
