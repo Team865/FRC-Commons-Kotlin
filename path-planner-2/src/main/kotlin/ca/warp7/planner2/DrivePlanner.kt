@@ -38,7 +38,9 @@ class DrivePlanner {
                 Separator(),
                 pathActions,
                 Separator(),
-                Button("Simulate"),
+                Button("Simulate").apply {
+                    setOnAction { onSpacePressed() }
+                },
                 Separator(),
                 MenuButton("Generate", null,
                         MenuItem("Java Trajectory Command"),
@@ -101,22 +103,12 @@ class DrivePlanner {
                 "dω/dt" to "0.0rad/s^2"
         ))
         redrawScreen()
-        val pl = ui.poseList
-        pl.isShowRoot = false
-        pl.root = TreeItem<Pose2D>().apply {
-            children.addAll(state.segments.map {
-                TreeItem<Pose2D>().apply {
-                    children.addAll(it.waypoints.map { p -> TreeItem(p) })
-                    isExpanded = true
-                }
-            })
-        }
     }
 
     fun redrawScreen() {
         val bg = state.config.background ?: return
 
-        ui.canvas.width = bg.width + 32 + 300
+        ui.canvas.width = bg.width + 32 + 500
         ui.canvas.height = bg.height + 32
         gc.fill = Color.WHITE
         gc.fillRect(0.0, 0.0, ui.canvas.width, ui.canvas.height)
@@ -132,12 +124,17 @@ class DrivePlanner {
             drawSplines(t, j % 2 == 1)
             if (t.trajectory.first().curvature.isFinite()) j++
         }
-        j = 0
-        for (i in state.segments.indices) {
-            val t = state.segments[i]
-            drawControlPoints(t, j % 2 == 1)
-            if (t.trajectory.first().curvature.isFinite()) j++
+
+        if (!simulating) {
+            j = 0
+            for (i in state.segments.indices) {
+                val t = state.segments[i]
+                drawControlPoints(t, j % 2 == 1)
+                if (t.trajectory.first().curvature.isFinite()) j++
+            }
         }
+
+        drawGraph()
     }
 
     fun drawArrow(point: Pose2D) {
@@ -248,6 +245,73 @@ class DrivePlanner {
         }
     }
 
+    fun drawGraph() {
+        gc.lineWidth = 1.0
+        gc.stroke = Color.rgb(255, 128, 0)
+        var trackedTime = 0.0
+        for (segment in state.segments) {
+            for (trajectoryState in segment.trajectory) {
+                val progress = (trajectoryState.t + trackedTime) / state.totalTime
+                val x = (531 + progress * 474)
+                gc.strokeLine(x, 335.0, x, 350.0)
+            }
+            trackedTime += segment.trajectoryTime
+        }
+        gc.stroke = Color.LIGHTGRAY
+        gc.lineWidth = 1.0
+
+        val accPxPerM = 50.0 / config.maxAcceleration
+        val min = 384.0
+        val max = 484.0
+        gc.strokeLine(531.0, min, 531.0 + 474.0, min)
+        gc.strokeLine( 531.0, max, 531.0 + 474.0, max)
+        var accStep = -config.maxAcceleration.toInt()
+        while (accStep < config.maxAcceleration) {
+            val h = min + (config.maxAcceleration - accStep) * accPxPerM
+            gc.strokeLine( 531.0, h, 531.0 + 474.0, h)
+            accStep++
+        }
+
+        val velPxPerM = 50.0 / config.maxVelocity
+        val min2 = 200.0
+        val max2 = 300.0
+        gc.strokeLine(531.0, min2, 531.0 + 474.0, min2)
+        gc.strokeLine( 531.0, max2, 531.0 + 474.0, max2)
+        var velStep = -config.maxVelocity.toInt()
+        while (velStep < config.maxVelocity) {
+            val h = min2 + (config.maxVelocity - velStep) * velPxPerM
+            gc.strokeLine( 531.0, h, 531.0 + 474.0, h)
+            velStep++
+        }
+
+        gc.lineWidth = 2.0
+        gc.stroke = Color.rgb(0, 128, 192)
+        trackedTime = 0.0
+        gc.beginPath()
+        for (segment in state.segments) {
+            for (trajectoryState in segment.trajectory) {
+                val progress = (trajectoryState.t + trackedTime) / state.totalTime
+                gc.lineTo(531 + progress * 474,
+                        434 - trajectoryState.dv / config.maxAcceleration * 50)
+            }
+            trackedTime += segment.trajectoryTime
+        }
+        gc.stroke()
+        gc.lineWidth = 2.0
+        gc.stroke = Color.rgb(128, 128, 255)
+        trackedTime = 0.0
+        gc.beginPath()
+        for (segment in state.segments) {
+            for (trajectoryState in segment.trajectory) {
+                val progress = (trajectoryState.t + trackedTime) / state.totalTime
+                gc.lineTo(531 + progress * 474,
+                        250 - trajectoryState.v / config.maxVelocity * 50)
+            }
+            trackedTime += segment.trajectoryTime
+        }
+        gc.stroke()
+    }
+
     var simFrameCount = 0
 
     val simulationTimer = object : AnimationTimer() {
@@ -267,18 +331,22 @@ class DrivePlanner {
     init {
         ui.stage.scene.setOnKeyPressed {
             if (it.code == KeyCode.SPACE) {
-                if (simulating) {
-                    simPaused = !simPaused
-                } else {
-                    simulating = true
-                    simElapsed = 0.0
-                    simFrameCount = 0
-                    simPaused = false
-                    lastTime = System.currentTimeMillis() / 1000.0
-                    redrawScreen()
-                    simulationTimer.start()
-                }
+                onSpacePressed()
             }
+        }
+    }
+
+    fun onSpacePressed() {
+        if (simulating) {
+            simPaused = !simPaused
+        } else {
+            simulating = true
+            simElapsed = 0.0
+            simFrameCount = 0
+            simPaused = false
+            lastTime = System.currentTimeMillis() / 1000.0
+            redrawScreen()
+            simulationTimer.start()
         }
     }
 
@@ -353,18 +421,8 @@ class DrivePlanner {
         drawRobot(transformedPos, heading)
         gc.stroke = Color.WHITE
         drawArrow(Pose2D(pos, heading))
-//        stroke(255f, 255f, 255f)
-//        noFill()
-//        val headingXY = pos + heading.translation().scaled(0.5).newXYNoOffset
-//        val dir = heading.unit().translation()
-//        drawArrow(ControlPoint(pos, headingXY, dir))
-//        drawGraph(simIndex)
-//        stroke(255f, 0f, 0f)
-//        val x1 = (531 + (t / trajectoryTime) * 474)
-//        line(x1, 233, x1, 492)
-//        val x2 = (531 + (t / trajectoryTime) * 231)
-//        line(x2, 17, x2, 225)
-//        val x3 = (774 + (t / trajectoryTime) * 231)
-//        line(x3, 17, x3, 225)
+        gc.stroke = Color.RED
+        val x1 = (531 + (t / state.totalTime) * 474)
+        gc.strokeLine(x1, 190.0, x1, 492.0)
     }
 }

@@ -1,11 +1,8 @@
 package ca.warp7.planner2
 
-import ca.warp7.frc.geometry.Pose2D
-import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.MapChangeListener
 import javafx.collections.ObservableMap
-import javafx.event.Event
 import javafx.geometry.Insets
 import javafx.scene.Scene
 import javafx.scene.canvas.Canvas
@@ -21,32 +18,6 @@ class PlannerUI {
     val stage = Stage()
 
     val toolBar = ToolBar()
-
-    val poseList = TreeTableView<Pose2D>().apply {
-        columns.addAll(
-                TreeTableColumn<Pose2D, String>("x").apply {
-                    isSortable = false
-                    isResizable = false
-                    setCellValueFactory {
-                        SimpleStringProperty(it.value.value?.translation?.x?.f?.plus("m") ?: "---")
-                    }
-                },
-                TreeTableColumn<Pose2D, String>("y").apply {
-                    isSortable = false
-                    isResizable = false
-                    setCellValueFactory {
-                        SimpleStringProperty(it.value.value?.translation?.y?.f?.plus("m") ?: "---")
-                    }
-                },
-                TreeTableColumn<Pose2D, String>("heading").apply {
-                    isSortable = false
-                    isResizable = false
-                    setCellValueFactory {
-                        SimpleStringProperty(it.value.value?.rotation?.degrees()?.f?.plus("deg") ?: "---")
-                    }
-                }
-        )
-    }
 
     val canvas = Canvas()
 
@@ -64,12 +35,9 @@ class PlannerUI {
         style = "-fx-text-fill: white"
     }
 
-    val sideBar = poseList
-
     val view = BorderPane().apply {
         top = toolBar
-        left = sideBar
-        right = canvas
+        left = canvas
         bottom = VBox().apply {
             children.addAll(
                     HBox().apply {
