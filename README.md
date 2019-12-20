@@ -15,7 +15,7 @@ Copy this code into `Commons.json` in the `vendordeps` folder of a robot project
 {
     "fileName": "Commons.json",
     "name": "FRC-Commons-Kotlin",
-    "version": "2019.8.0",
+    "version": "2019.9.0",
     "uuid": "ab676553-b602-441f-a38d-f1296eff6538",
     "mavenUrls": [
         "https://jitpack.io"
@@ -25,7 +25,7 @@ Copy this code into `Commons.json` in the `vendordeps` folder of a robot project
         {
             "groupId": "com.github.Team865",
             "artifactId": "FRC-Commons-Kotlin",
-            "version": "2019.8.0"
+            "version": "2019.9.0"
         }
     ],
     "jniDependencies": [],
@@ -45,6 +45,6 @@ repositories {
 }
 
 dependencies {
-    implementation(group="com.github.Team865", name="FRC-Commons-Kotlin", version="2019.8.0")
+    implementation(group="com.github.Team865", name="FRC-Commons-Kotlin", version="2019.9.0")
 }
 ```

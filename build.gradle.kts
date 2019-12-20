@@ -21,7 +21,7 @@ repositories {
 }
 
 group = "ca.warp7.frc"
-version = "2019.8.0"
+version = "2019.9.0"
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
@@ -46,6 +46,8 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = "5.5.1")
+    testImplementation("org.openjdk.jmh:jmh-core:1.21")
+    testImplementation("org.openjdk.jmh:jmh-generator-annprocess:1.21")
     testRuntimeOnly(group = "org.junit.jupiter", name = "junit-jupiter-engine", version = "5.5.1")
     testRuntimeOnly(group = "org.junit.platform", name = "junit-platform-launcher", version = "1.5.1")
 }
