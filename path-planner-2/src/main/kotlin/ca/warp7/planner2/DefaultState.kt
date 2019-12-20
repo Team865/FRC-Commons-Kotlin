@@ -29,6 +29,7 @@ fun getDefaultState(): State {
     })
     val p = Pose2D(16.8.feet, 11.2.feet, (180+32).degrees) + Pose2D(2.3, -0.2, 0.0)
     state.segments.add(Segment().apply {
+        inverted = true
         waypoints = listOf(
                 Pose2D(16.8.feet, 11.2.feet, (180 + 32).degrees),
                 p
@@ -49,6 +50,7 @@ fun getDefaultState(): State {
     })
 
     state.segments.add(Segment().apply {
+        inverted = true
         waypoints = listOf(
                 Pose2D(3.feet, 11.5.feet, 0.degrees),
                 Pose2D(24.feet, 8.feet, 0.degrees)

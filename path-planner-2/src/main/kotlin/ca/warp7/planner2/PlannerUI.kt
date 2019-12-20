@@ -17,7 +17,7 @@ import javafx.stage.Stage
 class PlannerUI {
     val stage = Stage()
 
-    val toolBar = ToolBar()
+    val menuBar = MenuBar()
 
     val canvas = Canvas()
 
@@ -36,7 +36,7 @@ class PlannerUI {
     }
 
     val view = BorderPane().apply {
-        top = toolBar
+        top = menuBar
         left = canvas
         bottom = VBox().apply {
             children.addAll(
@@ -56,7 +56,7 @@ class PlannerUI {
 
     val referenceImage = Image(DrivePlanner::class.java.getResourceAsStream("/reference.png"))
 
-    val shortcutButton = Button("Shortcuts").apply {
+    val shortcutButton = MenuItem("Shortcuts").apply {
         setOnAction {
             val dialog = Dialog<ButtonType>()
             dialog.title = "Shortcuts"
@@ -68,6 +68,7 @@ class PlannerUI {
     }
 
     init {
+        menuBar.isUseSystemMenuBar = true
         pathStatus.addListener(MapChangeListener {
             pathStatusLabel.text = pathStatus.entries
                     .joinToString("   ") { it.key + ": " + it.value }

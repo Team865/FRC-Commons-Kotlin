@@ -57,6 +57,7 @@ class TrajectoryController(private val builder: TrajectoryBuilder) {
         val curvature = linearInterpolate(last.curvature, next.curvature, x)
         val position = last.pose.translation.interpolate(next.pose.translation, x)
         val heading = last.pose.rotation.interpolate(next.pose.rotation, x)
+
         val state = TrajectoryState(Pose2D(position, heading), curvature)
 
         state.v = linearInterpolate(last.v, next.v, x)

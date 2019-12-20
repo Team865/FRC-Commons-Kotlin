@@ -8,7 +8,8 @@ import ca.warp7.frc.linearInterpolate
 import javafx.animation.AnimationTimer
 import javafx.application.Platform
 import javafx.scene.canvas.GraphicsContext
-import javafx.scene.control.*
+import javafx.scene.control.Menu
+import javafx.scene.control.MenuItem
 import javafx.scene.input.KeyCode
 import javafx.scene.paint.Color
 import kotlin.math.abs
@@ -19,8 +20,8 @@ class DrivePlanner {
     val ui = PlannerUI()
     val gc: GraphicsContext = ui.canvas.graphicsContext2D
 
-    val pathActions = MenuButton(
-            "Path Actions",
+    val pathMenu = Menu(
+            "Path",
             null,
             MenuItem("Insert Spline Control Point"),
             MenuItem("Insert Reverse Direction"),
@@ -33,28 +34,24 @@ class DrivePlanner {
     )
 
     init {
-        ui.toolBar.items.addAll(
-                Button("Refit Canvas"),
-                Separator(),
-                pathActions,
-                Separator(),
-                Button("Simulate").apply {
-                    setOnAction { onSpacePressed() }
-                },
-                Separator(),
-                MenuButton("Generate", null,
+        ui.menuBar.menus.addAll(
+                pathMenu,
+                Menu("View", null,
+                        MenuItem("Resize Canvas to Window"),
+                        MenuItem("Settings").apply {
+                            setOnAction {
+                                showSettings()
+                            }
+                        },
+                        MenuItem("Simulation").apply {
+                            setOnAction { onSpacePressed() }
+                        }),
+                Menu("Generate", null,
                         MenuItem("Java Trajectory Command"),
                         MenuItem("WPILib function"),
                         MenuItem("CSV File")
                 ),
-                Separator(),
-                Button("Settings").apply {
-                    setOnAction {
-                        showSettings()
-                    }
-                },
-                Separator(),
-                ui.shortcutButton
+                Menu("Help", null, ui.shortcutButton)
         )
     }
 
@@ -112,9 +109,6 @@ class DrivePlanner {
         ui.canvas.height = bg.height + 32
         gc.fill = Color.WHITE
         gc.fillRect(0.0, 0.0, ui.canvas.width, ui.canvas.height)
-        gc.stroke = Color.valueOf("#5a8ade")
-        gc.lineWidth = 4.0
-        gc.strokeRect(10.0, 10.0, bg.width + 12, bg.height + 12)
         gc.drawImage(bg, 16.0, 16.0)
         gc.drawImage(ui.referenceImage, bg.width + 32, 16.0, 96.0, 96.0)
 
@@ -206,7 +200,7 @@ class DrivePlanner {
             val newRight = ref.transform(t + normal)
 
             if (s.curvature.isFinite()) {
-                val kx = abs(s.curvature) / segment.maxK
+                val kx = abs(s.curvature) / segment.maxCurvature
                 if (odd) {
                     val r = linearInterpolate(0.0, 192.0, kx) + 63
                     val b = 255 - linearInterpolate(0.0, 192.0, kx)
@@ -264,11 +258,11 @@ class DrivePlanner {
         val min = 384.0
         val max = 484.0
         gc.strokeLine(531.0, min, 531.0 + 474.0, min)
-        gc.strokeLine( 531.0, max, 531.0 + 474.0, max)
+        gc.strokeLine(531.0, max, 531.0 + 474.0, max)
         var accStep = -config.maxAcceleration.toInt()
         while (accStep < config.maxAcceleration) {
             val h = min + (config.maxAcceleration - accStep) * accPxPerM
-            gc.strokeLine( 531.0, h, 531.0 + 474.0, h)
+            gc.strokeLine(531.0, h, 531.0 + 474.0, h)
             accStep++
         }
 
@@ -276,11 +270,11 @@ class DrivePlanner {
         val min2 = 200.0
         val max2 = 300.0
         gc.strokeLine(531.0, min2, 531.0 + 474.0, min2)
-        gc.strokeLine( 531.0, max2, 531.0 + 474.0, max2)
+        gc.strokeLine(531.0, max2, 531.0 + 474.0, max2)
         var velStep = -config.maxVelocity.toInt()
         while (velStep < config.maxVelocity) {
             val h = min2 + (config.maxVelocity - velStep) * velPxPerM
-            gc.strokeLine( 531.0, h, 531.0 + 474.0, h)
+            gc.strokeLine(531.0, h, 531.0 + 474.0, h)
             velStep++
         }
 
@@ -395,32 +389,34 @@ class DrivePlanner {
             }
             trackedTime += seg.trajectoryTime
         }
-        var simIndex = -1
-        val trajectory = simSeg.trajectory
         val relativeTime = t - trackedTime
-        while (simIndex < trajectory.size - 2 && trajectory[simIndex + 1].t < relativeTime) {
-            simIndex++
-        }
 
-        val thisMoment = trajectory[simIndex]
-        val nextMoment = trajectory[simIndex + 1]
-        val tx = (relativeTime - thisMoment.t) / (nextMoment.t - thisMoment.t)
-        val pos = thisMoment.pose.translation.interpolate(nextMoment.pose.translation, tx)
-        val heading = thisMoment.pose.rotation.interpolate(nextMoment.pose.rotation, tx)
-        val transformedPos = ref.transform(pos)
-        val curvature = linearInterpolate(thisMoment.curvature, nextMoment.curvature, tx)
+        val sample = simSeg.sample(relativeTime)
+
+        val transformedPos = ref.transform(sample.pose.translation)
         redrawScreen()
-        if (curvature.isFinite() && curvature != 0.0 && config.tangentCircle) {
-            val radius = 1 / curvature
-            val offset = ref.scale(heading.normal().translation().scaled(radius))
+        if (sample.curvature.isFinite() && sample.curvature != 0.0 && config.tangentCircle) {
+            val radius = 1 / sample.curvature
+            val offset = ref.scale(sample.pose.rotation.normal().translation().scaled(radius))
             val center = transformedPos + offset
             val rad2 = ref.scale(radius) * 2
             gc.stroke = Color.YELLOW
             gc.strokeOval(center.x - rad2, center.y - rad2, rad2, rad2)
         }
-        drawRobot(transformedPos, heading)
+        ui.pointStatus.putAll(mapOf(
+                "x" to "${sample.pose.translation.x.f2}m",
+                "y" to "${sample.pose.translation.y.f2}m",
+                "heading" to "${sample.pose.rotation.degrees().f2}deg",
+                "curvature" to "${sample.curvature.f2}rad/m",
+                "t" to "${sample.t.f2}s",
+                "v" to "${sample.v.f2}m/s",
+                "ω" to "${sample.w.f2}rad/s",
+                "dv/dt" to "${sample.dv.f2}m/s^2",
+                "dω/dt" to "${sample.dw.f2}rad/s^2"
+        ))
+        drawRobot(transformedPos, sample.pose.rotation)
         gc.stroke = Color.WHITE
-        drawArrow(Pose2D(pos, heading))
+        drawArrow(sample.pose)
         gc.stroke = Color.RED
         val x1 = (531 + (t / state.totalTime) * 474)
         gc.strokeLine(x1, 190.0, x1, 492.0)

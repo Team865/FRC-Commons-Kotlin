@@ -119,7 +119,7 @@ class State {
         segment.trajectoryTime = trajectory.last().t
         segment.maxAngular = trajectory.map { it.w }.max()!!
         segment.maxAngularAcc = trajectory.map { it.dw }.max()!!
-        segment.maxK = trajectory.map { abs(it.curvature) }.max()!!
+        segment.maxCurvature = trajectory.map { abs(it.curvature) }.max()!!
     }
 
     fun generateAll() {
