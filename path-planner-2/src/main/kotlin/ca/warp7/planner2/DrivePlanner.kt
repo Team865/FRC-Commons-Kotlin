@@ -5,9 +5,11 @@ import ca.warp7.frc.geometry.Pose2D
 import ca.warp7.frc.geometry.Rotation2D
 import ca.warp7.frc.geometry.Translation2D
 import ca.warp7.frc.linearInterpolate
+import javafx.animation.AnimationTimer
 import javafx.application.Platform
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.*
+import javafx.scene.input.KeyCode
 import javafx.scene.paint.Color
 import kotlin.math.abs
 
@@ -73,23 +75,9 @@ class DrivePlanner {
         }
     }
 
-
     fun regenerate() {
-
-        val bg = state.config.background ?: return
-
-        ui.canvas.width = bg.width + 32 + 300
-        ui.canvas.height = bg.height + 32
-        gc.fill = Color.WHITE
-        gc.fillRect(0.0, 0.0, ui.canvas.width, ui.canvas.height)
-        gc.stroke = Color.valueOf("#5a8ade")
-        gc.lineWidth = 4.0
-        gc.strokeRect(10.0, 10.0, bg.width + 12, bg.height + 12)
-        gc.drawImage(bg, 16.0, 16.0)
-
         state.generateAll()
 
-        gc.drawImage(ui.referenceImage, bg.width + 32, 16.0, 96.0, 96.0)
         ui.pathStatus.putAll(mapOf(
                 "JerkLimit" to state.jerkLimiting.toString(),
                 "Optimize" to state.optimizing.toString(),
@@ -112,6 +100,32 @@ class DrivePlanner {
                 "dv/dt" to "0.0m/s^2",
                 "dω/dt" to "0.0rad/s^2"
         ))
+        redrawScreen()
+        val pl = ui.poseList
+        pl.isShowRoot = false
+        pl.root = TreeItem<Pose2D>().apply {
+            children.addAll(state.segments.map {
+                TreeItem<Pose2D>().apply {
+                    children.addAll(it.waypoints.map { p -> TreeItem(p) })
+                    isExpanded = true
+                }
+            })
+        }
+    }
+
+    fun redrawScreen() {
+        val bg = state.config.background ?: return
+
+        ui.canvas.width = bg.width + 32 + 300
+        ui.canvas.height = bg.height + 32
+        gc.fill = Color.WHITE
+        gc.fillRect(0.0, 0.0, ui.canvas.width, ui.canvas.height)
+        gc.stroke = Color.valueOf("#5a8ade")
+        gc.lineWidth = 4.0
+        gc.strokeRect(10.0, 10.0, bg.width + 12, bg.height + 12)
+        gc.drawImage(bg, 16.0, 16.0)
+        gc.drawImage(ui.referenceImage, bg.width + 32, 16.0, 96.0, 96.0)
+
         var j = 0
         for (i in state.segments.indices) {
             val t = state.segments[i]
@@ -123,17 +137,6 @@ class DrivePlanner {
             val t = state.segments[i]
             drawControlPoints(t, j % 2 == 1)
             if (t.trajectory.first().curvature.isFinite()) j++
-        }
-
-        val pl = ui.poseList
-        pl.isShowRoot = false
-        pl.root = TreeItem<Pose2D>().apply {
-            children.addAll(state.segments.map {
-                TreeItem<Pose2D>().apply {
-                    children.addAll(it.waypoints.map { p -> TreeItem(p) })
-                    isExpanded = true
-                }
-            })
         }
     }
 
@@ -243,6 +246,125 @@ class DrivePlanner {
             gc.lineTo(left, a1)
             gc.lineTo(right, b1)
         }
+    }
 
+    var simFrameCount = 0
+
+    val simulationTimer = object : AnimationTimer() {
+        override fun handle(now: Long) {
+            if (simFrameCount % 3 == 0) {
+                handleSimulation()
+            }
+        }
+    }
+
+    var simulating = false
+    var simPaused = false
+    var simElapsed = 0.0
+    var simElapsedChanged = false
+    var lastTime = 0.0
+
+    init {
+        ui.stage.scene.setOnKeyPressed {
+            if (it.code == KeyCode.SPACE) {
+                if (simulating) {
+                    simPaused = !simPaused
+                } else {
+                    simulating = true
+                    simElapsed = 0.0
+                    simFrameCount = 0
+                    simPaused = false
+                    lastTime = System.currentTimeMillis() / 1000.0
+                    redrawScreen()
+                    simulationTimer.start()
+                }
+            }
+        }
+    }
+
+    fun drawRobot(pos: Translation2D, heading: Rotation2D) {
+        val a = ref.scale(Translation2D(config.robotLength, config.robotWidth).rotate(heading))
+        val b = ref.scale(Translation2D(config.robotLength, -config.robotWidth).rotate(heading))
+        val p1 = pos + a
+        val p2 = pos + b
+        val p3 = pos - a
+        val p4 = pos - b
+        gc.stroke = Color.rgb(60, 92, 148)
+        gc.fill = Color.rgb(90, 138, 222)
+        gc.beginPath()
+        gc.vertex(p1)
+        gc.vertex(p2)
+        gc.vertex(p3)
+        gc.vertex(p4)
+        gc.vertex(p1)
+        gc.closePath()
+        gc.stroke()
+        gc.fill()
+    }
+
+    fun handleSimulation() {
+        val nt = System.currentTimeMillis() / 1000.0
+        val dt = nt - lastTime
+        lastTime = nt
+        if (simPaused) {
+            if (!simElapsedChanged) return
+            simElapsedChanged = false
+        } else simElapsed += dt
+        val t = simElapsed
+        if (t > state.totalTime) {
+            simulating = false
+            simPaused = false
+            redrawScreen()
+            simulationTimer.stop()
+            return
+        }
+        var trackedTime = 0.0
+        var simSeg = state.segments.first()
+        for (seg in state.segments) {
+            if ((trackedTime + seg.trajectoryTime) > t) {
+                simSeg = seg
+                break
+            }
+            trackedTime += seg.trajectoryTime
+        }
+        var simIndex = -1
+        val trajectory = simSeg.trajectory
+        val relativeTime = t - trackedTime
+        while (simIndex < trajectory.size - 2 && trajectory[simIndex + 1].t < relativeTime) {
+            simIndex++
+        }
+
+        val thisMoment = trajectory[simIndex]
+        val nextMoment = trajectory[simIndex + 1]
+        val tx = (relativeTime - thisMoment.t) / (nextMoment.t - thisMoment.t)
+        val pos = thisMoment.pose.translation.interpolate(nextMoment.pose.translation, tx)
+        val heading = thisMoment.pose.rotation.interpolate(nextMoment.pose.rotation, tx)
+        val transformedPos = ref.transform(pos)
+        val curvature = linearInterpolate(thisMoment.curvature, nextMoment.curvature, tx)
+        redrawScreen()
+        if (curvature.isFinite() && curvature != 0.0 && config.tangentCircle) {
+            val radius = 1 / curvature
+            val offset = ref.scale(heading.normal().translation().scaled(radius))
+            val center = transformedPos + offset
+            val rad2 = ref.scale(radius) * 2
+            gc.stroke = Color.YELLOW
+            gc.strokeOval(center.x - rad2, center.y - rad2, rad2, rad2)
+        }
+        drawRobot(transformedPos, heading)
+        gc.stroke = Color.WHITE
+        drawArrow(Pose2D(pos, heading))
+//        stroke(255f, 255f, 255f)
+//        noFill()
+//        val headingXY = pos + heading.translation().scaled(0.5).newXYNoOffset
+//        val dir = heading.unit().translation()
+//        drawArrow(ControlPoint(pos, headingXY, dir))
+//        drawGraph(simIndex)
+//        stroke(255f, 0f, 0f)
+//        val x1 = (531 + (t / trajectoryTime) * 474)
+//        line(x1, 233, x1, 492)
+//        val x2 = (531 + (t / trajectoryTime) * 231)
+//        line(x2, 17, x2, 225)
+//        val x3 = (774 + (t / trajectoryTime) * 231)
+//        line(x3, 17, x3, 225)
     }
 }

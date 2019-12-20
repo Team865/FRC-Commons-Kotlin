@@ -64,6 +64,8 @@ class PixelReference {
             -pixelPerMetreHeight * point.x
     )
 
+    fun scale(x: Double) = x * pixelPerMetreWidth
+
     fun inverseScale(point: Translation2D) = Translation2D(
             -point.y / pixelPerMetreWidth,
             -point.x / pixelPerMetreHeight
@@ -107,6 +109,10 @@ class Segment {
     var maxK = 0.0
     var maxAngular = 0.0
     var maxAngularAcc = 0.0
+}
+
+class Simulator {
+
 }
 
 /**
@@ -305,7 +311,7 @@ fun getDefaultState(): State {
 
     state.segments.add(Segment().apply {
         waypoints = listOf(
-                Pose2D(24.feet, 8.feet, 0.degrees),
+                Pose2D(24.feet, 8.feet, 180.degrees),
                 Pose2D(24.feet, 8.feet, (180-90).degrees)
         )
     })
