@@ -4,19 +4,15 @@ package ca.warp7.frc.trajectory
 
 import ca.warp7.frc.geometry.Pose2D
 import ca.warp7.frc.geometry.Rotation2D
-import ca.warp7.frc.geometry.Translation2D
-import ca.warp7.frc.path.Path2DState
 import ca.warp7.frc.path.QuinticSegment2D
-import ca.warp7.frc.path.get
 import ca.warp7.frc.path.quinticSplinesOf
-import kotlin.math.hypot
 
 fun parameterizedSplinesOf(waypoints: List<Pose2D>): List<TrajectoryState> =
         quinticSplinesOf(waypoints).parameterized()
 
 fun List<QuinticSegment2D>.parameterized(): List<TrajectoryState> {
     val points = mutableListOf<TrajectoryState>()
-    val p0 = first()[0.0]
+    val p0 = first().getState(0.0)
     points.add(TrajectoryState(p0.pose(), p0.curvature()))
     forEach { points.addAll(it.parameterized()) }
     return points
@@ -28,16 +24,6 @@ fun QuinticSegment2D.parameterized(): List<TrajectoryState> {
     return points
 }
 
-fun QuinticSegment2D.getState(t: Double): Path2DState {
-    return Path2DState(0.0, px(t), py(t), vx(t), vy(t), ax(t), ay(t), 0.0, 0.0)
-}
-
-fun QuinticSegment2D.getPose(t: Double): Pose2D {
-    val vx = vx(t)
-    val vy = vy(t)
-    val hp = hypot(vx, vy)
-    return Pose2D(Translation2D(px(t), py(t)), Rotation2D(vx/hp, vy/hp))
-}
 
 fun QuinticSegment2D.parameterize(
         points: MutableList<TrajectoryState>,
