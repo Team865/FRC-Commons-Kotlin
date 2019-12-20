@@ -40,7 +40,8 @@ class DrivePlanner {
                         MenuItem("Resize Canvas to Window"),
                         MenuItem("Settings").apply {
                             setOnAction {
-                                showSettings()
+                                config.showSettings()
+                                regenerate()
                             }
                         },
                         MenuItem("Simulation").apply {
@@ -104,6 +105,7 @@ class DrivePlanner {
 
     fun redrawScreen() {
         val bg = state.config.background ?: return
+        ref.set(bg.width, bg.height, 16.0, 16.0)
 
         ui.canvas.width = bg.width + 32 + 500
         ui.canvas.height = bg.height + 32
@@ -328,6 +330,9 @@ class DrivePlanner {
                 onSpacePressed()
             }
         }
+        ui.stage.showingProperty().addListener { _, _, nv ->
+            if (!nv) config.save()
+        }
     }
 
     fun onSpacePressed() {
@@ -399,9 +404,9 @@ class DrivePlanner {
             val radius = 1 / sample.curvature
             val offset = ref.scale(sample.pose.rotation.normal().translation().scaled(radius))
             val center = transformedPos + offset
-            val rad2 = ref.scale(radius) * 2
+            val radius2 = ref.scale(radius) * 2
             gc.stroke = Color.YELLOW
-            gc.strokeOval(center.x - rad2, center.y - rad2, rad2, rad2)
+            gc.strokeOval(center.x - radius2, center.y - radius2, radius2, radius2)
         }
         ui.pointStatus.putAll(mapOf(
                 "x" to "${sample.pose.translation.x.f2}m",

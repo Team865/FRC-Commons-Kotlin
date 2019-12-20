@@ -10,9 +10,9 @@ import java.io.FileInputStream
 fun getDefaultState(): State {
     val state = State()
 
-    val bg = Image(FileInputStream("C:\\Users\\Yu\\IdeaProjects\\FRC-Commons-Kotlin\\path-planner\\src\\main\\resources\\field.PNG"))
     state.config.apply {
-        background = bg
+        load()
+        background = Image(FileInputStream("C:\\Users\\Yu\\IdeaProjects\\FRC-Commons-Kotlin\\path-planner\\src\\main\\resources\\field.PNG"))
         maxVelocity = 3.5
         maxAcceleration = 3.0
         maxCentripetalAcceleration = 4.0
@@ -20,14 +20,13 @@ fun getDefaultState(): State {
         robotWidth = 0.33
         wheelbaseRadius = 0.5
     }
-    state.reference.set(bg.width, bg.height, 16.0, 16.0)
     state.segments.add(Segment().apply {
         waypoints = listOf(
                 Pose2D(6.feet, 4.feet, 0.degrees),
                 Pose2D(16.8.feet, 11.2.feet, 32.degrees)
         )
     })
-    val p = Pose2D(16.8.feet, 11.2.feet, (180+32).degrees) + Pose2D(2.3, -0.2, 0.0)
+    val p = Pose2D(16.8.feet, 11.2.feet, (180 + 32).degrees) + Pose2D(2.3, -0.2, 0.0)
     state.segments.add(Segment().apply {
         inverted = true
         waypoints = listOf(
@@ -60,14 +59,14 @@ fun getDefaultState(): State {
     state.segments.add(Segment().apply {
         waypoints = listOf(
                 Pose2D(24.feet, 8.feet, 180.degrees),
-                Pose2D(24.feet, 8.feet, (180-90).degrees)
+                Pose2D(24.feet, 8.feet, (180 - 90).degrees)
         )
     })
 
     state.segments.add(Segment().apply {
         waypoints = listOf(
-                Pose2D(24.feet, 8.feet, (180-90).degrees),
-                Pose2D(22.6.feet, 11.2.feet, (180-32).degrees)
+                Pose2D(24.feet, 8.feet, (180 - 90).degrees),
+                Pose2D(22.6.feet, 11.2.feet, (180 - 32).degrees)
         )
     })
 
