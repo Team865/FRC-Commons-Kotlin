@@ -79,7 +79,7 @@ class PlannerUI {
         canvas.isFocusTraversable = true
         canvas.addEventFilter(MouseEvent.MOUSE_CLICKED) { canvas.requestFocus() }
         stage.scene = Scene(view)
-        stage.title = "WARP7 PathPlanner"
+        stage.title = "FRC Drive Trajectory Planner"
         stage.icons.add(Image(DrivePlanner::class.java.getResourceAsStream("/icon.png")))
     }
 }

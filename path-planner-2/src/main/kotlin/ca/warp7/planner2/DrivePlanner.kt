@@ -86,7 +86,7 @@ class DrivePlanner {
                 "B" to state.bendFactor.toString(),
                 "MaxVel" to state.maxVelString(),
                 "MaxAcc" to state.maxAccString(),
-                "MaxCAcc" to state.maxAcSring(),
+                "MaxCAcc" to state.maxAcString(),
                 "∫(dξ)" to "${state.totalDist.f2}m",
                 "∫(dt)" to "${state.totalTime.f2}s",
                 "Σ(dCurvature)²" to state.totalSumOfCurvature.f2
