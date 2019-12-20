@@ -29,6 +29,9 @@ class TrajectoryState(val pose: Pose2D, val curvature: Double) {
         s.v = -v
         s.dv = -dv
         s.ddv = -ddv
+        s.w = w
+        s.dw = dw
+        s.ddw = ddw
         s.t = t
         return s
     }

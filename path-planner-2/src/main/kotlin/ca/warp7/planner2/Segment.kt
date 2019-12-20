@@ -8,6 +8,7 @@ class Segment {
     var inverted = false
     var waypoints: List<Pose2D> = emptyList()
     var trajectory: List<TrajectoryState> = emptyList()
+    var bendFactor = 1.2
 
     var curvatureSum = 0.0
     var arcLength = 0.0

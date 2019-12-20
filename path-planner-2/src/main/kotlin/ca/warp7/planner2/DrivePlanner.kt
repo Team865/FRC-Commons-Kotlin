@@ -81,7 +81,6 @@ class DrivePlanner {
         ui.pathStatus.putAll(mapOf(
                 "JerkLimit" to state.jerkLimiting.toString(),
                 "Optimize" to state.optimizing.toString(),
-                "B" to state.bendFactor.toString(),
                 "MaxVel" to state.maxVelString(),
                 "MaxAcc" to state.maxAccString(),
                 "MaxCAcc" to state.maxAcString(),
@@ -287,8 +286,13 @@ class DrivePlanner {
         for (segment in state.segments) {
             for (trajectoryState in segment.trajectory) {
                 val progress = (trajectoryState.t + trackedTime) / state.totalTime
+                val dv = if (segment.inverted) {
+                    -trajectoryState.dv
+                } else {
+                    trajectoryState.dv
+                }
                 gc.lineTo(531 + progress * 474,
-                        434 - trajectoryState.dv / config.maxAcceleration * 50)
+                        434 - dv / config.maxAcceleration * 50)
             }
             trackedTime += segment.trajectoryTime
         }
@@ -300,8 +304,12 @@ class DrivePlanner {
         for (segment in state.segments) {
             for (trajectoryState in segment.trajectory) {
                 val progress = (trajectoryState.t + trackedTime) / state.totalTime
-                gc.lineTo(531 + progress * 474,
-                        250 - trajectoryState.v / config.maxVelocity * 50)
+                val v = if (segment.inverted) {
+                    -trajectoryState.v
+                } else {
+                    trajectoryState.v
+                }
+                gc.lineTo(531 + progress * 474, 250 - v / config.maxVelocity * 50)
             }
             trackedTime += segment.trajectoryTime
         }

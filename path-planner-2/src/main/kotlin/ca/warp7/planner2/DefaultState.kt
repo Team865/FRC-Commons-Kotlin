@@ -52,20 +52,20 @@ fun getDefaultState(): State {
         inverted = true
         waypoints = listOf(
                 Pose2D(3.feet, 11.5.feet, 0.degrees),
-                Pose2D(24.feet, 8.feet, 0.degrees)
+                Pose2D(24.feet, 7.feet, 0.degrees)
         )
     })
 
     state.segments.add(Segment().apply {
         waypoints = listOf(
-                Pose2D(24.feet, 8.feet, 180.degrees),
-                Pose2D(24.feet, 8.feet, (180 - 90).degrees)
+                Pose2D(24.feet, 7.feet, 180.degrees),
+                Pose2D(24.feet, 7.feet, (180 - 90).degrees)
         )
     })
 
     state.segments.add(Segment().apply {
         waypoints = listOf(
-                Pose2D(24.feet, 8.feet, (180 - 90).degrees),
+                Pose2D(24.feet, 7.feet, (180 - 90).degrees),
                 Pose2D(22.6.feet, 11.2.feet, (180 - 32).degrees)
         )
     })

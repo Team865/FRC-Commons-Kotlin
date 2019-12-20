@@ -25,7 +25,6 @@ class State {
     var maxAcRatio = 1.0
     var jerkLimiting = false
     var optimizing = false
-    var bendFactor = 1.2
 
     var maxAngular = 0.0
     var maxAngularAcc = 0.0
@@ -91,35 +90,36 @@ class State {
         path.clear()
     }
 
-    private fun generateSegment(segment: Segment) {
+    private fun generateSegment(seg: Segment) {
 
-        segment.curvatureSum = 0.0
-        segment.arcLength = 0.0
+        seg.curvatureSum = 0.0
+        seg.arcLength = 0.0
 
         val trajectory = mutableListOf<TrajectoryState>()
         val path = mutableListOf<QuinticSegment2D>()
 
-        for (i in 0 until segment.waypoints.size - 1) {
-            val a = segment.waypoints[i]
-            val b = segment.waypoints[i + 1]
+        for (i in 0 until seg.waypoints.size - 1) {
+            val a = seg.waypoints[i]
+            val b = seg.waypoints[i + 1]
             if (!a.translation.epsilonEquals(b.translation)) {
-                path.add(quinticSplineFromPose(segment.waypoints[i], segment.waypoints[i + 1], bendFactor))
+                path.add(quinticSplineFromPose(seg.waypoints[i],
+                        seg.waypoints[i + 1], seg.bendFactor))
             } else {
                 if (path.isNotEmpty()) {
-                    addSplineTrajectory(segment, path, trajectory)
+                    addSplineTrajectory(seg, path, trajectory)
                 }
                 addToTrajectory(trajectory, generateQuickTurn(a, b))
             }
         }
         if (path.isNotEmpty()) {
-            addSplineTrajectory(segment, path, trajectory)
+            addSplineTrajectory(seg, path, trajectory)
         }
 
-        segment.trajectory = trajectory
-        segment.trajectoryTime = trajectory.last().t
-        segment.maxAngular = trajectory.map { it.w }.max()!!
-        segment.maxAngularAcc = trajectory.map { it.dw }.max()!!
-        segment.maxCurvature = trajectory.map { abs(it.curvature) }.max()!!
+        seg.trajectory = trajectory
+        seg.trajectoryTime = trajectory.last().t
+        seg.maxAngular = trajectory.map { it.w }.max()!!
+        seg.maxAngularAcc = trajectory.map { it.dw }.max()!!
+        seg.maxCurvature = trajectory.map { abs(it.curvature) }.max()!!
     }
 
     fun generateAll() {
