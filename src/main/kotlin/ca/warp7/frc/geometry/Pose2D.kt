@@ -82,9 +82,7 @@ class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
      */
     val inverse: Pose2D get() = Pose2D(translation.rotate(rotation.inverse).inverse, rotation.inverse)
 
-    override fun toString(): String {
-        return "Pose($translation, $rotation)"
-    }
+    override fun toString(): String = "Pose($translation, $rotation)"
 
     /**
      * Returns a Twist2d that maps this pose to the end pose. If c is the output

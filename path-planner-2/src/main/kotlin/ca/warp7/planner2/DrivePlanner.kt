@@ -10,7 +10,9 @@ import javafx.application.Platform
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.Menu
 import javafx.scene.control.MenuItem
+import javafx.scene.control.SeparatorMenuItem
 import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyCodeCombination
 import javafx.scene.paint.Color
 import kotlin.math.abs
 
@@ -35,23 +37,25 @@ class DrivePlanner {
 
     init {
         ui.menuBar.menus.addAll(
-                pathMenu,
-                Menu("View", null,
-                        MenuItem("Resize Canvas to Window"),
-                        MenuItem("Settings").apply {
+                Menu("File", null,
+                        MenuItem("Save"),
+                        MenuItem("Load"),
+                        MenuItem("Configure Path").apply {
                             setOnAction {
-                                config.showSettings()
+                                config.showSettings(ui.stage)
                                 regenerate()
                             }
                         },
-                        MenuItem("Simulation").apply {
+                        MenuItem("Generate Java Command"),
+                        MenuItem("Generate WPILib function")
+                ),
+                pathMenu,
+                Menu("View", null,
+                        MenuItem("Resize Canvas to Window"),
+                        MenuItem("Start/Pause Simulation").apply {
+                            accelerator = KeyCodeCombination(KeyCode.SPACE)
                             setOnAction { onSpacePressed() }
                         }),
-                Menu("Generate", null,
-                        MenuItem("Java Trajectory Command"),
-                        MenuItem("WPILib function"),
-                        MenuItem("CSV File")
-                ),
                 Menu("Help", null, ui.shortcutButton)
         )
     }
@@ -62,7 +66,6 @@ class DrivePlanner {
 
     var draggingPoint = false
     var draggingAngle = false
-    var draggedControlPoint: Pose2D? = null
 
     val state = getDefaultState()
     val ref = state.reference
@@ -332,11 +335,6 @@ class DrivePlanner {
     var lastTime = 0.0
 
     init {
-        ui.stage.scene.setOnKeyPressed {
-            if (it.code == KeyCode.SPACE) {
-                onSpacePressed()
-            }
-        }
         ui.stage.showingProperty().addListener { _, _, nv ->
             if (!nv) config.save()
         }

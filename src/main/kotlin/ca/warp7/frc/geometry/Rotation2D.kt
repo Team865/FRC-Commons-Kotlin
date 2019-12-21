@@ -52,13 +52,9 @@ class Rotation2D(val cos: Double, val sin: Double) {
 
     val inverse: Rotation2D get() = Rotation2D(cos, -sin)
 
-    fun degrees(): Double {
-        return Math.toDegrees(radians())
-    }
+    fun degrees(): Double = Math.toDegrees(radians())
 
-    fun radians(): Double {
-        return atan2(y = sin, x = cos)
-    }
+    fun radians(): Double = atan2(y = sin, x = cos)
 
     fun tan(): Double = if (abs(cos) < 1E-12) {
         if (sin >= 0.0) {
@@ -68,9 +64,7 @@ class Rotation2D(val cos: Double, val sin: Double) {
         }
     } else sin / cos
 
-    override fun toString(): String {
-        return "⟳${degrees().f}°"
-    }
+    override fun toString(): String = "⟳${degrees().f}°"
 
     override fun equals(other: Any?): Boolean {
         if (other !is Rotation2D) return false

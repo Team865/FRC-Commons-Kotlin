@@ -4,6 +4,7 @@ import javafx.scene.control.*
 import javafx.scene.image.Image
 import javafx.scene.layout.GridPane
 import javafx.stage.FileChooser
+import javafx.stage.Window
 import java.io.FileInputStream
 import java.nio.file.Paths
 import java.util.*
@@ -37,9 +38,10 @@ class Configuration {
         }
     }
 
-    fun showSettings() {
+    fun showSettings(owner: Window) {
         val dialog = Dialog<ButtonType>()
-        dialog.title = "Robot Settings"
+        dialog.title = "Configure Path"
+        dialog.initOwner(owner)
         dialog.dialogPane.buttonTypes.addAll(ButtonType.CANCEL, ButtonType.OK)
 
 
