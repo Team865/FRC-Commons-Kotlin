@@ -40,12 +40,12 @@ dist -> dt    v       dv        ddv
 
 fun main() {
 
-    val path2 = (0..7).map { TrajectoryState(Pose2D(it / 10.0, 0.0, 0.0), 0.0) }
+    val path2 = (0..8).map { TrajectoryState(Pose2D(it / 10.0, 0.0, 0.0), 0.0) }
     parameterizeTrajectory(path2, 1.0, 1.0, 1.0, 1.0, Double.POSITIVE_INFINITY)
     println(path2.joinToString("\n"))
 
     println()
-    val path = (0..7).map { TrajectoryState(Pose2D(it / 10.0, 0.0, 0.0), 0.0) }
+    val path = (0..8).map { TrajectoryState(Pose2D(it / 10.0, 0.0, 0.0), 0.0) }
     parameterizeTrajectory(path, 1.0, 1.0, 1.0, 1.0, 5.0)
     println(path.joinToString("\n"))
 

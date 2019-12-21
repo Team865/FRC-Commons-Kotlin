@@ -292,6 +292,24 @@ private fun rampedAccelerationPass(
     accumulativePass(states, arcLengths)
 }
 
+@Suppress("unused")
+private fun smoothAccelerationPass(
+        states: List<TrajectoryState>,
+        arcLengths: List<Double>,
+        maxJerk: Double
+) {
+
+    for (i in 2 until states.size) {
+        val current = states[i]
+        if (abs(current.ddv) > maxJerk) {
+            val previous = states[i - 1]
+            val beforePrevious = states[i - 2]
+            previous.v = (previous.v + current.v +  + beforePrevious.v) / 3.0
+        }
+    }
+    accumulativePass(states, arcLengths)
+}
+
 /**
  * Integrate dt into trajectory time
  */

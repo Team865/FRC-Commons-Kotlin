@@ -135,7 +135,7 @@ class DrivePlanner {
     fun drawArrow(point: Pose2D) {
         val pos = ref.transform(point.translation)
         val heading = ref.transform(point.translation + point.rotation.translation().scaled(0.5))
-        val dir = point.rotation.unit().translation()
+        val dir = point.rotation.translation()
 
         val r1 = dir.scaled(0.1524 * Constants.kTriangleRatio * 2)
         val r2 = r1.rotate(Rotation2D(0.0, 1.0)).scaled(Constants.kTriangleRatio)
@@ -173,8 +173,7 @@ class DrivePlanner {
 
         val s0 = segment.trajectory.first()
         val t0 = s0.pose.translation
-        var normal = (s0.pose.rotation.normal() *
-                config.robotWidth).translation()
+        var normal = s0.pose.rotation.normal().translation() * config.robotWidth
         var left = ref.transform(t0 - normal)
         var right = ref.transform(t0 + normal)
 
@@ -196,7 +195,7 @@ class DrivePlanner {
         for (i in 1 until segment.trajectory.size) {
             val s = segment.trajectory[i]
             val t = s.pose.translation
-            normal = (s.pose.rotation.normal() * config.robotWidth).translation()
+            normal = s.pose.rotation.normal().translation() * config.robotWidth
             val newLeft = ref.transform(t - normal)
             val newRight = ref.transform(t + normal)
 

@@ -2,13 +2,27 @@ package ca.warp7.frc.geometry
 
 import ca.warp7.frc.epsilonEquals
 import ca.warp7.frc.f
-import kotlin.math.*
+import kotlin.math.abs
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
 
+/**
+ * A rotation vector
+ *
+ * cos and sin must satisfy cos^2+sin^2=1
+ */
 @Suppress("MemberVisibilityCanBePrivate")
 class Rotation2D(val cos: Double, val sin: Double) {
 
+    /**
+     * @return an equivalent translation to moving along this rotation for 1 unit
+     */
     fun translation(): Translation2D = Translation2D(cos, sin)
 
+    /**
+     * @return the direction that is normal to this rotation
+     */
     fun normal(): Rotation2D = Rotation2D(-sin, cos)
 
     infix fun parallelTo(other: Rotation2D) = (translation() cross other.translation()).epsilonEquals(0.0)
@@ -21,17 +35,6 @@ class Rotation2D(val cos: Double, val sin: Double) {
 
     operator fun minus(by: Rotation2D): Rotation2D =
             Rotation2D(cos * by.cos - sin * -by.sin, cos * -by.sin + sin * by.cos)
-
-    fun scaled(by: Double): Rotation2D {
-        if (by == 1.0) {
-            return this
-        }
-        return Rotation2D(cos * by, sin * by)
-    }
-
-    operator fun times(by: Double): Rotation2D = scaled(by)
-
-    operator fun div(by: Double): Rotation2D = scaled(1.0 / by)
 
     fun distanceTo(state: Rotation2D): Double =
             atan2(y = cos * state.sin + -sin * state.cos, x = cos * state.cos - -sin * state.sin)
@@ -57,7 +60,6 @@ class Rotation2D(val cos: Double, val sin: Double) {
         return atan2(y = sin, x = cos)
     }
 
-
     fun tan(): Double = if (abs(cos) < 1E-12) {
         if (sin >= 0.0) {
             Double.POSITIVE_INFINITY
@@ -65,23 +67,6 @@ class Rotation2D(val cos: Double, val sin: Double) {
             Double.NEGATIVE_INFINITY
         }
     } else sin / cos
-
-    /**
-     * Gets the magnitude of the vector.
-     *
-     * **Example**
-     *
-     * @sample ca.warp7.frc.geometry.Translation2DTest.magWorksProperly
-     *
-     * @return the magnitude of the vector.
-     *
-     */
-    fun mag(): Double = hypot(cos, sin)
-
-    /**
-     * Get the unit rotation vector
-     */
-    fun unit(): Rotation2D = scaled(1 / mag())
 
     override fun toString(): String {
         return "⟳${degrees().f}°"
@@ -97,7 +82,6 @@ class Rotation2D(val cos: Double, val sin: Double) {
         result = 31 * result + sin.hashCode()
         return result
     }
-
 
     companion object {
 

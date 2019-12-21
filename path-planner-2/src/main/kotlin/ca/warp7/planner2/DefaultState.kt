@@ -19,6 +19,7 @@ fun getDefaultState(): State {
         robotLength = 0.42
         robotWidth = 0.33
         wheelbaseRadius = 0.5
+        maxJerk = 5.0
     }
     state.segments.add(Segment().apply {
         waypoints = listOf(
