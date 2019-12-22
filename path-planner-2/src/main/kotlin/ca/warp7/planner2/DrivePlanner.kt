@@ -10,7 +10,6 @@ import javafx.application.Platform
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.Menu
 import javafx.scene.control.MenuItem
-import javafx.scene.control.SeparatorMenuItem
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyCodeCombination
 import javafx.scene.paint.Color
@@ -22,18 +21,15 @@ class DrivePlanner {
     val ui = PlannerUI()
     val gc: GraphicsContext = ui.canvas.graphicsContext2D
 
-    val pathMenu = Menu(
-            "Path",
-            null,
-            MenuItem("Insert Spline Control Point"),
-            MenuItem("Insert Reverse Direction"),
-            MenuItem("Insert Quick Turn"),
-            MenuItem("Delete Point(s)"),
-            MenuItem("Reverse Point(s)"),
-            MenuItem("Snap Point(s) to 0.01m"),
-            MenuItem("Edit Point"),
-            MenuItem("Add Change to Point(s)")
-    )
+    val selections = ArrayList<MouseSelection>()
+    var selectionChanged = false
+
+    var draggingPoint = false
+    var draggingAngle = false
+
+    val state = getDefaultState()
+    val ref = state.reference
+    val config = state.config
 
     init {
         ui.menuBar.menus.addAll(
@@ -49,7 +45,18 @@ class DrivePlanner {
                         MenuItem("Generate Java Command"),
                         MenuItem("Generate WPILib function")
                 ),
-                pathMenu,
+                Menu(
+                        "Path",
+                        null,
+                        MenuItem("Insert Spline Control Point"),
+                        MenuItem("Insert Reverse Direction"),
+                        MenuItem("Insert Quick Turn"),
+                        MenuItem("Delete Point(s)"),
+                        MenuItem("Reverse Point(s)"),
+                        MenuItem("Snap Point(s) to 0.01m"),
+                        MenuItem("Edit Point"),
+                        MenuItem("Add Change to Point(s)")
+                ),
                 Menu("View", null,
                         MenuItem("Resize Canvas to Window"),
                         MenuItem("Start/Pause Simulation").apply {
@@ -59,16 +66,6 @@ class DrivePlanner {
                 Menu("Help", null, ui.shortcutButton)
         )
     }
-
-    val selections = ArrayList<MouseSelection>()
-    var selectionChanged = false
-
-    var draggingPoint = false
-    var draggingAngle = false
-
-    val state = getDefaultState()
-    val ref = state.reference
-    val config = state.config
 
     fun show() {
         Platform.runLater {

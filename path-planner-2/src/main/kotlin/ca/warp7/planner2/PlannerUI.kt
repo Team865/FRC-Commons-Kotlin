@@ -8,6 +8,8 @@ import javafx.scene.Scene
 import javafx.scene.canvas.Canvas
 import javafx.scene.control.*
 import javafx.scene.image.Image
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyCodeCombination
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
@@ -57,6 +59,7 @@ class PlannerUI {
     val referenceImage = Image(DrivePlanner::class.java.getResourceAsStream("/reference.png"))
 
     val shortcutButton = MenuItem("Shortcuts").apply {
+        accelerator = KeyCodeCombination(KeyCode.F1)
         setOnAction {
             val dialog = Dialog<ButtonType>()
             dialog.title = "Shortcuts"
