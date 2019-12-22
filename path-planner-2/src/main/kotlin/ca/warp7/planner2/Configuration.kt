@@ -19,8 +19,6 @@ class Configuration {
     var robotWidth = 0.0
     var robotLength = 0.0
     var background: Image? = null
-    var tangentCircle = false
-    var angularGraph = false
 
     private fun validate(str: String, old: Double): Double {
         return try {
@@ -51,8 +49,6 @@ class Configuration {
         val botLength = TextField(robotLength.toString())
 
         val choose = Button("Choose")
-        val tangent = CheckBox()
-        val angVel = CheckBox()
 
         choose.setOnAction {
             val chooser = FileChooser()
@@ -96,12 +92,6 @@ class Configuration {
 
             add(Label("Half Field Background"), 2, 0)
             add(choose, 3, 0)
-
-            add(Label("Show Tangent Circle"), 2, 1)
-            add(tangent, 3, 1)
-
-            add(Label("Show Angular Velocity Graph"), 2, 2)
-            add(angVel, 3, 2)
         }
 
         dialog.showAndWait()
@@ -113,8 +103,5 @@ class Configuration {
         maxJerk = validate(maxJ.text, maxJerk)
         robotWidth = validate(botWidth.text, robotWidth)
         robotLength = validate(botLength.text, robotLength)
-
-        tangentCircle = tangent.isSelected
-        angularGraph = angVel.isSelected
     }
 }

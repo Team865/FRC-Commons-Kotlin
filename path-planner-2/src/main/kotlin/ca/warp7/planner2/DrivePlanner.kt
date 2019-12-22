@@ -398,14 +398,6 @@ class DrivePlanner {
 
         val transformedPos = ref.transform(sample.pose.translation)
         redrawScreen()
-        if (sample.curvature.isFinite() && sample.curvature != 0.0 && config.tangentCircle) {
-            val radius = 1 / sample.curvature
-            val offset = ref.scale(sample.pose.rotation.normal().translation().scaled(radius))
-            val center = transformedPos + offset
-            val radius2 = ref.scale(radius) * 2
-            gc.stroke = Color.YELLOW
-            gc.strokeOval(center.x - radius2, center.y - radius2, radius2, radius2)
-        }
         ui.pointStatus.putAll(mapOf(
                 "x" to "${sample.pose.translation.x.f2}m",
                 "y" to "${sample.pose.translation.y.f2}m",
