@@ -11,6 +11,7 @@ plugins {
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 buildDir = File(rootProject.projectDir, "build/" + project.name)
@@ -36,5 +37,6 @@ tasks.withType<KotlinCompile> {
 
 dependencies {
     implementation(rootProject)
+    implementation("com.beust:klaxon:5.2")
     implementation(kotlin("stdlib"))
 }

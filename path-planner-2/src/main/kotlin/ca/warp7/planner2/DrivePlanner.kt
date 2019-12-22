@@ -60,8 +60,7 @@ class DrivePlanner {
         )
     }
 
-    var selectedSegment = -1
-    var selectedPoint = -1
+    val selections = ArrayList<MouseSelection>()
     var selectionChanged = false
 
     var draggingPoint = false
@@ -333,12 +332,6 @@ class DrivePlanner {
     var simElapsed = 0.0
     var simElapsedChanged = false
     var lastTime = 0.0
-
-    init {
-        ui.stage.showingProperty().addListener { _, _, nv ->
-            if (!nv) config.save()
-        }
-    }
 
     fun onSpacePressed() {
         if (simulating) {

@@ -10,7 +10,6 @@ fun getDefaultState(): State {
     val state = State()
 
     state.config.apply {
-        load()
         background = Image(FileInputStream("C:\\Users\\Yu\\IdeaProjects\\FRC-Commons-Kotlin\\path-planner\\src\\main\\resources\\field.PNG"))
         maxVelocity = 3.5
         maxAcceleration = 3.0

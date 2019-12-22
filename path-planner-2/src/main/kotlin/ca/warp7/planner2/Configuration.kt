@@ -5,9 +5,6 @@ import javafx.scene.image.Image
 import javafx.scene.layout.GridPane
 import javafx.stage.FileChooser
 import javafx.stage.Window
-import java.io.FileInputStream
-import java.nio.file.Paths
-import java.util.*
 
 /**
  * The part of the State that the user sets in a
@@ -119,42 +116,5 @@ class Configuration {
 
         tangentCircle = tangent.isSelected
         angularGraph = angVel.isSelected
-    }
-
-    private val home = System.getProperty("user.home")
-    private val savePath = Paths.get(home, ".FRC-Trajectory-Generator.properties")
-    private val props = Properties()
-
-    fun load() {
-        try {
-            props.load(savePath.toFile().inputStream())
-
-            wheelbaseRadius = props.getProperty("wheelbaseRadius").toDouble()
-            maxVelocity = props.getProperty("maxVelocity").toDouble()
-            maxAcceleration = props.getProperty("maxAcceleration").toDouble()
-            maxCentripetalAcceleration = props.getProperty("maxCentripetalAcceleration").toDouble()
-            maxJerk = props.getProperty("maxJerk").toDouble()
-            robotWidth = props.getProperty("robotWidth").toDouble()
-            robotLength = props.getProperty("robotLength").toDouble()
-            background = null
-            tangentCircle = false
-            angularGraph = false
-        } catch (e: Exception) {
-        }
-    }
-
-    fun save() {
-        try {
-            props.setProperty("wheelbaseRadius", wheelbaseRadius.toString())
-            props.setProperty("maxVelocity", maxVelocity.toString())
-            props.setProperty("maxAcceleration", maxAcceleration.toString())
-            props.setProperty("maxCentripetalAcceleration", maxCentripetalAcceleration.toString())
-            props.setProperty("maxJerk", maxJerk.toString())
-            props.setProperty("robotWidth", robotWidth.toString())
-            props.setProperty("robotLength", robotLength.toString())
-            props.store(savePath.toFile().outputStream(), null)
-        } catch (e: Exception) {
-
-        }
     }
 }
