@@ -20,8 +20,7 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
 
-class PlannerUI {
-    val stage = Stage()
+class PlannerUI(stage: Stage) {
 
     val menuBar = MenuBar()
 
@@ -30,16 +29,14 @@ class PlannerUI {
     val pathStatus: ObservableMap<String, String> = FXCollections
             .observableMap<String, String>(LinkedHashMap())
 
-    val pathStatusLabel = Label().apply {
+    private val pathStatusLabel = Label().apply {
         style = "-fx-text-fill: white"
     }
 
     val pointStatus: ObservableMap<String, String> = FXCollections
             .observableMap<String, String>(LinkedHashMap())
 
-    val pointStatusLabel = Label().apply {
-        style = "-fx-text-fill: white"
-    }
+    private val pointStatusLabel = Label()
 
     val view = BorderPane().apply {
         top = menuBar
@@ -47,7 +44,7 @@ class PlannerUI {
         bottom = VBox().apply {
             children.addAll(
                     HBox().apply {
-                        style = "-fx-background-color: #3c5c94"
+                        style = "-fx-background-color: white"
                         padding = Insets(4.0, 16.0, 4.0, 16.0)
                         children.add(pointStatusLabel)
                     },

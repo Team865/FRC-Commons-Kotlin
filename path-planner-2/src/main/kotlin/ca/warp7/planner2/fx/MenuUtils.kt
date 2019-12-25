@@ -27,9 +27,11 @@ fun Menu.name(name: String) {
     text = name
 }
 
-fun menuItem(name: String, combo: KeyCombination, action: () -> Unit): MenuItem {
+fun menuItem(name: String, combo: KeyCombination?, action: () -> Unit): MenuItem {
     val mi = MenuItem(name)
-    mi.accelerator = combo
+    if (combo != null) {
+        mi.accelerator = combo
+    }
     mi.setOnAction { action() }
     return mi
 }

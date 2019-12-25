@@ -6,6 +6,7 @@ import ca.warp7.frc.geometry.Rotation2D
 import ca.warp7.frc.geometry.Translation2D
 import ca.warp7.frc.linearInterpolate
 import javafx.animation.AnimationTimer
+import javafx.application.HostServices
 import javafx.application.Platform
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.Menu
@@ -13,13 +14,14 @@ import javafx.scene.control.MenuItem
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyCodeCombination
 import javafx.scene.paint.Color
+import javafx.stage.Stage
 import kotlin.math.abs
 
 @Suppress("MemberVisibilityCanBePrivate")
-class DrivePlanner {
+class DrivePlanner(val stage: Stage, hostServices: HostServices) {
 
-    val ui = PlannerUI()
-    val dialogs = Dialogs()
+    val ui = PlannerUI(stage)
+    val dialogs = Dialogs(stage, hostServices)
     val gc: GraphicsContext = ui.canvas.graphicsContext2D
 
 //    var draggingPoint = false
@@ -36,7 +38,7 @@ class DrivePlanner {
                         MenuItem("Load"),
                         MenuItem("Configure Path").apply {
                             setOnAction {
-                                config.showSettings(ui.stage)
+                                config.showSettings(stage)
                                 regenerate()
                             }
                         },
@@ -89,7 +91,7 @@ class DrivePlanner {
     fun show() {
         Platform.runLater {
             regenerate()
-            ui.stage.show()
+            stage.show()
         }
     }
 

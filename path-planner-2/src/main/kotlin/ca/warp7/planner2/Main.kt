@@ -1,9 +1,7 @@
 package ca.warp7.planner2
 
-import javafx.application.Platform
+import javafx.application.Application
 
 fun main() {
-    Platform.startup {
-        DrivePlanner().show()
-    }
+    Application.launch(PlannerApplication::class.java)
 }
