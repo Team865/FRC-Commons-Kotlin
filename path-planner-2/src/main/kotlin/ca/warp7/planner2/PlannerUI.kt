@@ -1,15 +1,19 @@
 package ca.warp7.planner2
 
+import ca.warp7.planner2.fx.combo
+import ca.warp7.planner2.fx.menuItem
 import javafx.collections.FXCollections
 import javafx.collections.MapChangeListener
 import javafx.collections.ObservableMap
 import javafx.geometry.Insets
 import javafx.scene.Scene
 import javafx.scene.canvas.Canvas
-import javafx.scene.control.*
+import javafx.scene.control.ButtonType
+import javafx.scene.control.Dialog
+import javafx.scene.control.Label
+import javafx.scene.control.MenuBar
 import javafx.scene.image.Image
 import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyCodeCombination
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
@@ -57,18 +61,6 @@ class PlannerUI {
     }
 
     val referenceImage = Image(DrivePlanner::class.java.getResourceAsStream("/reference.png"))
-
-    val shortcutButton = MenuItem("Shortcuts").apply {
-        accelerator = KeyCodeCombination(KeyCode.F1)
-        setOnAction {
-            val dialog = Dialog<ButtonType>()
-            dialog.title = "Shortcuts"
-            dialog.contentText = PlannerUI::class.java.getResourceAsStream("/docs.txt")
-                    .bufferedReader().readText()
-            dialog.dialogPane.buttonTypes.add(ButtonType.OK)
-            dialog.show()
-        }
-    }
 
     init {
         menuBar.isUseSystemMenuBar = true

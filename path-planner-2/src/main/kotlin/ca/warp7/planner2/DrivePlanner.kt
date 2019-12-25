@@ -19,6 +19,7 @@ import kotlin.math.abs
 class DrivePlanner {
 
     val ui = PlannerUI()
+    val dialogs = Dialogs()
     val gc: GraphicsContext = ui.canvas.graphicsContext2D
 
 //    var draggingPoint = false
@@ -60,7 +61,7 @@ class DrivePlanner {
                             accelerator = KeyCodeCombination(KeyCode.SPACE)
                             setOnAction { onSpacePressed() }
                         }),
-                Menu("Help", null, ui.shortcutButton)
+               dialogs.helpMenu
         )
         ui.canvas.setOnMouseClicked { onMouseClick(it.x, it.y) }
     }
