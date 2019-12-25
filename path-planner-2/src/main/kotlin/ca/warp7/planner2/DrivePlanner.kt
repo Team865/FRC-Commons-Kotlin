@@ -21,8 +21,6 @@ class DrivePlanner {
     val ui = PlannerUI()
     val gc: GraphicsContext = ui.canvas.graphicsContext2D
 
-    val selections = ArrayList<MouseSelection>()
-
 //    var draggingPoint = false
 //    var draggingAngle = false
 
@@ -75,29 +73,16 @@ class DrivePlanner {
                 && mouseOnField.x < Constants.kFieldSize
                 && mouseOnField.y > -Constants.kHalfFieldSize
                 && mouseOnField.y < Constants.kHalfFieldSize) {
-            for ((i, segment) in state.segments.withIndex()) {
-                for ((j, wp) in segment.waypoints.withIndex()) {
-                    if (wp.translation.epsilonEquals(mouseOnField, 0.1)) {
-                        toggleSelection(i, segment, j, wp)
-                        selectionChanged = true
-                    }
+            for (controlPoint in state.controlPoints) {
+                if (controlPoint.pose.translation.epsilonEquals(mouseOnField, Constants.kMouseControlPointRange)) {
+                    controlPoint.isSelected = !controlPoint.isSelected
+                    selectionChanged = true
                 }
             }
         }
         if (selectionChanged) {
             redrawScreen()
         }
-    }
-
-    fun toggleSelection(si: Int, s: Segment, pi: Int, p: Pose2D) {
-        println("toggling $si, $pi")
-        for (seg in selections) {
-            if (seg.segmentIndex == si && seg.pointIndex == pi) {
-                selections.remove(seg)
-                return
-            }
-        }
-        selections.add(MouseSelection(s, si, p, pi))
     }
 
     fun show() {
@@ -157,22 +142,17 @@ class DrivePlanner {
 
     fun drawAllControlPoints() {
         if (simulating) return
-        var j = 0
-        for (i in state.segments.indices) {
-            val t = state.segments[i]
-            if (j % 2 == 1) {
-                gc.stroke = Color.rgb(128, 255, 0)
-            } else {
-                gc.stroke = Color.rgb(255, 255, 0)
+        for (controlPoint in state.controlPoints) {
+            gc.stroke = when {
+                controlPoint.isSelected -> Color.rgb(90, 138, 222)
+                controlPoint.indexInState % 2 == 1 -> Color.rgb(128, 255, 0)
+                else -> Color.rgb(255, 255, 0)
             }
-            for (point in t.waypoints) {
-                drawArrow(point)
-            }
-            if (t.trajectory.first().curvature.isFinite()) j++
+            drawArrowForPose(controlPoint.pose)
         }
     }
 
-    fun drawArrow(point: Pose2D) {
+    fun drawArrowForPose(point: Pose2D) {
         val pos = ref.transform(point.translation)
         val heading = ref.transform(point.translation + point.rotation.translation().scaled(0.5))
         val dir = point.rotation.translation()
@@ -438,7 +418,7 @@ class DrivePlanner {
         ))
         drawRobot(transformedPos, sample.pose.rotation)
         gc.stroke = Color.WHITE
-        drawArrow(sample.pose)
+        drawArrowForPose(sample.pose)
         gc.stroke = Color.RED
         val x1 = (531 + (t / state.totalTime) * 474)
         gc.strokeLine(x1, 190.0, x1, 492.0)

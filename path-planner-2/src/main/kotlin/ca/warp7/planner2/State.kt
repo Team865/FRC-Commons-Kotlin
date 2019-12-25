@@ -19,6 +19,7 @@ class State {
     val config = Configuration()
     val reference = PixelReference()
     val segments = ArrayList<Segment>()
+    val controlPoints = ArrayList<ControlPoint>()
 
     var maxVRatio = 1.0
     var maxARatio = 1.0
