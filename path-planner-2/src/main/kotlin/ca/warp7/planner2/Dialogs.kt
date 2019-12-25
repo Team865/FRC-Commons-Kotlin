@@ -6,6 +6,7 @@ import javafx.application.HostServices
 import javafx.scene.control.ButtonType
 import javafx.scene.control.Dialog
 import javafx.scene.control.Menu
+import javafx.scene.control.TextArea
 import javafx.scene.input.KeyCode
 import javafx.stage.Stage
 
@@ -45,4 +46,16 @@ Max Heap Size: ${Runtime.getRuntime().maxMemory() / 1024 / 1024}Mb"""
     }
 
     val helpMenu = Menu("Help", null, shortcutButton, githubButton, githubButton2, aboutButton)
+
+    fun showTextBox(title: String, content: String) {
+        val dialog = Dialog<ButtonType>()
+        dialog.title = title
+        dialog.dialogPane.content = TextArea(content).apply {
+            prefWidth = 800.0
+            prefHeight = 600.0
+        }
+        dialog.dialogPane.buttonTypes.add(ButtonType.OK)
+        dialog.initOwner(stage)
+        dialog.show()
+    }
 }

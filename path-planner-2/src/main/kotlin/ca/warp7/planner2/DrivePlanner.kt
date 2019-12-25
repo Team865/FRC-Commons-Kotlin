@@ -5,6 +5,7 @@ import ca.warp7.frc.geometry.Pose2D
 import ca.warp7.frc.geometry.Rotation2D
 import ca.warp7.frc.geometry.Translation2D
 import ca.warp7.frc.linearInterpolate
+import ca.warp7.planner2.fx.menuItem
 import javafx.animation.AnimationTimer
 import javafx.application.HostServices
 import javafx.application.Platform
@@ -41,6 +42,10 @@ class DrivePlanner(val stage: Stage, hostServices: HostServices) {
                                 config.showSettings(stage)
                                 regenerate()
                             }
+                        },
+                        menuItem("Generate Commons-based Command", null) {
+                            val s = toCommonsCommand(state)
+                            dialogs.showTextBox("Command", s)
                         },
                         MenuItem("Generate Java Command"),
                         MenuItem("Generate WPILib function")
