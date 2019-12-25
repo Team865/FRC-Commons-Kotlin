@@ -69,7 +69,5 @@ fun getDefaultState(): State {
         )
     })
 
-    println(state.segments.joinToString("\n") {it.waypoints.map { p -> "(${p.translation.x}, ${p.translation.y})" }.toString()})
-
     return state
 }

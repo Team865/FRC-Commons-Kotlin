@@ -39,11 +39,9 @@ class PixelReference {
             -pixelPerMetreHeight * point.x
     )
 
-    fun scale(x: Double) = x * pixelPerMetreWidth
-
     fun inverseScale(point: Translation2D) = Translation2D(
-            -point.y / pixelPerMetreWidth,
-            -point.x / pixelPerMetreHeight
+            -point.y / pixelPerMetreHeight,
+            -point.x / pixelPerMetreWidth
     )
 
     fun transform(point: Translation2D) = Translation2D(
@@ -52,7 +50,7 @@ class PixelReference {
     )
 
     fun inverseTransform(point: Translation2D) = Translation2D(
-            (originX - point.y) / pixelPerMetreWidth,
-            (originY - point.x) / pixelPerMetreHeight
+            (originY - point.y) / pixelPerMetreHeight,
+            (originX - point.x) / pixelPerMetreWidth
     )
 }

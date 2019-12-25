@@ -22,10 +22,9 @@ class DrivePlanner {
     val gc: GraphicsContext = ui.canvas.graphicsContext2D
 
     val selections = ArrayList<MouseSelection>()
-    var selectionChanged = false
 
-    var draggingPoint = false
-    var draggingAngle = false
+//    var draggingPoint = false
+//    var draggingAngle = false
 
     val state = getDefaultState()
     val ref = state.reference
@@ -65,6 +64,40 @@ class DrivePlanner {
                         }),
                 Menu("Help", null, ui.shortcutButton)
         )
+        ui.canvas.setOnMouseClicked { onMouseClick(it.x, it.y) }
+    }
+
+    fun onMouseClick(x: Double, y: Double) {
+        if (simulating) return
+        val mouseOnField = ref.inverseTransform(Translation2D(x, y))
+        var selectionChanged = false
+        if (mouseOnField.x > 0
+                && mouseOnField.x < Constants.kFieldSize
+                && mouseOnField.y > -Constants.kHalfFieldSize
+                && mouseOnField.y < Constants.kHalfFieldSize) {
+            for ((i, segment) in state.segments.withIndex()) {
+                for ((j, wp) in segment.waypoints.withIndex()) {
+                    if (wp.translation.epsilonEquals(mouseOnField, 0.1)) {
+                        toggleSelection(i, segment, j, wp)
+                        selectionChanged = true
+                    }
+                }
+            }
+        }
+        if (selectionChanged) {
+            redrawScreen()
+        }
+    }
+
+    fun toggleSelection(si: Int, s: Segment, pi: Int, p: Pose2D) {
+        println("toggling $si, $pi")
+        for (seg in selections) {
+            if (seg.segmentIndex == si && seg.pointIndex == pi) {
+                selections.remove(seg)
+                return
+            }
+        }
+        selections.add(MouseSelection(s, si, p, pi))
     }
 
     fun show() {
@@ -118,17 +151,25 @@ class DrivePlanner {
             drawSplines(t, j % 2 == 1)
             if (t.trajectory.first().curvature.isFinite()) j++
         }
-
-        if (!simulating) {
-            j = 0
-            for (i in state.segments.indices) {
-                val t = state.segments[i]
-                drawControlPoints(t, j % 2 == 1)
-                if (t.trajectory.first().curvature.isFinite()) j++
-            }
-        }
-
+        drawAllControlPoints()
         drawGraph()
+    }
+
+    fun drawAllControlPoints() {
+        if (simulating) return
+        var j = 0
+        for (i in state.segments.indices) {
+            val t = state.segments[i]
+            if (j % 2 == 1) {
+                gc.stroke = Color.rgb(128, 255, 0)
+            } else {
+                gc.stroke = Color.rgb(255, 255, 0)
+            }
+            for (point in t.waypoints) {
+                drawArrow(point)
+            }
+            if (t.trajectory.first().curvature.isFinite()) j++
+        }
     }
 
     fun drawArrow(point: Pose2D) {
@@ -153,17 +194,6 @@ class DrivePlanner {
         gc.vertex(a1)
         gc.closePath()
         gc.stroke()
-    }
-
-    fun drawControlPoints(segment: Segment, odd: Boolean) {
-        if (odd) {
-            gc.stroke = Color.rgb(128, 255, 0)
-        } else {
-            gc.stroke = Color.rgb(255, 255, 0)
-        }
-        for (point in segment.waypoints) {
-            drawArrow(point)
-        }
     }
 
     fun drawSplines(segment: Segment, odd: Boolean) {
