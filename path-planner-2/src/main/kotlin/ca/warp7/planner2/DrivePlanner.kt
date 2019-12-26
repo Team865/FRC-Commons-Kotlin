@@ -152,7 +152,7 @@ class DrivePlanner(val stage: Stage, hostServices: HostServices) {
                 if (controlPoint.isSelected) {
                     if (controlDown) {
                         if (controlPoint.pose.translation
-                                        .epsilonEquals(mouseOnField, Constants.kMouseControlPointRange)) {
+                                        .epsilonEquals(mouseOnField, Constants.kControlPointCircleSize)) {
                             controlPoint.isSelected = false
                             selectionChanged = true
                         }
@@ -162,7 +162,7 @@ class DrivePlanner(val stage: Stage, hostServices: HostServices) {
                     }
                 } else {
                     if (controlPoint.pose.translation
-                                    .epsilonEquals(mouseOnField, Constants.kMouseControlPointRange)) {
+                                    .epsilonEquals(mouseOnField, Constants.kControlPointCircleSize)) {
                         controlPoint.isSelected = true
                         selectionChanged = true
                     }
@@ -260,19 +260,26 @@ class DrivePlanner(val stage: Stage, hostServices: HostServices) {
     }
 
     fun drawArrowForPose(point: Pose2D) {
-        val pos = ref.transform(point.translation)
-        val heading = ref.transform(point.translation + point.rotation.translation().scaled(0.5))
-        val dir = point.rotation.translation()
+        val posOnCanvas = ref.transform(point.translation)
 
-        val r1 = dir.scaled(0.1524 * Constants.kTriangleRatio * 2)
-        val r2 = r1.rotate(Rotation2D(0.0, 1.0)).scaled(Constants.kTriangleRatio)
-        val r3 = r1.rotate(Rotation2D(0.0, -1.0)).scaled(Constants.kTriangleRatio)
-        gc.strokeOval(pos.x - 6.0, pos.y - 6.0, 12.0, 12.0)
-        val start = pos - dir.scaled(6.0).transposed()
-        gc.lineTo(start, heading)
-        val a1 = heading + ref.scale(r1)
-        val a2 = heading + ref.scale(r2)
-        val a3 = heading + ref.scale(r3)
+        val directionVector = point.rotation.translation()
+        val arrowOffset = ref.transform(point.translation + directionVector.scaled(Constants.kArrowLength))
+
+        // This is the offset from the base of the tip to the actual tip
+        val r1 = directionVector.scaled(Constants.kArrowTipLength * Constants.k60DegreesRatio * 2)
+        val r2 = r1.rotate(Rotation2D(0.0, 1.0)).scaled(Constants.k60DegreesRatio)
+        val r3 = r1.rotate(Rotation2D(0.0, -1.0)).scaled(Constants.k60DegreesRatio)
+
+        val ovalSize = ref.scale(Translation2D(-Constants.kControlPointCircleSize, -Constants.kControlPointCircleSize))
+        gc.strokeOval(posOnCanvas.x - ovalSize.x / 2.0,
+                posOnCanvas.y - ovalSize.y / 2.0, ovalSize.x, ovalSize.y)
+
+        val start = posOnCanvas + ref.scale(directionVector.scaled(Constants.kControlPointCircleSize / 2.0))
+        gc.lineTo(start, arrowOffset)
+
+        val a1 = arrowOffset + ref.scale(r1)
+        val a2 = arrowOffset + ref.scale(r2)
+        val a3 = arrowOffset + ref.scale(r3)
 
         gc.beginPath()
         gc.vertex(a1)

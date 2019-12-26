@@ -1,4 +1,4 @@
-@file:Suppress("unused", "UNUSED_PARAMETER")
+@file:Suppress("unused", "UNUSED_PARAMETER", "UNUSED_VARIABLE")
 
 package ca.warp7.planner2
 

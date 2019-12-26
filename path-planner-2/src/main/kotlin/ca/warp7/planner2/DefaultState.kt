@@ -70,8 +70,8 @@ fun getDefaultState(): State {
     })
 
     for ((i, s) in state.segments.withIndex()) {
-        for ((j, p) in s.waypoints.withIndex()) {
-            state.controlPoints.add(ControlPoint(s, p, i, j))
+        for ((j, point) in s.waypoints.withIndex()) {
+            state.controlPoints.add(ControlPoint(s, point, i, j))
         }
     }
 

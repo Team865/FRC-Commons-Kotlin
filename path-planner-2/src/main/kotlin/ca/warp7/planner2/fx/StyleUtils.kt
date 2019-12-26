@@ -1,6 +1,6 @@
 @file:Suppress("unused", "SpellCheckingInspection", "NOTHING_TO_INLINE")
 
-package kb.core.fx
+package ca.warp7.planner2.fx
 
 import javafx.geometry.Pos
 import javafx.scene.Node
