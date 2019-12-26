@@ -44,7 +44,7 @@ fun toCommonsCommand(state: State): String {
         val cmd = segmentToCommonsCommand(state, state.segments.first())
         return "$cmd;"
     }
-    return state.segments.joinToString(",\n", "new SequentialCommandGroup(\n", ");") {
+    return state.segments.joinToString(",\n", "new SequentialCommandGroup(\n", "\n);") {
         segmentToCommonsCommand(state, it)
     }
 }

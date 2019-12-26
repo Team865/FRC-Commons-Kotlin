@@ -5,6 +5,7 @@ import ca.warp7.frc.geometry.Pose2D
 import ca.warp7.frc.geometry.Rotation2D
 import ca.warp7.frc.geometry.Translation2D
 import ca.warp7.frc.linearInterpolate
+import ca.warp7.planner2.fx.combo
 import ca.warp7.planner2.fx.menuItem
 import javafx.animation.AnimationTimer
 import javafx.application.HostServices
@@ -13,7 +14,6 @@ import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.Menu
 import javafx.scene.control.MenuItem
 import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyCodeCombination
 import javafx.scene.paint.Color
 import javafx.stage.Stage
 import kotlin.math.abs
@@ -32,64 +32,118 @@ class DrivePlanner(val stage: Stage, hostServices: HostServices) {
     val ref = state.reference
     val config = state.config
 
+    var controlDown = false
+
+    private val fileMenu = Menu("File", null,
+            menuItem("Save as JSON", combo(KeyCode.S, control = true)) {
+
+            },
+            menuItem("Load JSON", combo(KeyCode.O, control = true)) {
+
+            },
+            menuItem("Configure Path", combo(KeyCode.COMMA, control = true)) {
+                config.showSettings(stage)
+                regenerate()
+            },
+            menuItem("Generate Commons-based Command", null) {
+                val s = toCommonsCommand(state)
+                dialogs.showTextBox("Command", s)
+            },
+            MenuItem("Generate Java Command"),
+            MenuItem("Generate WPILib function"),
+            MenuItem("Generate PathFinder-style CSV")
+    )
+
+    private val editMenu = Menu(
+            "Edit",
+            null,
+            MenuItem("Insert Spline Control Point"),
+            MenuItem("Insert Reverse Direction"),
+            MenuItem("Insert Quick Turn"),
+            MenuItem("Delete Point(s)"),
+            MenuItem("Reverse Point(s)"),
+            MenuItem("Snap Point(s) to 0.01m"),
+            MenuItem("Edit Point"),
+            MenuItem("Add Change to Point(s)"),
+            menuItem("Mirror path about x axis", combo(KeyCode.M)) {
+
+            }
+    )
+
+    private val pointMenu = Menu(
+            "Control Point",
+            null,
+            menuItem("Rotate 1 degree counter-clockwise", combo(KeyCode.Q)) {
+
+            },
+            menuItem("Rotate 1 degree clockwise", combo(KeyCode.W)) {
+
+            },
+            menuItem("Move up 0.1 metres", combo(KeyCode.UP)) {
+            },
+            menuItem("Move down 0.1 metres", combo(KeyCode.DOWN)) {
+            },
+            menuItem("Move left 0.1 metres", combo(KeyCode.LEFT)) {
+            },
+            menuItem("Move right 0.1 metres", combo(KeyCode.RIGHT)) {
+            },
+            menuItem("Move forward 0.1 metres", combo(KeyCode.UP, shift = true)) {
+            },
+            menuItem("Move backward 0.1 metres", combo(KeyCode.DOWN, shift = true)) {
+            },
+            menuItem("Move left-normal 0.1 metres", combo(KeyCode.LEFT, shift = true)) {
+            },
+            menuItem("Move right-normal 0.1 metres", combo(KeyCode.RIGHT, shift = true)) {
+            }
+    )
+
+    private val viewMenu = Menu("View", null,
+            MenuItem("Resize Canvas to Window"),
+            menuItem("Start/Pause Simulation", combo(KeyCode.SPACE)) { onSpacePressed() },
+            menuItem("Stop Simulation", combo(KeyCode.DIGIT0)) { stopSimulation() }
+    )
+
     init {
         ui.menuBar.menus.addAll(
-                Menu("File", null,
-                        MenuItem("Save"),
-                        MenuItem("Load"),
-                        MenuItem("Configure Path").apply {
-                            setOnAction {
-                                config.showSettings(stage)
-                                regenerate()
-                            }
-                        },
-                        menuItem("Generate Commons-based Command", null) {
-                            val s = toCommonsCommand(state)
-                            dialogs.showTextBox("Command", s)
-                        },
-                        MenuItem("Generate Java Command"),
-                        MenuItem("Generate WPILib function")
-                ),
-                Menu(
-                        "Path",
-                        null,
-                        MenuItem("Insert Spline Control Point"),
-                        MenuItem("Insert Reverse Direction"),
-                        MenuItem("Insert Quick Turn"),
-                        MenuItem("Delete Point(s)"),
-                        MenuItem("Reverse Point(s)"),
-                        MenuItem("Snap Point(s) to 0.01m"),
-                        MenuItem("Edit Point"),
-                        MenuItem("Add Change to Point(s)")
-                ),
-                Menu("View", null,
-                        MenuItem("Resize Canvas to Window"),
-                        MenuItem("Start/Pause Simulation").apply {
-                            accelerator = KeyCodeCombination(KeyCode.SPACE)
-                            setOnAction { onSpacePressed() }
-                        }),
-               dialogs.helpMenu
+                fileMenu,
+                editMenu,
+                pointMenu,
+                viewMenu,
+                dialogs.helpMenu
         )
         ui.canvas.setOnMouseClicked { onMouseClick(it.x, it.y) }
+        stage.scene.setOnKeyPressed {
+            if (it.isShortcutDown) controlDown = true
+        }
+        stage.scene.setOnKeyReleased {
+            if (it.isShortcutDown) controlDown = false
+        }
     }
 
     fun onMouseClick(x: Double, y: Double) {
         if (simulating) return
         val mouseOnField = ref.inverseTransform(Translation2D(x, y))
-        var selectionChanged = false
+
         if (mouseOnField.x > 0
                 && mouseOnField.x < Constants.kFieldSize
                 && mouseOnField.y > -Constants.kHalfFieldSize
                 && mouseOnField.y < Constants.kHalfFieldSize) {
+            var selectionChanged = false
+
             for (controlPoint in state.controlPoints) {
-                if (controlPoint.pose.translation.epsilonEquals(mouseOnField, Constants.kMouseControlPointRange)) {
-                    controlPoint.isSelected = !controlPoint.isSelected
+                if (!controlPoint.isSelected && controlPoint.pose.translation
+                                .epsilonEquals(mouseOnField, Constants.kMouseControlPointRange)) {
+                    controlPoint.isSelected = true
+                    selectionChanged = true
+                } else if (!controlDown && controlPoint.isSelected) {
+                    controlPoint.isSelected = false
                     selectionChanged = true
                 }
             }
-        }
-        if (selectionChanged) {
-            redrawScreen()
+
+            if (selectionChanged) {
+                redrawScreen()
+            }
         }
     }
 
@@ -104,21 +158,21 @@ class DrivePlanner(val stage: Stage, hostServices: HostServices) {
         state.generateAll()
 
         ui.pathStatus.putAll(mapOf(
+                "∫(dξ)" to "${state.totalDist.f2}m",
+                "∫(dt)" to "${state.totalTime.f2}s",
+                "Σ(dCurvature²)" to state.totalSumOfCurvature.f2,
                 "JerkLimit" to state.jerkLimiting.toString(),
                 "Optimize" to state.optimizing.toString(),
                 "MaxVel" to state.maxVelString(),
                 "MaxAcc" to state.maxAccString(),
-                "MaxCAcc" to state.maxAcString(),
-                "∫(dξ)" to "${state.totalDist.f2}m",
-                "∫(dt)" to "${state.totalTime.f2}s",
-                "Σ(dCurvature)²" to state.totalSumOfCurvature.f2
+                "MaxCAcc" to state.maxAcString()
         ))
         ui.pointStatus.putAll(mapOf(
+                "t" to "0.0s",
                 "x" to "0.0m",
                 "y" to "0.0m",
                 "heading" to "0.0deg",
                 "curvature" to "0.0rad/m",
-                "t" to "0.0",
                 "v" to "0.0m/s",
                 "ω" to "0.0rad/s",
                 "dv/dt" to "0.0m/s^2",
@@ -152,7 +206,7 @@ class DrivePlanner(val stage: Stage, hostServices: HostServices) {
         if (simulating) return
         for (controlPoint in state.controlPoints) {
             gc.stroke = when {
-                controlPoint.isSelected -> Color.rgb(90, 138, 222)
+                controlPoint.isSelected -> Color.rgb(0, 255, 255)
                 controlPoint.indexInState % 2 == 1 -> Color.rgb(128, 255, 0)
                 else -> Color.rgb(255, 255, 0)
             }
@@ -362,6 +416,13 @@ class DrivePlanner(val stage: Stage, hostServices: HostServices) {
         }
     }
 
+    fun stopSimulation() {
+        simulating = false
+        simPaused = false
+        redrawScreen()
+        simulationTimer.stop()
+    }
+
     fun drawRobot(pos: Translation2D, heading: Rotation2D) {
         val a = ref.scale(Translation2D(config.robotLength, config.robotWidth).rotate(heading))
         val b = ref.scale(Translation2D(config.robotLength, -config.robotWidth).rotate(heading))
@@ -392,10 +453,7 @@ class DrivePlanner(val stage: Stage, hostServices: HostServices) {
         } else simElapsed += dt
         val t = simElapsed
         if (t > state.totalTime) {
-            simulating = false
-            simPaused = false
-            redrawScreen()
-            simulationTimer.stop()
+            stopSimulation()
             return
         }
         var trackedTime = 0.0
@@ -414,11 +472,11 @@ class DrivePlanner(val stage: Stage, hostServices: HostServices) {
         val transformedPos = ref.transform(sample.pose.translation)
         redrawScreen()
         ui.pointStatus.putAll(mapOf(
+                "t" to "${sample.t.f2}s",
                 "x" to "${sample.pose.translation.x.f2}m",
                 "y" to "${sample.pose.translation.y.f2}m",
                 "heading" to "${sample.pose.rotation.degrees().f2}deg",
                 "curvature" to "${sample.curvature.f2}rad/m",
-                "t" to "${sample.t.f2}s",
                 "v" to "${sample.v.f2}m/s",
                 "ω" to "${sample.w.f2}rad/s",
                 "dv/dt" to "${sample.dv.f2}m/s^2",

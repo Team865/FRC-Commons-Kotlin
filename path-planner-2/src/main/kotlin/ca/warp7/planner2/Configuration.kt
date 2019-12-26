@@ -66,6 +66,9 @@ class Configuration {
             }
         }
 
+        val f2020 = Button("Load 2020 Blue")
+        val f20202 = Button("Load 2020 Red")
+
         dialog.dialogPane.content = GridPane().apply {
             hgap = 8.0
             vgap = 8.0
@@ -92,6 +95,9 @@ class Configuration {
 
             add(Label("Half Field Background"), 2, 0)
             add(choose, 3, 0)
+
+            add(f2020, 3, 1)
+            add(f20202, 3, 2)
         }
 
         dialog.showAndWait()

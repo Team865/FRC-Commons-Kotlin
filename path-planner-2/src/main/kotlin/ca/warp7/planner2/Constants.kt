@@ -9,7 +9,7 @@ object Constants {
     const val kRotationStep = 1.0 // deg
 
 
-    const val kMouseControlPointRange = 0.1 // m
+    const val kMouseControlPointRange = 0.2 // m
     const val kControlPointDrawScale = 0.1 // m
 
     const val kTriangleRatio = 0.5773502691896258 // 1/sqrt(3)
