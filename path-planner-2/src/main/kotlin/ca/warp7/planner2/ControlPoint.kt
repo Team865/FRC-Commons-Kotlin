@@ -7,7 +7,7 @@ import ca.warp7.frc.geometry.Pose2D
  */
 class ControlPoint(
         val segment: Segment,
-        val pose: Pose2D,
+        var pose: Pose2D,
         val indexInState: Int,
         val indexInSegment: Int
 ) {

@@ -15,6 +15,7 @@ import javafx.scene.control.Menu
 import javafx.scene.control.MenuItem
 import javafx.scene.input.KeyCode
 import javafx.scene.paint.Color
+import javafx.scene.text.FontSmoothingType
 import javafx.stage.Stage
 import kotlin.math.abs
 
@@ -67,6 +68,10 @@ class DrivePlanner(val stage: Stage, hostServices: HostServices) {
             MenuItem("Add Change to Point(s)"),
             menuItem("Mirror path about x axis", combo(KeyCode.M)) {
 
+            },
+            menuItem("Select All", combo(KeyCode.A, control = true)) {
+                for (cp in state.controlPoints) cp.isSelected = true
+                redrawScreen()
             }
     )
 
@@ -74,26 +79,34 @@ class DrivePlanner(val stage: Stage, hostServices: HostServices) {
             "Control Point",
             null,
             menuItem("Rotate 1 degree counter-clockwise", combo(KeyCode.Q)) {
-
+                transformSelected(0.0, 0.0, 1.0, false)
             },
             menuItem("Rotate 1 degree clockwise", combo(KeyCode.W)) {
-
+                transformSelected(0.0, 0.0, -1.0, false)
             },
-            menuItem("Move up 0.1 metres", combo(KeyCode.UP)) {
+            menuItem("Move up 0.01 metres", combo(KeyCode.UP)) {
+                transformSelected(0.01, 0.0, 0.0, true)
             },
-            menuItem("Move down 0.1 metres", combo(KeyCode.DOWN)) {
+            menuItem("Move down 0.01 metres", combo(KeyCode.DOWN)) {
+                transformSelected(-0.01, 0.0, 0.0, true)
             },
-            menuItem("Move left 0.1 metres", combo(KeyCode.LEFT)) {
+            menuItem("Move left 0.01 metres", combo(KeyCode.LEFT)) {
+                transformSelected(0.0, 0.01, 0.0, true)
             },
-            menuItem("Move right 0.1 metres", combo(KeyCode.RIGHT)) {
+            menuItem("Move right 0.01 metres", combo(KeyCode.RIGHT)) {
+                transformSelected(0.0, -0.01, 0.0, true)
             },
-            menuItem("Move forward 0.1 metres", combo(KeyCode.UP, shift = true)) {
+            menuItem("Move forward 0.01 metres", combo(KeyCode.UP, shift = true)) {
+                transformSelected(0.01, 0.0, 0.0, false)
             },
-            menuItem("Move backward 0.1 metres", combo(KeyCode.DOWN, shift = true)) {
+            menuItem("Move backward 0.01 metres", combo(KeyCode.DOWN, shift = true)) {
+                transformSelected(-0.01, 0.0, 0.0, false)
             },
-            menuItem("Move left-normal 0.1 metres", combo(KeyCode.LEFT, shift = true)) {
+            menuItem("Move left-normal 0.01 metres", combo(KeyCode.LEFT, shift = true)) {
+                transformSelected(0.0, 0.01, 0.0, false)
             },
-            menuItem("Move right-normal 0.1 metres", combo(KeyCode.RIGHT, shift = true)) {
+            menuItem("Move right-normal 0.01 metres", combo(KeyCode.RIGHT, shift = true)) {
+                transformSelected(0.0, -0.01, 0.0, false)
             }
     )
 
@@ -113,10 +126,14 @@ class DrivePlanner(val stage: Stage, hostServices: HostServices) {
         )
         ui.canvas.setOnMouseClicked { onMouseClick(it.x, it.y) }
         stage.scene.setOnKeyPressed {
-            if (it.isShortcutDown) controlDown = true
+            if (it.code == KeyCode.CONTROL) {
+                controlDown = true
+            }
         }
         stage.scene.setOnKeyReleased {
-            if (it.isShortcutDown) controlDown = false
+            if (it.code == KeyCode.CONTROL) {
+                controlDown = false
+            }
         }
     }
 
@@ -130,14 +147,25 @@ class DrivePlanner(val stage: Stage, hostServices: HostServices) {
                 && mouseOnField.y < Constants.kHalfFieldSize) {
             var selectionChanged = false
 
+
             for (controlPoint in state.controlPoints) {
-                if (!controlPoint.isSelected && controlPoint.pose.translation
-                                .epsilonEquals(mouseOnField, Constants.kMouseControlPointRange)) {
-                    controlPoint.isSelected = true
-                    selectionChanged = true
-                } else if (!controlDown && controlPoint.isSelected) {
-                    controlPoint.isSelected = false
-                    selectionChanged = true
+                if (controlPoint.isSelected) {
+                    if (controlDown) {
+                        if (controlPoint.pose.translation
+                                        .epsilonEquals(mouseOnField, Constants.kMouseControlPointRange)) {
+                            controlPoint.isSelected = false
+                            selectionChanged = true
+                        }
+                    } else {
+                        controlPoint.isSelected = false
+                        selectionChanged = true
+                    }
+                } else {
+                    if (controlPoint.pose.translation
+                                    .epsilonEquals(mouseOnField, Constants.kMouseControlPointRange)) {
+                        controlPoint.isSelected = true
+                        selectionChanged = true
+                    }
                 }
             }
 
@@ -152,6 +180,23 @@ class DrivePlanner(val stage: Stage, hostServices: HostServices) {
             regenerate()
             stage.show()
         }
+    }
+
+    fun transformSelected(x: Double, y: Double, theta: Double, fieldRelative: Boolean) {
+        val delta = Translation2D(x, y)
+        val rotation = Rotation2D.fromDegrees(theta)
+        for (controlPoint in state.controlPoints) {
+            if (controlPoint.isSelected) {
+                val oldPose = controlPoint.pose
+                val offset = if (fieldRelative) delta else delta.rotate(oldPose.rotation)
+                val newPose = Pose2D(snap(oldPose.translation + offset), oldPose.rotation + rotation)
+                controlPoint.pose = newPose
+                val mutableWaypoints = controlPoint.segment.waypoints.toMutableList()
+                mutableWaypoints[controlPoint.indexInSegment] = newPose
+                controlPoint.segment.waypoints = mutableWaypoints
+            }
+        }
+        regenerate()
     }
 
     fun regenerate() {
@@ -311,8 +356,13 @@ class DrivePlanner(val stage: Stage, hostServices: HostServices) {
     }
 
     fun drawGraph() {
+        gc.fontSmoothingType = FontSmoothingType.LCD
         gc.lineWidth = 1.0
-        gc.stroke = Color.rgb(255, 128, 0)
+        gc.fill = Color.BLACK
+        gc.fillText("Velocity vs Time", 531.0, 190.0)
+        gc.fillText("Time Steps", 531.0, 325.0)
+        gc.fillText("Acceleration vs Time", 531.0, 374.0)
+        gc.stroke = Color.ORANGE
         var trackedTime = 0.0
         for (segment in state.segments) {
             for (trajectoryState in segment.trajectory) {
