@@ -8,11 +8,11 @@ import org.junit.jupiter.api.Test
 
 class DriveOdometryTest {
 
-    private val odometry = DriveOdometry(Rotation2D.identity, Pose2D.identity)
+    private val odometry = DriveOdometry(Rotation2D(), Pose2D())
 
     @Test
     fun testOdometryWithEncoderDistances() {
-        odometry.resetPosition(Pose2D.identity, fromDegrees(45.0))
+        odometry.resetPosition(Pose2D(), fromDegrees(45.0))
         val pose = odometry.update(fromDegrees(135.0), 0.0, 5 * Math.PI)
         assertEquals(pose.translation.x, 5.0, kEpsilon)
         assertEquals(pose.translation.y, 5.0, kEpsilon)

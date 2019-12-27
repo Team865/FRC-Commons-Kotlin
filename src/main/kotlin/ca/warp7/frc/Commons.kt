@@ -153,7 +153,7 @@ val Number.inches: Double get() = this.toDouble() * kInchesToMetres
 /**
  * Converts a number in radians to a Rotation
  */
-val Number.radians: Rotation2D get() = Rotation2D.fromRadians(this.toDouble())
+val Number.radians: Rotation2D get() = Rotation2D(this.toDouble())
 
 /**
  * Converts a number in degrees to a Rotation

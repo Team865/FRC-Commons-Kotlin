@@ -12,6 +12,11 @@ package ca.warp7.frc.geometry
 class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
 
     /**
+     * Creates the identity Pose, which does not transform anything when applied
+     */
+    constructor(): this(Translation2D(), Rotation2D())
+
+    /**
      * Convenience constructors that takes in x and y values directly instead of
      * having to construct a Translation2D.
      *
@@ -29,7 +34,7 @@ class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
      * @param y        The y component of the translational component of the pose.
      * @param rotation The rotational component of the pose.
      */
-    constructor(x: Double, y: Double, rotation: Double) : this(Translation2D(x, y), Rotation2D.fromRadians(rotation))
+    constructor(x: Double, y: Double, rotation: Double) : this(Translation2D(x, y), Rotation2D(rotation))
 
     fun epsilonEquals(state: Pose2D, epsilon: Double = 1E-12): Boolean =
             translation.epsilonEquals(state.translation, epsilon) && rotation.epsilonEquals(state.rotation, epsilon)
@@ -111,10 +116,5 @@ class Pose2D(val translation: Translation2D, val rotation: Rotation2D) {
         var result = translation.hashCode()
         result = 31 * result + rotation.hashCode()
         return result
-    }
-
-    companion object {
-        @JvmStatic
-        val identity = Pose2D(Translation2D.identity, Rotation2D.identity)
     }
 }

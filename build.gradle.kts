@@ -1,7 +1,6 @@
 @file:Suppress("UnusedImport", "SpellCheckingInspection")
 
 import org.javamodularity.moduleplugin.extensions.TestModuleOptions
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -10,9 +9,9 @@ plugins {
     `maven-publish`
     id("org.jetbrains.dokka") version "0.10.0"
     id("org.javamodularity.moduleplugin") version "1.6.0"
+    id("edu.wpi.first.GradleRIO") version "2020.1.1-beta-4"
     id("org.openjfx.javafxplugin") version "0.0.9-SNAPSHOT" apply false
-    id ("org.beryx.jlink") version "2.16.4" apply false
-//    id("edu.wpi.first.GradleRIO") version "2020.1.1-beta-4" apply false
+    id("org.beryx.jlink") version "2.16.4" apply false
 }
 
 repositories {
@@ -47,8 +46,12 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = "5.5.1")
-    testImplementation("org.openjdk.jmh:jmh-core:1.21")
-    testImplementation("org.openjdk.jmh:jmh-generator-annprocess:1.21")
+    testImplementation("edu.wpi.first.wpilibj:wpilibj-java:${wpi.wpilibVersion}")
+    testImplementation("edu.wpi.first.wpiutil:wpiutil-java:${wpi.wpilibVersion}")
+    testImplementation("org.ejml:ejml-simple:${wpi.ejmlVersion}")
+    testImplementation("com.fasterxml.jackson.core:jackson-annotations:${wpi.jacksonVersion}")
+    testImplementation("com.fasterxml.jackson.core:jackson-core:${wpi.jacksonVersion}")
+    testImplementation("com.fasterxml.jackson.core:jackson-databind:${wpi.jacksonVersion}")
     testRuntimeOnly(group = "org.junit.jupiter", name = "junit-jupiter-engine", version = "5.5.1")
     testRuntimeOnly(group = "org.junit.platform", name = "junit-platform-launcher", version = "1.5.1")
 }

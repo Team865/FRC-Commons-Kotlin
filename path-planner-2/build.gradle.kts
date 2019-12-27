@@ -39,7 +39,5 @@ tasks.withType<KotlinCompile> {
 dependencies {
     implementation(rootProject)
     implementation("com.beust:klaxon:5.2")
-//    implementation("edu.wpi.first.wpilibj:wpilibj-java:${wpi.wpilibVersion}")
-//    implementation("edu.wpi.first.wpiutil:wpiutil-java:${wpi.wpilibVersion}")
     implementation(kotlin("stdlib"))
 }

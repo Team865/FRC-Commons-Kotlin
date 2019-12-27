@@ -13,13 +13,13 @@ class TrajectoryGeneratorTest {
 
     private fun createStraightLinePath(): List<TrajectoryState> {
         return (0..10).map {
-            TrajectoryState(Pose2D(it / 10.0, 0.0, Rotation2D.identity), 0.0)
+            TrajectoryState(Pose2D(it / 10.0, 0.0, Rotation2D()), 0.0)
         }
     }
 
     private fun createStraightLinePathLong(): List<TrajectoryState> {
         return (0..100).map {
-            TrajectoryState(Pose2D(it / 10.0, 0.0, Rotation2D.identity), 0.0)
+            TrajectoryState(Pose2D(it / 10.0, 0.0, Rotation2D()), 0.0)
         }
     }
 
@@ -96,14 +96,14 @@ class TrajectoryGeneratorTest {
 
     @Test
     fun testSinglePathInput() {
-        val path = listOf(TrajectoryState(Pose2D.identity, 0.0))
+        val path = listOf(TrajectoryState(Pose2D(), 0.0))
         generateNoJerkLimit(path)
         assertEquals(0.0, path.first().t)
     }
 
     @Test
     fun testSingleInfCurvatureInput() {
-        val path = listOf(TrajectoryState(Pose2D.identity, Double.POSITIVE_INFINITY))
+        val path = listOf(TrajectoryState(Pose2D(), Double.POSITIVE_INFINITY))
         assertThrows<IllegalArgumentException> {
             generateNoJerkLimit(path)
         }
@@ -112,16 +112,16 @@ class TrajectoryGeneratorTest {
     @Test
     fun testMultiInfCurvatureInput() {
         val path = listOf(
-                TrajectoryState(Pose2D.identity, 0.0),
-                TrajectoryState(Pose2D(1.0, 0.0, Rotation2D.identity), Double.POSITIVE_INFINITY))
+                TrajectoryState(Pose2D(), 0.0),
+                TrajectoryState(Pose2D(1.0, 0.0, Rotation2D()), Double.POSITIVE_INFINITY))
         assertThrows<IllegalArgumentException> { generateNoJerkLimit(path) }
     }
 
     @Test
     fun testMultiSamePositionInput() {
         val path = listOf(
-                TrajectoryState(Pose2D.identity, 0.0),
-                TrajectoryState(Pose2D.identity, 0.0))
+                TrajectoryState(Pose2D(), 0.0),
+                TrajectoryState(Pose2D(), 0.0))
         assertThrows<IllegalArgumentException> { generateNoJerkLimit(path) }
     }
 }

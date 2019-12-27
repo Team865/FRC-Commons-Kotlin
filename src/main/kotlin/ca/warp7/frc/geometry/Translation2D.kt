@@ -11,6 +11,10 @@ import kotlin.math.hypot
 @Suppress("MemberVisibilityCanBePrivate")
 class Translation2D(val x: Double, val y: Double) {
 
+    /**
+     * Creates an identity translation
+     */
+    constructor(): this(0.0, 0.0)
 
     fun interpolate(other: Translation2D, x1: Double): Translation2D = when {
         x1 <= 0 -> this
@@ -173,10 +177,5 @@ class Translation2D(val x: Double, val y: Double) {
         var result = x.hashCode()
         result = 31 * result + y.hashCode()
         return result
-    }
-
-    companion object {
-        @JvmStatic
-        val identity = Translation2D(0.0, 0.0)
     }
 }

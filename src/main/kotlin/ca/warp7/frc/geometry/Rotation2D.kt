@@ -16,6 +16,17 @@ import kotlin.math.sin
 class Rotation2D(val cos: Double, val sin: Double) {
 
     /**
+     * Creates the identity, The [Rotation2D] in which when transformed
+     * onto another [Rotation2D] does not change its value
+     */
+    constructor(): this(1.0, 0.0)
+
+    /**
+     * Creates a [Rotation2D] object from the angle in radians
+     */
+    constructor(radians: Double): this(cos(radians), sin(radians))
+
+    /**
      * @return an equivalent translation to moving along this rotation for 1 unit
      */
     fun translation(): Translation2D = Translation2D(cos, sin)
@@ -80,22 +91,9 @@ class Rotation2D(val cos: Double, val sin: Double) {
     companion object {
 
         /**
-         * Creates a [Rotation2D] object from the angle in radians
-         */
-        @JvmStatic
-        fun fromRadians(radians: Double): Rotation2D = Rotation2D(cos(radians), sin(radians))
-
-        /**
          * Creates a [Rotation2D] object from the angle in degrees
          */
         @JvmStatic
-        fun fromDegrees(degrees: Double) = fromRadians(Math.toRadians(degrees))
-
-        /**
-         * The [Rotation2D] in which when transformed onto another [Rotation2D]
-         * does not change its value
-         */
-        @JvmStatic
-        val identity = Rotation2D(1.0, 0.0)
+        fun fromDegrees(degrees: Double) = Rotation2D(Math.toRadians(degrees))
     }
 }
