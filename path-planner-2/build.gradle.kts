@@ -7,6 +7,7 @@ plugins {
     id("org.javamodularity.moduleplugin")
     id("org.openjfx.javafxplugin")
     id ("org.beryx.jlink")
+//    id("edu.wpi.first.GradleRIO")
 }
 
 repositories {
@@ -38,5 +39,7 @@ tasks.withType<KotlinCompile> {
 dependencies {
     implementation(rootProject)
     implementation("com.beust:klaxon:5.2")
+//    implementation("edu.wpi.first.wpilibj:wpilibj-java:${wpi.wpilibVersion}")
+//    implementation("edu.wpi.first.wpiutil:wpiutil-java:${wpi.wpilibVersion}")
     implementation(kotlin("stdlib"))
 }

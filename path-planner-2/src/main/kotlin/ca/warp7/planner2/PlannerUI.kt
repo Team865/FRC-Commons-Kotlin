@@ -1,19 +1,14 @@
 package ca.warp7.planner2
 
-import ca.warp7.planner2.fx.combo
-import ca.warp7.planner2.fx.menuItem
 import javafx.collections.FXCollections
 import javafx.collections.MapChangeListener
 import javafx.collections.ObservableMap
 import javafx.geometry.Insets
 import javafx.scene.Scene
 import javafx.scene.canvas.Canvas
-import javafx.scene.control.ButtonType
-import javafx.scene.control.Dialog
 import javafx.scene.control.Label
 import javafx.scene.control.MenuBar
 import javafx.scene.image.Image
-import javafx.scene.input.KeyCode
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox

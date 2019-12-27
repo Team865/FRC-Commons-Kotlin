@@ -20,7 +20,6 @@ fun runOnFxThread(action: () -> Unit) {
 fun label(text: String) = Label(text)
 
 
-
 fun <T> List<T>.observable(): ObservableList<T> {
     return FXCollections.observableList(this)
 }

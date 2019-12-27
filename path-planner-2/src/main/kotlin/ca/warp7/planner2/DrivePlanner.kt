@@ -20,10 +20,10 @@ import javafx.stage.Stage
 import kotlin.math.abs
 
 @Suppress("MemberVisibilityCanBePrivate")
-class DrivePlanner(val stage: Stage, hostServices: HostServices) {
+class DrivePlanner(val stage: Stage) {
 
     val ui = PlannerUI(stage)
-    val dialogs = Dialogs(stage, hostServices)
+    val dialogs = Dialogs(stage)
     val gc: GraphicsContext = ui.canvas.graphicsContext2D
 
 //    var draggingPoint = false
@@ -36,10 +36,10 @@ class DrivePlanner(val stage: Stage, hostServices: HostServices) {
     var controlDown = false
 
     private val fileMenu = Menu("File", null,
-            menuItem("Save as JSON", combo(KeyCode.S, control = true)) {
-
+            menuItem("New/Open Trajectory", combo(KeyCode.N, control = true)) {
+                PathWizard(stage).show()
             },
-            menuItem("Load JSON", combo(KeyCode.O, control = true)) {
+            menuItem("Save as", combo(KeyCode.S, control = true)) {
 
             },
             menuItem("Configure Path", combo(KeyCode.COMMA, control = true)) {

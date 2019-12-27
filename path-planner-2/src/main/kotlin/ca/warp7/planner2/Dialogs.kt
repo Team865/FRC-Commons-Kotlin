@@ -2,7 +2,6 @@ package ca.warp7.planner2
 
 import ca.warp7.planner2.fx.combo
 import ca.warp7.planner2.fx.menuItem
-import javafx.application.HostServices
 import javafx.scene.control.ButtonType
 import javafx.scene.control.Dialog
 import javafx.scene.control.Menu
@@ -10,7 +9,7 @@ import javafx.scene.control.TextArea
 import javafx.scene.input.KeyCode
 import javafx.stage.Stage
 
-class Dialogs(val stage: Stage, val hostServices: HostServices) {
+class Dialogs(val stage: Stage) {
     private val shortcutButton = menuItem("Keyboard Shortcuts", combo(KeyCode.F1)) {
         val dialog = Dialog<ButtonType>()
         dialog.title = "Shortcuts"
@@ -38,11 +37,11 @@ Max Heap Size: ${Runtime.getRuntime().maxMemory() / 1024 / 1024}Mb"""
     }
 
     private val githubButton = menuItem("Show Project on GitHub", null) {
-        hostServices.showDocument("https://github.com/Team865/Trajectory-Planner/")
+        PlannerApplication.host?.showDocument("https://github.com/Team865/Trajectory-Planner/")
     }
 
     private val githubButton2 = menuItem("Show Library on GitHub", null) {
-        hostServices.showDocument("https://github.com/Team865/FRC-Commons-Kotlin/")
+        PlannerApplication.host?.showDocument("https://github.com/Team865/FRC-Commons-Kotlin/")
     }
 
     val helpMenu = Menu("Help", null, shortcutButton, githubButton, githubButton2, aboutButton)

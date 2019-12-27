@@ -12,6 +12,7 @@ plugins {
     id("org.javamodularity.moduleplugin") version "1.6.0"
     id("org.openjfx.javafxplugin") version "0.0.9-SNAPSHOT" apply false
     id ("org.beryx.jlink") version "2.16.4" apply false
+//    id("edu.wpi.first.GradleRIO") version "2020.1.1-beta-4" apply false
 }
 
 repositories {

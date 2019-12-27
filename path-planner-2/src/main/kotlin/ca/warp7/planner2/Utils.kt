@@ -9,5 +9,5 @@ fun GraphicsContext.vertex(a: Translation2D) = lineTo(a.x, a.y)
 
 
 fun snap(t: Translation2D): Translation2D {
-    return Translation2D((t.x * 1000).toInt() / 1000.0,  (t.y * 1000).toInt() / 1000.0)
+    return Translation2D((t.x * 1000).toInt() / 1000.0, (t.y * 1000).toInt() / 1000.0)
 }

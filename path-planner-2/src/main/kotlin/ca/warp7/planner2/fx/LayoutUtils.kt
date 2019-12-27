@@ -3,7 +3,7 @@
 package ca.warp7.planner2.fx
 
 import javafx.scene.Node
-import javafx.scene.control.*
+import javafx.scene.control.SplitPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
