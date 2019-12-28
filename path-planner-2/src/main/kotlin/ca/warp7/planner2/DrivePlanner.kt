@@ -8,7 +8,6 @@ import ca.warp7.frc.linearInterpolate
 import ca.warp7.planner2.fx.combo
 import ca.warp7.planner2.fx.menuItem
 import javafx.animation.AnimationTimer
-import javafx.application.HostServices
 import javafx.application.Platform
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.Menu
@@ -18,6 +17,7 @@ import javafx.scene.paint.Color
 import javafx.scene.text.FontSmoothingType
 import javafx.stage.Stage
 import kotlin.math.abs
+import kotlin.system.measureNanoTime
 
 @Suppress("MemberVisibilityCanBePrivate")
 class DrivePlanner(val stage: Stage) {
@@ -200,7 +200,10 @@ class DrivePlanner(val stage: Stage) {
     }
 
     fun regenerate() {
-        state.generateAll()
+
+        val time = measureNanoTime {
+            state.generateAll()
+        } / 1E6
 
         ui.pathStatus.putAll(mapOf(
                 "∫(dξ)" to "${state.totalDist.f2}m",
@@ -210,7 +213,8 @@ class DrivePlanner(val stage: Stage) {
                 "Optimize" to state.optimizing.toString(),
                 "MaxVel" to state.maxVelString(),
                 "MaxAcc" to state.maxAccString(),
-                "MaxCAcc" to state.maxAcString()
+                "MaxCAcc" to state.maxAcString(),
+                "ComputeTime" to "${time.f2}ms"
         ))
         ui.pointStatus.putAll(mapOf(
                 "t" to "0.0s",
