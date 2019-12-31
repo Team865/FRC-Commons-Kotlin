@@ -5,10 +5,6 @@ package ca.warp7.frc.path
 
 import ca.warp7.frc.geometry.*
 
-operator fun Path2D.get(t: Double): Path2DState {
-    return Path2DState(t, px(t), py(t), vx(t), vy(t), ax(t), ay(t), jx(t), jy(t))
-}
-
 fun quinticSplineFromPose(p0: Pose2D, p1: Pose2D, bendFactor: Double = 1.2): QuinticSegment2D {
     val scale = p0.translation.distanceTo(p1.translation) * bendFactor
     return QuinticSegment2D(

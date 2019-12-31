@@ -152,7 +152,7 @@ class PathPlanner : PApplet() {
         waypoints.forEach {
             val pos = it.translation.newXY
             val heading = (it.translation + it.rotation.translation().scaled(0.5)).newXY
-            val dir = it.rotation.unit().translation()
+            val dir = it.rotation.translation()
             controlPoints.add(ControlPoint(pos, heading, dir))
         }
         intermediate = quinticSplinesOf(waypoints.toList(), optimizePath = optimizing)
@@ -270,7 +270,7 @@ class PathPlanner : PApplet() {
         // draw the start of the curve
         val s0 = trajectory.first()
         val t0 = s0.pose.translation
-        var normal = (s0.pose.rotation.normal() * wheelBaseRadius).translation()
+        var normal = s0.pose.rotation.normal().translation() * wheelBaseRadius
         var left = (t0 - normal).newXY
         var right = (t0 + normal).newXY
 
@@ -286,7 +286,7 @@ class PathPlanner : PApplet() {
         for (i in 1 until trajectory.size) {
             val s = trajectory[i]
             val t = s.pose.translation
-            normal = (s.pose.rotation.normal() * wheelBaseRadius).translation()
+            normal = s.pose.rotation.normal().translation() * wheelBaseRadius
             val newLeft = (t - normal).newXY
             val newRight = (t + normal).newXY
             val kx = s.curvature.absoluteValue / maxK
@@ -409,7 +409,7 @@ class PathPlanner : PApplet() {
                 for (i in 0..selectedIndex) newWaypoints[i] = waypoints[i]
                 for (i in selectedIndex + 2..waypoints.size) newWaypoints[i] = waypoints[i - 1]
                 val newPoint = waypoints[selectedIndex].run {
-                    Pose2D(translation + rotation.unit().scaled(0.75).translation(), rotation)
+                    Pose2D(translation + rotation.translation().scaled(0.75), rotation)
                 }
                 selectedIndex++
                 newWaypoints[selectedIndex] = newPoint
@@ -479,7 +479,7 @@ class PathPlanner : PApplet() {
         if (draggingPoint) {
             redrawScreen()
             val heading = (mouse.oldXY + waypoint.rotation.translation().scaled(0.5)).newXY
-            val dir = waypoint.rotation.unit().translation()
+            val dir = waypoint.rotation.translation()
             stroke(255f, 128f, 255f)
             strokeWeight(2f)
             draggedControlPoint = drawArrow(ControlPoint(mouse, heading, dir))
@@ -600,7 +600,7 @@ class PathPlanner : PApplet() {
             stroke(255f, 255f, 255f)
             noFill()
             val headingXY = pos + heading.translation().scaled(0.5).newXYNoOffset
-            val dir = heading.unit().translation()
+            val dir = heading.translation()
             drawArrow(ControlPoint(pos, headingXY, dir))
             drawGraph(simIndex)
             stroke(255f, 0f, 0f)

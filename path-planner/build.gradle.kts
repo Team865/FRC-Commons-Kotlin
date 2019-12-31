@@ -18,7 +18,6 @@ application {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions {
-        freeCompilerArgs = listOf("-Xnew-inference")
         kotlinOptions.jvmTarget = "11"
     }
 }

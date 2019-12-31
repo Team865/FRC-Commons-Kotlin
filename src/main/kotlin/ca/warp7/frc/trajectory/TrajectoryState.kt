@@ -28,7 +28,21 @@ class TrajectoryState(val pose: Pose2D, val curvature: Double) {
         val s = TrajectoryState(Pose2D(pose.translation, Rotation2D(-h.cos, -h.sin)), -curvature)
         s.v = -v
         s.dv = -dv
+        s.ddv = -ddv
+        s.w = w
+        s.dw = dw
+        s.ddw = ddw
         s.t = t
         return s
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is TrajectoryState) return false
+        return pose == other.pose
+    }
+
+    override fun hashCode(): Int {
+        return pose.hashCode()
     }
 }

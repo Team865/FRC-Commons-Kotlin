@@ -25,30 +25,39 @@ class PIDControl(
     }
 
     fun updateByError(error: Double): Double {
+
         // normalize the change in time so kD doesn't need to be too high and kI doesn't need to be too low
         val normalizedDt = dt * dtNormalizer
+
         // calculate proportional gain
         val pGain = pid.kP * error
+
         // calculate conditions for resetting integral sum
         if (!pGain.epsilonEquals(0.0, maxOutput) // error is bigger than kP can handle
                 || error.epsilonEquals(0.0, errorEpsilon) // error is smaller than the epsilon range
                 || (pGain > 0 && sumError < 0) // sumError is in reverse while kP goes in forward
                 || (pGain < 0 && sumError > 0) // sumError is in forward while kP goes in reverse
         ) sumError = 0.0
+
         // otherwise add current error to the sum of errors
         else sumError += error * normalizedDt
+
         // calculate the integral gain
         val iGain = pid.kI * sumError
+
         // calculate change in error
         dError = (error - lastError) / normalizedDt
         lastError = error
+
         // calculate derivative gain
         val dGain = pid.kD * dError
+
         // calculate the time when error and change in error is small enough
         // by adding the unmodified dt to a sum
         if (error.epsilonEquals(0.0, errorEpsilon)
                 && dError.epsilonEquals(0.0, dErrorEpsilon)
         ) timeInEpsilon += dt
+
         // reset timeInEpsilon
         else timeInEpsilon = 0.0
 
@@ -56,12 +65,16 @@ class PIDControl(
     }
 
     fun updateBySetpoint(actual: Double): Double {
-        // calculate feedforward gain
+
+        // calculate feed forward gain
         val fGain = pid.kF * setpoint
+
         // calculate error
         val error = setpoint - actual
+
         // calculate feedback gains
         val pidGain = updateByError(error)
+
         // add up gains to get the output
         return (fGain + pidGain).coerceIn(-maxOutput, maxOutput)
     }

@@ -42,7 +42,7 @@ class ActionTest {
     fun testWait() {
         executeUnrestricted(parallel {
             +sequential {
-                +wait(0.1)
+                +wait(0.01)
                 +runOnce {
                     print("1")
                 }
@@ -60,13 +60,13 @@ class ActionTest {
     fun testDoubleSequential() {
         executeUnrestricted(parallel {
             +sequential {
-                +wait(0.1)
+                +wait(0.03)
                 +runOnce {
                     print("1")
                 }
             }
             +sequential {
-                +wait(0.06)
+                +wait(0.01)
                 +runOnce {
                     print("2")
                 }
@@ -80,7 +80,7 @@ class ActionTest {
         executeUnrestricted(sequential {
             +parallel {
                 +sequential {
-                    +wait(0.1)
+                    +wait(0.01)
                     +runOnce {
                         print("1")
                     }

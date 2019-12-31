@@ -4,11 +4,17 @@ import ca.warp7.frc.epsilonEquals
 import ca.warp7.frc.f
 import kotlin.math.hypot
 
-//Translation2D can often be used as mathematical vector.
+/**
+ * Translation2D can often be used as mathematical vector.
+ */
 
 @Suppress("MemberVisibilityCanBePrivate")
 class Translation2D(val x: Double, val y: Double) {
 
+    /**
+     * Creates an identity translation
+     */
+    constructor(): this(0.0, 0.0)
 
     fun interpolate(other: Translation2D, x1: Double): Translation2D = when {
         x1 <= 0 -> this
@@ -21,7 +27,8 @@ class Translation2D(val x: Double, val y: Double) {
     }
 
     fun direction(): Rotation2D {
-        return Rotation2D(x, y).unit()
+        val mag = mag()
+        return Rotation2D(x / mag, y / mag)
     }
 
     fun rotate(by: Rotation2D): Translation2D {
@@ -170,10 +177,5 @@ class Translation2D(val x: Double, val y: Double) {
         var result = x.hashCode()
         result = 31 * result + y.hashCode()
         return result
-    }
-
-    companion object {
-        @JvmStatic
-        val identity = Translation2D(0.0, 0.0)
     }
 }

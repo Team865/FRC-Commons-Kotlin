@@ -6,9 +6,9 @@ import ca.warp7.frc.geometry.Twist2D
 
 class DriveOdometry(
         gyroAngle: Rotation2D,
-        private var pose: Pose2D = Pose2D.identity
+        private var pose: Pose2D = Pose2D()
 ) {
-    private var prevAngle = Rotation2D.identity
+    private var prevAngle = Rotation2D()
     private var gyroOffset = pose.rotation - gyroAngle
 
     /**

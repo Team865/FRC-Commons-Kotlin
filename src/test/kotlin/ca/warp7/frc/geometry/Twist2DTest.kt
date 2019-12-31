@@ -1,7 +1,5 @@
-/*----------------------------------------------------------------------------*/ /* Copyright (c) 2019 FIRST. All Rights Reserved.                             */ /* Open Source Software - may be modified and shared by FRC teams. The code   */ /* must be accompanied by the FIRST BSD license file in the root directory of */ /* the project.                                                               */ /*----------------------------------------------------------------------------*/
 package ca.warp7.frc.geometry
 
-import ca.warp7.frc.geometry.Pose2D.Companion.identity
 import ca.warp7.frc.geometry.Rotation2D.Companion.fromDegrees
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -53,7 +51,7 @@ class Twist2DTest {
 
     @Test
     fun testPose2DLog() {
-        val start = identity
+        val start = Pose2D()
         val end = Pose2D(5.0, 5.0, fromDegrees(90.0))
         val twist = end.minus(start).log()
         assertEquals(twist.dx, 5.0 / 2.0 * Math.PI, kEpsilon)

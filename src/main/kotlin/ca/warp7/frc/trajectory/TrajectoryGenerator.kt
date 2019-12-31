@@ -52,7 +52,7 @@ fun parameterizeTrajectory(
         wheelbaseRadius: Double, // m
         maxVelocity: Double, // m/s
         maxAcceleration: Double, // m/s^2
-        maxCentripetalAcceleration: Double, // s^-1
+        maxCentripetalAcceleration: Double, // rad/s
         maxJerk: Double // m/s^3
 ) {
     // If path is empty, return directly
@@ -72,7 +72,7 @@ fun parameterizeTrajectory(
     // Step 3
     reversePass(states, arcLengths, maxAcceleration)
     // Step 4
-    accumulativePass(states)
+    accumulativePass(states, arcLengths)
     // Step 5
     if (maxJerk.isFinite()) {
         rampedAccelerationPass(states, arcLengths, maxJerk)
@@ -174,9 +174,6 @@ private fun forwardPass(
 
         // Limit velocity based on curvature constraint and forward acceleration
         next.v = minOf(maxVelocity, constrainedVelocity, maxReachableVelocity)
-
-        // Calculate the forward dt
-        next.t = (2 * arcLength) / (current.v + next.v)
     }
 }
 
@@ -197,16 +194,13 @@ private fun reversePass(
 
         val arcLength = arcLengths[i - 1]
         val current = states[i]
-        val next = states[i - 1]
+        val previous = states[i - 1]
 
         // Apply kinematic equation vf^2 = vi^2 + 2ax, solve for vf
         val maxReachableVelocity = sqrt(current.v * current.v + 2 * maxAcceleration * arcLength)
 
         // Limit velocity based on reverse acceleration
-        next.v = minOf(next.v, maxReachableVelocity)
-
-        // Calculate the reverse dt
-        current.t = maxOf(current.t, (2 * arcLength) / (current.v + next.v))
+        previous.v = minOf(previous.v, maxReachableVelocity)
     }
 }
 
@@ -216,23 +210,27 @@ private fun reversePass(
  * (acceleration and jerk), as well as giving back the sign
  * of the curvature
  */
-private fun accumulativePass(states: List<TrajectoryState>) {
+private fun accumulativePass(states: List<TrajectoryState>, arcLengths: List<Double>) {
     for (i in 0 until states.size - 1) {
-        val current = states[i + 1]
-        val last = states[i]
+        val current = states[i]
+        val next = states[i + 1]
+        val arcLength = arcLengths[i]
+
+        // Calculate change in time
+        next.t = 2 * arcLength / (current.v + next.v)
 
         // Calculate acceleration
-        current.dv = (current.v - last.v) / current.t
+        next.dv = (next.v - current.v) / next.t
 
         // Calculate angular velocity
-        current.w = current.v * current.curvature
+        next.w = next.v * next.curvature
 
         // Calculate angular acceleration
-        current.dw = (current.w - last.w) / current.t
+        next.dw = (next.w - current.w) / next.t
 
         // Calculate jerk
-        current.ddv = (current.dv - last.dv) / current.t
-        current.ddw = (current.dw - last.dw) / current.t
+        next.ddv = (next.dv - current.dv) / next.t
+        next.ddw = (next.dw - current.dw) / next.t
     }
 }
 
@@ -242,7 +240,7 @@ private fun accumulativePass(states: List<TrajectoryState>) {
  *
  * This works only in some cases
  */
-internal fun rampedAccelerationPass(
+private fun rampedAccelerationPass(
         states: List<TrajectoryState>,
         arcLengths: List<Double>,
         maxJerk: Double
@@ -291,7 +289,25 @@ internal fun rampedAccelerationPass(
             next.t = (2 * arcLength) / (current.v + next.v)
         }
     }
-    accumulativePass(states)
+    accumulativePass(states, arcLengths)
+}
+
+@Suppress("unused")
+private fun smoothAccelerationPass(
+        states: List<TrajectoryState>,
+        arcLengths: List<Double>,
+        maxJerk: Double
+) {
+
+    for (i in 2 until states.size) {
+        val current = states[i]
+        if (abs(current.ddv) > maxJerk) {
+            val previous = states[i - 1]
+            val beforePrevious = states[i - 2]
+            previous.v = (previous.v + current.v +  + beforePrevious.v) / 3.0
+        }
+    }
+    accumulativePass(states, arcLengths)
 }
 
 /**
